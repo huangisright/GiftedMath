@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>數理資優班　互動實驗台</title>
+<meta name="description" content="金城國中數理資優班的數學互動實驗台，依年級與章節收錄各單元。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Crimson+Text:ital,wght@0,600;1,400;1,600&display=swap">
+<style>
+:root{
+  --paper:#F5F2E8; --grid:rgba(46,90,136,.075); --card:#FFFDF8; --edge:#DFD6C4; --edge-soft:#EBE3D4;
+  --ink:#23282D; --ink-2:#5C554A; --ink-3:#847B6C;
+  --indigo:#2E5A88; --indigo-soft:#E7EEF6; --orange:#C1652F; --orange-soft:#FBEEE1;
+  --green:#4A7C59; --green-soft:#E7F0E9;
+  --shadow:0 1px 2px rgba(72,60,40,.06), 0 6px 18px rgba(72,60,40,.07);
+  --shadow-lift:0 2px 4px rgba(72,60,40,.08), 0 14px 34px rgba(72,60,40,.12);
+  --serif:"Noto Serif TC",'Songti TC','Times New Roman',serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --math:"Crimson Text","Times New Roman",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+    --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+    --indigo:#82ADDC; --indigo-soft:#1D2A38; --orange:#E08A54; --orange-soft:#33251C;
+    --green:#7FB08D; --green-soft:#1E2A22;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.35);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+  --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+  --indigo:#82ADDC; --indigo-soft:#1D2A38; --orange:#E08A54; --orange-soft:#33251C;
+  --green:#7FB08D; --green-soft:#1E2A22;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.35);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px; line-height:1.75; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:34px 20px 70px}
+header{margin-bottom:26px}
+.eyebrow{font-size:13px; letter-spacing:.16em; color:var(--indigo); font-weight:600; margin-bottom:8px}
+h1{font-family:var(--serif); font-size:clamp(30px,5.4vw,44px); line-height:1.28; margin:0 0 10px; letter-spacing:.01em}
+.sub{color:var(--ink-2); font-size:16px; margin:0 0 14px}
+.counts{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px}
+.count{
+  background:var(--card); border:1px solid var(--edge); border-radius:8px; padding:8px 14px; box-shadow:var(--shadow);
+}
+.count b{font-family:var(--math); font-size:24px; color:var(--indigo); margin-right:5px; font-variant-numeric:tabular-nums}
+.count span{font-size:13px; color:var(--ink-3)}
+.tools{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin:26px 0 6px; padding:12px 14px; background:var(--card);
+  border:1px solid var(--edge); border-radius:10px; box-shadow:var(--shadow); position:sticky; top:0; z-index:5;
+}
+#q{
+  flex:1 1 210px; min-width:150px; font-family:var(--sans); font-size:14.5px; padding:8px 12px;
+  border:1px solid var(--edge); border-radius:7px; background:var(--paper); color:var(--ink);
+}
+#q:focus{outline:2px solid var(--indigo); outline-offset:1px}
+.filters{display:flex; gap:0; flex-wrap:wrap; border:1px solid var(--edge); border-radius:7px; overflow:hidden}
+.f{
+  font-family:var(--sans); font-size:13.5px; padding:7px 13px; border:none; cursor:pointer;
+  background:var(--card); color:var(--ink-3); border-right:1px solid var(--edge-soft);
+}
+.f:last-child{border-right:none}
+.f.on{background:var(--indigo); color:#fff}
+.f:hover:not(.on){color:var(--indigo)}
+h2.grp{
+  font-family:var(--serif); font-size:21px; margin:34px 0 4px; padding-bottom:7px;
+  border-bottom:1px solid var(--edge); color:var(--ink);
+}
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:15px; margin-top:16px}
+/* a.unit 有自己的 display，會蓋掉瀏覽器內建的 [hidden]{display:none}；沒有這一條的話搜尋與篩選都不會作用 */
+[hidden]{display:none!important}
+a.unit{
+  display:flex; flex-direction:column; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--edge); border-radius:11px; padding:17px 18px 15px;
+  box-shadow:var(--shadow); transition:transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+a.unit:hover{transform:translateY(-2px); box-shadow:var(--shadow-lift); border-color:var(--indigo)}
+a.unit:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.badges{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px}
+.b{font-size:11.5px; padding:2.5px 8px; border-radius:20px; font-weight:600; letter-spacing:.03em}
+.b.ch{background:var(--indigo-soft); color:var(--indigo)}
+.b.main{background:var(--orange-soft); color:var(--orange)}
+.b.extra{background:var(--green-soft); color:var(--green)}
+.b.topic{background:transparent; color:var(--ink-3); border:1px solid var(--edge)}
+a.unit h3{font-family:var(--serif); font-size:22px; margin:0 0 8px; line-height:1.35; letter-spacing:.01em}
+a.unit p{margin:0 0 14px; font-size:14px; color:var(--ink-2); line-height:1.72; flex:1}
+.foot{
+  display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid var(--edge-soft); padding-top:10px; font-size:13px; color:var(--ink-3);
+}
+.foot .go{color:var(--indigo); font-weight:600}
+.empty{color:var(--ink-3); padding:30px 0; font-size:15px}
+footer{
+  margin-top:52px; padding-top:18px; border-top:1px solid var(--edge);
+  font-size:13px; color:var(--ink-3); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+.note{
+  margin-top:30px; background:var(--card); border:1px solid var(--edge); border-left:3px solid var(--indigo);
+  border-radius:8px; padding:14px 17px; font-size:14px; color:var(--ink-2); box-shadow:var(--shadow);
+}
+.note b{color:var(--ink)}
+@media(max-width:520px){ .wrap{padding:24px 15px 54px} .tools{position:static} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">金城國中　數理資優班</div>
+  <h1>互動實驗台</h1>
+  <p class="sub">每一份學習單都有一組實驗台。打開任何一個單元，都可以直接動手。</p>
+  <div class="counts">
+    <div class="count"><b>30</b><span>個單元</span></div>
+    <div class="count"><b>204</b><span>台實驗</span></div>
+  </div>
+</header>
+
+<div class="tools">
+  <input id="q" type="search" placeholder="搜尋單元、主題或關鍵字……" aria-label="搜尋單元">
+  <div class="filters">
+    <button class="f on" data-f="all">全部</button>
+    <button class="f" data-f="七年級上">七上</button>
+    <button class="f" data-f="七年級下">七下</button>
+    <button class="f" data-f="八年級上">八上</button>
+    <button class="f" data-f="八年級下">八下</button>
+    <button class="f" data-f="九年級上">九上</button>
+    <button class="f" data-f="九年級下">九下</button>
+    <button class="f" data-f="正課">正課</button>
+    <button class="f" data-f="補充卷">補充卷</button>
+  </div>
+</div>
+
+<p class="empty" id="empty" hidden>沒有符合的單元。換個關鍵字試試。</p>
+
+<section class="group"><h2 class="grp">七年級上</h2><div class="cards">
+<a class="unit" href="units/g7a-ch1-number-line.html" data-grade="七年級上" data-kind="正課" data-search="七上 1 一條數線，兩把尺 正課 數與量 數線是舞台：加法是平移、乘法是伸縮、負號是翻轉、指數把乘法翻成加法。 負數 數線 正負 加減 乘除 四則 指數 科學記號 平移 伸縮 絕對值"><div class="badges"><span class="b ch">七上 1</span><span class="b main">正課</span><span class="b topic">數與量</span></div><h3>一條數線，兩把尺</h3><p>數線是舞台：加法是平移、乘法是伸縮、負號是翻轉、指數把乘法翻成加法。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7a-ch2-skeleton.html" data-grade="七年級上" data-kind="正課" data-search="七上 2 拆開來看 正課 數與量 骨架是身分證：比大小、數因數、取 min 取 max，全都要拆開才看得出來。 因數 倍數 質數 質因數分解 最大公因數 最小公倍數 短除法 互質"><div class="badges"><span class="b ch">七上 2</span><span class="b main">正課</span><span class="b topic">數與量</span></div><h3>拆開來看</h3><p>骨架是身分證：比大小、數因數、取 min 取 max，全都要拆開才看得出來。</p><div class="foot"><span>5 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7a-ch2-modular.html" data-grade="七年級上" data-kind="補充卷" data-search="七上 2 把數線捲起來 補充卷 數與量 留下餘數、丟掉商：同餘是一種等號，除法要買門票，捲起來就有週期。 同餘 餘數 模 時鐘 週期 費馬小定理 檢查碼 身分證 星期"><div class="badges"><span class="b ch">七上 2</span><span class="b extra">補充卷</span><span class="b topic">數與量</span></div><h3>把數線捲起來</h3><p>留下餘數、丟掉商：同餘是一種等號，除法要買門票，捲起來就有週期。</p><div class="foot"><span>6 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7a-ch2-fraction-unit.html" data-grade="七年級上" data-kind="正課" data-search="七上 2 分母是單位 正課 數與量 分母是單位：加減要同單位（數個數），乘除只論倍率（伸縮）。 分數 通分 約分 倒數 四則 帶分數 單位分數"><div class="badges"><span class="b ch">七上 2</span><span class="b main">正課</span><span class="b topic">數與量</span></div><h3>分母是單位</h3><p>分母是單位：加減要同單位（數個數），乘除只論倍率（伸縮）。</p><div class="foot"><span>5 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7a-ch3-naming.html" data-grade="七年級上" data-kind="正課" data-search="七上 3 先給它一個名字 正課 代數 命名把三步變一步；不變量就是等號，而等號不准壞掉。 代數 代數式 一元一次方程式 等量公理 移項 列式 未知數 應用問題"><div class="badges"><span class="b ch">七上 3</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>先給它一個名字</h3><p>命名把三步變一步；不變量就是等號，而等號不准壞掉。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+<section class="group"><h2 class="grp">七年級下</h2><div class="cards">
+<a class="unit" href="units/g7b-ch1-simultaneous.html" data-grade="七年級下" data-kind="正課" data-search="七下 1 一條不夠 正課 代數 一條式子只能縮小範圍；第二條線索才把答案釘死。消去，就是把未知數減少一個。 二元一次方程式 聯立方程式 代入消去法 加減消去法 消去 無解 無限多組解 平行 重合 交點 雞兔同籠 抬腳法 和差問題 百雞問題 張丘建算經 九章算術 方程 克拉瑪 三元一次"><div class="badges"><span class="b ch">七下 1</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>一條不夠</h3><p>一條式子只能縮小範圍；第二條線索才把答案釘死。消去，就是把未知數減少一個。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7b-ch2-coordinates.html" data-grade="七年級下" data-kind="正課" data-search="七下 2 一個數不夠 正課 坐標幾何・代數 平面上的一個點要一對有順序的數；有了坐標，圖形可以用算的，式子可以用看的。 直角坐標 坐標平面 象限 原點 橫坐標 縱坐標 軍艦棋 對稱 平移 距離 框起來再減掉 鞋帶公式 測量師公式 pick 皮克定理 格子點 二元一次方程式的圖形 截距 鉛直線 水平線 斜率 y=ax+b desmos 交點 平行 重合 棋盤 同餘"><div class="badges"><span class="b ch">七下 2</span><span class="b main">正課</span><span class="b topic">坐標幾何・代數</span></div><h3>一個數不夠</h3><p>平面上的一個點要一對有順序的數；有了坐標，圖形可以用算的，式子可以用看的。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7b-ch3-ratio.html" data-grade="七年級下" data-kind="正課" data-search="七下 3 換一個基準看 正課 數與量 只看多少會被騙；比，是先說好以誰為基準，再問是它的幾倍。 比 比值 比例式 前項 後項 基準量 比較量 內項 外項 交叉相乘 設k 按比分配 比例尺 人口密度 金門 會考 正比 反比 y=kx xy=k 雙曲線 黃金比例 費氏數列 向日葵 黃金角 齒輪"><div class="badges"><span class="b ch">七下 3</span><span class="b main">正課</span><span class="b topic">數與量</span></div><h3>換一個基準看</h3><p>只看多少會被騙；比，是先說好以誰為基準，再問是它的幾倍。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7b-ch4-inequality.html" data-grade="七年級下" data-kind="正課" data-search="七下 4 答案是一整段 正課 代數 方程式的答案是一個點，不等式的答案是一整段；會讓不等號轉向的只有乘或除以負數。 不等式 一元一次不等式 不等號 轉向 數線 實心 空心 大於等於 小於等於 至少 不超過 未滿 天平 平移 伸縮 翻轉 乘以負數 移項 恆成立 無解 整數解 進位 捨去 夾在中間 絕對值 距離 算幾不等式 challenge"><div class="badges"><span class="b ch">七下 4</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>答案是一整段</h3><p>方程式的答案是一個點，不等式的答案是一整段；會讓不等號轉向的只有乘或除以負數。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7b-ch5-statistics.html" data-grade="七年級下" data-kind="正課" data-search="七下 5 誰能代表大家 正課 資料與不確定性 沒有一個數字代表得了所有人：平均數是平分、中位數是中間的人、眾數是最多人的那一格，先問你想回答什麼問題。 統計 圓形圖 立體圓形圖 列聯表 次數分配表 組距 組中點 以上未滿 長條圖 直方圖 次數分配折線圖 折線圖 基本工資 不等組距 平均數 中位數 眾數 眾數組 平衡點 離差 極端值 薪資 被平均 咖啡店 站牌 加權平均 去頭尾 會考"><div class="badges"><span class="b ch">七下 5</span><span class="b main">正課</span><span class="b topic">資料與不確定性</span></div><h3>誰能代表大家</h3><p>沒有一個數字代表得了所有人：平均數是平分、中位數是中間的人、眾數是最多人的那一格，先問你想回答什麼問題。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g7b-ch6-geometry.html" data-grade="七年級下" data-kind="正課" data-search="七下 6 正對著看 正課 空間與形狀 正對著，才量得準、折得齊、看得清：垂線段最短、對稱軸垂直平分對稱點的連線、三視圖每一張壓扁一個方向。 直線 射線 線段 角 垂直 垂足 垂線 點到直線的距離 平行線距離 線對稱 對稱軸 中垂線 垂直平分線 角平分線 一刀剪 剪紙 摺紙 正八邊形 菱形 鏡子 平面鏡 兩面鏡子 萬花筒 三視圖 前視圖 上視圖 右視圖 積木 將軍飲馬 取水 最短路徑"><div class="badges"><span class="b ch">七下 6</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>正對著看</h3><p>正對著，才量得準、折得齊、看得清：垂線段最短、對稱軸垂直平分對稱點的連線、三視圖每一張壓扁一個方向。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+<section class="group"><h2 class="grp">八年級上</h2><div class="cards">
+<a class="unit" href="units/g8a-ch1-polynomial.html" data-grade="八年級上" data-kind="正課" data-search="八上 1 把十換成 x 正課 代數 整數會進位，多項式不會——不進位，係數就留在原位，資訊才看得見。 多項式 係數 次數 常數項 降冪 同類項 乘法公式 平方差 完全平方 和的平方 差的平方 長除法 綜合除法 餘式定理 因式定理 位值制 進位 巴斯卡三角 巧算"><div class="badges"><span class="b ch">八上 1</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>把十換成 x</h3><p>整數會進位，多項式不會——不進位，係數就留在原位，資訊才看得見。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-s1-1-binomial.html" data-grade="八年級上" data-kind="補充卷" data-search="八上 1-1 不要乘，用數的 補充卷 代數 係數不是乘出來的，是數出來的——巴斯卡三角的每一格都在數「從 n 個括號挑 k 個出 b」。 二項式 巴斯卡三角 楊輝三角 組合 c(n,k) 挑法 曲棍球桿 格子路 路徑數 三角數 四角數 圓上的點 交點 換底數 進位 一一對應 分類"><div class="badges"><span class="b ch">八上 1-1</span><span class="b extra">補充卷</span><span class="b topic">代數</span></div><h3>不要乘，用數的</h3><p>係數不是乘出來的，是數出來的——巴斯卡三角的每一格都在數「從 n 個括號挑 k 個出 b」。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch2-sqrt-pythagoras.html" data-grade="八年級上" data-kind="正課" data-search="八上 2 把面積翻回邊長 正課 數與量・空間與形狀 平方是邊長→面積，開方是面積→邊長。往回走會出事，出事的地方就是所有規定的來源。 平方根 開方 根號 根式 最簡根式 分母有理化 無理數 畢氏定理 直角三角形 雙重根號 直式開方"><div class="badges"><span class="b ch">八上 2</span><span class="b main">正課</span><span class="b topic">數與量・空間與形狀</span></div><h3>把面積翻回邊長</h3><p>平方是邊長→面積，開方是面積→邊長。往回走會出事，出事的地方就是所有規定的來源。</p><div class="foot"><span>12 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch3-factoring.html" data-grade="八年級上" data-kind="正課" data-search="八上 3 拆成乘法才看得見 正課 代數 加法藏起來的事，乘法會說出來；「不能分解」是相對於你允許用哪些數說的。 因式分解 提公因式 十字交乘 平方差 完全平方 乘法公式 質數判定 梅森"><div class="badges"><span class="b ch">八上 3</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>拆成乘法才看得見</h3><p>加法藏起來的事，乘法會說出來；「不能分解」是相對於你允許用哪些數說的。</p><div class="foot"><span>6 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch3-genfunc-1.html" data-grade="八年級上" data-kind="補充卷" data-search="八上 3 係數才是主角 補充卷 代數 x 是掛鉤不是數；把要數的東西掛上去，乘法會幫你數。 生成函數 係數 巴斯卡三角 組合 二項式 骰子 計數"><div class="badges"><span class="b ch">八上 3</span><span class="b extra">補充卷</span><span class="b topic">代數</span></div><h3>係數才是主角</h3><p>x 是掛鉤不是數；把要數的東西掛上去，乘法會幫你數。</p><div class="foot"><span>5 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch3-genfunc-2.html" data-grade="八年級上" data-kind="補充卷" data-search="八上 3 一直加下去 補充卷 代數 把盡頭拿掉；1/(1−x) 是一個名字，不是一個除法。 生成函數 無窮 級數 等比 費氏數列 分割數 遞迴"><div class="badges"><span class="b ch">八上 3</span><span class="b extra">補充卷</span><span class="b topic">代數</span></div><h3>一直加下去</h3><p>把盡頭拿掉；1/(1−x) 是一個名字，不是一個除法。</p><div class="foot"><span>5 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch4-quadratic.html" data-grade="八年級上" data-kind="正課" data-search="八上 4 變回你會解的樣子 正課 代數 你本來就會解的只有兩種樣子；公式解不是第三招，是配方法留下的收據。 一元二次方程式 配方法 公式解 判別式 根與係數 兩根和 兩根積 零因子 換元 驗根 應用問題"><div class="badges"><span class="b ch">八上 4</span><span class="b main">正課</span><span class="b topic">代數</span></div><h3>變回你會解的樣子</h3><p>你本來就會解的只有兩種樣子；公式解不是第三招，是配方法留下的收據。</p><div class="foot"><span>6 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8a-ch5-statistics.html" data-grade="八年級上" data-kind="正課" data-search="八上 5 中間的那個人在哪裡 正課 資料與不確定性 四張表是同一條路上的四站；累積只增不減，所以它讀得回來。 統計 次數分配表 相對次數 累積次數 累積相對次數 折線圖 直方圖 組距 中位數 平均數 pr值 四分位數 圖表誤用"><div class="badges"><span class="b ch">八上 5</span><span class="b main">正課</span><span class="b topic">資料與不確定性</span></div><h3>中間的那個人在哪裡</h3><p>四張表是同一條路上的四站；累積只增不減，所以它讀得回來。</p><div class="foot"><span>6 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+<section class="group"><h2 class="grp">八年級下</h2><div class="cards">
+<a class="unit" href="units/g8b-ch1-sequences.html" data-grade="八年級下" data-kind="正課" data-search="八下 1 規則才是數列 正課 數與量 有限多項決定不了下一項；規則有兩種寫法，而等差等比是同一件事換一把尺。 數列 級數 等差 等差級數 等比 等比級數 一般項 遞迴 公差 公比 高斯 頭尾配對 錯位相減 無窮等比 三角數 對數 費波那契 moser"><div class="badges"><span class="b ch">八下 1</span><span class="b main">正課</span><span class="b topic">數與量</span></div><h3>規則才是數列</h3><p>有限多項決定不了下一項；規則有兩種寫法，而等差等比是同一件事換一把尺。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8b-ch1-recursion.html" data-grade="八年級下" data-kind="補充卷" data-search="八下 1 裡面有一個小的自己 補充卷 數與量 遞迴是把「裡面有一個小一號的自己」寫下來；比值是規則的性質，維度可以不是整數。 遞迴 費波那契 盧卡斯 黃金比例 黃金矩形 特徵方程式 河內塔 碎形 謝爾賓斯基 地毯 科赫 碎形維度 巴斯卡三角形 自我相似 binet"><div class="badges"><span class="b ch">八下 1</span><span class="b extra">補充卷</span><span class="b topic">數與量</span></div><h3>裡面有一個小的自己</h3><p>遞迴是把「裡面有一個小一號的自己」寫下來；比值是規則的性質，維度可以不是整數。</p><div class="foot"><span>6 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8b-ch2-functions.html" data-grade="八年級下" data-kind="正課" data-search="八下 2 它不會改口 正課 函數 函數不是一條式子，是一種讀法；換讀法的代價是輸出只准一個。 函數 函數值 定義域 值域 對應關係 一對一 多對一 鉛直線測試 函數圖形 一次函數 正比 常數函數 斜率 平移 伸縮 等差數列 分段函數 反函數 二分搜尋 終極密碼"><div class="badges"><span class="b ch">八下 2</span><span class="b main">正課</span><span class="b topic">函數</span></div><h3>它不會改口</h3><p>函數不是一條式子，是一種讀法；換讀法的代價是輸出只准一個。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8b-ch3-triangle.html" data-grade="八年級下" data-kind="正課" data-search="八下 3 不能再動了 正課 空間與形狀 幾何不能靠看也不能靠量；憑據只有一個——條件夠不夠把圖形釘死。 三角形 內角和 外角 外角和 多邊形 尺規作圖 中垂線 角平分線 全等 sss sas asa aas rhs ssa aaa 垂直平分線 外心 內心 三線共點 三角不等式 大邊對大角 樞紐定理 逆樞紐定理 30-60-90 45-45-90 生鏽圓規 古希臘三大難題 摺紙 地震定位 旋轉木架 逆敘述 軌跡"><div class="badges"><span class="b ch">八下 3</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>不能再動了</h3><p>幾何不能靠看也不能靠量；憑據只有一個——條件夠不夠把圖形釘死。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g8b-ch4-parallel.html" data-grade="八年級下" data-kind="正課" data-search="八下 4 那條線本來不在圖上 正課 空間與形狀 幾何題卡住，通常是圖上少一條線：平行線搬角、保住面積，對角線把四邊形切回三角形，最後變成身分證。 平行 平行線 截線 同位角 內錯角 同側內角 第五公設 歐幾里得 非歐幾何 球面 鋸齒 轉折 兩平行線距離 線段等分 等積變形 同底等高 面積 平行四邊形 矩形 菱形 正方形 箏形 梯形 等腰梯形 對角線 互相平分 中位線 中點四邊形 varignon 梯形中線 2n-3 釘不死 四連桿 鏡子 成像 反射 旋轉 平移 密鋪"><div class="badges"><span class="b ch">八下 4</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>那條線本來不在圖上</h3><p>幾何題卡住，通常是圖上少一條線：平行線搬角、保住面積，對角線把四邊形切回三角形，最後變成身分證。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+<section class="group"><h2 class="grp">九年級上</h2><div class="cards">
+<a class="unit" href="units/g9a-ch1-similar.html" data-grade="九年級上" data-kind="正課" data-search="九上 1 兩個角就夠了 正課 空間與形狀 放掉「一樣大」這個要求：判別只要兩個角，比是面積翻譯出來的，而且可以拿小的去量大的。 相似 相似形 相似比 aa sas sss 兩個角 面積比 k² 平行線截比例線段 同底等高 角平分線 母子相似 射影定理 畢氏定理 影子法 測量 誤差 路燈 影子頂端 相關變率 黃金矩形 黃金比例 rep-tile 位似 平方立方律"><div class="badges"><span class="b ch">九上 1</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>兩個角就夠了</h3><p>放掉「一樣大」這個要求：判別只要兩個角，比是面積翻譯出來的，而且可以拿小的去量大的。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g9a-ch2-circle.html" data-grade="九年級上" data-kind="正課" data-search="九上 2 怎麼看都一樣 正課 空間與形狀 圓只有一個規定：到圓心等距；它在三個地方變成「怎麼看都一樣」——半徑、圓周角、圓冪。 圓 圓心 半徑 弦 弧 直徑 切線 割線 弦心距 切線段 點與圓 直線與圓 圓心角 圓周角 半圓 直角 弦切角 圓內角 圓外角 內接四邊形 對角互補 四點共圓 圓冪 相交弦 割線定理 切割線定理 射門 最大視角 雷格蒙塔努斯 阿基米德 圓周率 π 夾擠"><div class="badges"><span class="b ch">九上 2</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>怎麼看都一樣</h3><p>圓只有一個規定：到圓心等距；它在三個地方變成「怎麼看都一樣」——半徑、圓周角、圓冪。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g9a-ch3-proof.html" data-grade="九年級上" data-kind="正課" data-search="九上 3 不是剛好 正課 空間與形狀 看起來對的不算；三條線會碰在同一點，每一次都有一個理由。 證明 推理 已知 求證 逆敘述 反例 假證明 等腰 64=65 共邊定理 共角定理 角平分線定理 面積法 外心 內心 重心 垂心 旁心 中垂線 角平分線 中線 高 共點 外接圓 內切圓 切線段 半周長 三心排序 歐拉線 九點圓"><div class="badges"><span class="b ch">九上 3</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>不是剛好</h3><p>看起來對的不算；三條線會碰在同一點，每一次都有一個理由。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+<section class="group"><h2 class="grp">九年級下</h2><div class="cards">
+<a class="unit" href="units/g9b-ch1-quadratic.html" data-grade="九年級下" data-kind="正課" data-search="九下 1 同一條，搬了家 正課 函數 所有二次函數的圖形都是 y＝ax² 搬家、伸縮來的；配方把頂點找出來，最高、最低都在頂點。 二次函數 拋物線 頂點 對稱軸 開口 a b c 平移 上下搬 左右搬 頂點式 一般式 配方 配方法 最大值 最小值 限定範圍 端點 三角形裡的矩形 相似 判別式 交點 相切 聯立 差的差 x³ 高中 多項式函數 拋物運動"><div class="badges"><span class="b ch">九下 1</span><span class="b main">正課</span><span class="b topic">函數</span></div><h3>同一條，搬了家</h3><p>所有二次函數的圖形都是 y＝ax² 搬家、伸縮來的；配方把頂點找出來，最高、最低都在頂點。</p><div class="foot"><span>7 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g9b-ch2-statprob.html" data-grade="九年級下" data-kind="正課" data-search="九下 2 算出來之前，先問 正課 資料與不確定性 統計問「你排在哪裡」，機率問「分母是誰」：百分位數、盒狀圖、樣本空間、三門遊戲、期望值，以及約會問題與生日悖論。 統計 機率 百分位數 四分位數 盒狀圖 箱型圖 四分位距 五數摘要 全距 離群值 樣本空間 事件 互補事件 降雨機率 賭徒謬誤 大數法則 樹狀圖 三門遊戲 蒙提霍爾 期望值 公平遊戲 加權平均 約會問題 蒲豐投針 生日悖論 快篩 偽陽性 貝氏 條件機率 骰子 硬幣 抽獎"><div class="badges"><span class="b ch">九下 2</span><span class="b main">正課</span><span class="b topic">資料與不確定性</span></div><h3>算出來之前，先問</h3><p>統計問「你排在哪裡」，機率問「分母是誰」：百分位數、盒狀圖、樣本空間、三門遊戲、期望值，以及約會問題與生日悖論。</p><div class="foot"><span>8 台實驗</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/g9b-ch3-solids.html" data-grade="九年級下" data-kind="正課" data-search="九下 3 多出來的那個方向 正課 空間與形狀 立體圖形多了一個方向：歪斜線與線面垂直、展開圖與表面積、柱體的底面積乘高，以及用一層一層疊夾出錐體的 1/3。 立體圖形 歪斜 空間中的直線 線與面垂直 展開圖 正方體展開圖 角柱 圓柱 角錐 圓錐 扇形 側面積 表面積 體積 母線 斜高 斜柱 祖暅原理 卡瓦列里 半球 阿基米德 錐形杯 相似立體 歐拉 螞蟻 最短路徑 a4 圓筒 空間畢氏 會考非選"><div class="badges"><span class="b ch">九下 3</span><span class="b main">正課</span><span class="b topic">空間與形狀</span></div><h3>多出來的那個方向</h3><p>立體圖形多了一個方向：歪斜線與線面垂直、展開圖與表面積、柱體的底面積乘高，以及用一層一層疊夾出錐體的 1/3。</p><div class="foot"><span>8 台實驗</span><span class="go">打開 →</span></div></a>
+</div></section>
+
+<div class="note">
+  <b>怎麼用：</b>每個單元都是一個獨立的網頁，離線也能開（第一次開啟時字型會從網路載入，之後就不需要）。
+  投影給全班看、或讓學生自己在平板上操作都可以。<b>正課</b>對應課本章節與段考範圍，<b>補充卷</b>是加深的延伸主題。
+</div>
+
+<footer>
+  <span>黃士祐 老師（IsRight）</span>
+  <span>更新於 2026-10-04</span>
+</footer>
+
+</div>
+<script>
+(function(){
+  var q = document.getElementById('q');
+  var fs = Array.prototype.slice.call(document.querySelectorAll('.f'));
+  var cards = Array.prototype.slice.call(document.querySelectorAll('a.unit'));
+  var mode = 'all';
+  function apply(){
+    var s = (q.value || '').trim().toLowerCase();
+    cards.forEach(function(c){
+      var okF = mode === 'all'
+        || (mode === c.dataset.grade)
+        || (mode === c.dataset.kind);
+      var okQ = !s || c.dataset.search.indexOf(s) >= 0;
+      c.hidden = !(okF && okQ);
+    });
+    document.querySelectorAll('section.group').forEach(function(g){
+      var any = Array.prototype.slice.call(g.querySelectorAll('a.unit')).some(function(c){ return !c.hidden; });
+      g.hidden = !any;
+    });
+    var none = cards.every(function(c){ return c.hidden; });
+    document.getElementById('empty').hidden = !none;
+  }
+  q.addEventListener('input', apply);
+  fs.forEach(function(b){
+    b.addEventListener('click', function(){
+      fs.forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      mode = b.dataset.f;
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>
