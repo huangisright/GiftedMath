@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRML 競速練習統計</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* 版面：老師的成績簿。上方篩選吸附；先看隊伍總分，再看每題、每人、熱圖 */
+:root{
+  --paper:#f3f4ee; --grid:rgba(47,63,143,.07); --card:#ffffff; --ink:#1c2230; --muted:#5b6272; --line:#d6d9cc;
+  --indigo:#2f3f8f; --indigo-soft:#e4e7f5; --ochre:#b85a1f; --ochre-soft:#f7e6d8; --moss:#3f6f2e; --moss-soft:#e1eed9; --blank:#eceee6; --danger:#b3261e;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#13151b; --grid:rgba(143,160,255,.06); --card:#1b1e26; --ink:#e7e8ec; --muted:#9ba1ad; --line:#2d313b;
+  --indigo:#9aa8ff; --indigo-soft:#262b45; --ochre:#ec9a5f; --ochre-soft:#3a2a1f; --moss:#93c47d; --moss-soft:#22301d; --blank:#23262e; --danger:#ff8a80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#13151b; --grid:rgba(143,160,255,.06); --card:#1b1e26; --ink:#e7e8ec; --muted:#9ba1ad; --line:#2d313b;
+  --indigo:#9aa8ff; --indigo-soft:#262b45; --ochre:#ec9a5f; --ochre-soft:#3a2a1f; --moss:#93c47d; --moss-soft:#22301d; --blank:#23262e; --danger:#ff8a80; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:1.7rem;font-weight:900}
+h2{font-size:1.1rem}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--muted);font-weight:500}
+.muted{color:var(--muted)}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--muted);min-width:0}
+select,input[type=password],input[type=text]{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+button{font:inherit;cursor:pointer;border-radius:4px;border:1px solid var(--indigo);background:var(--indigo);color:var(--card);padding:8px 14px;font-weight:700}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+.chk{display:flex;gap:6px;align-items:center;font-size:.9rem;padding-bottom:8px}
+.demo{font-size:.82rem;background:var(--ochre-soft);color:var(--ochre);border-radius:4px;padding:6px 10px}
+.err{color:var(--danger)}
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:18px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.76rem;letter-spacing:.06em;position:sticky;top:0;background:var(--card)}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+th.n{text-align:right}
+.bar{display:inline-block;height:9px;border-radius:2px;background:var(--moss);vertical-align:middle}
+.bartrack{display:inline-block;width:90px;height:9px;border-radius:2px;background:var(--blank);vertical-align:middle;margin-right:6px;overflow:hidden}
+.low{color:var(--ochre);font-weight:700}
+.kpis{display:flex;gap:28px;flex-wrap:wrap}
+.kpi b{display:block;font-family:var(--f-display);font-size:1.8rem;font-weight:900;color:var(--indigo);line-height:1.1}
+.kpi span{font-size:.8rem;color:var(--muted)}
+/* 熱圖 */
+.heat{width:auto}
+.heat td{padding:0;border:2px solid var(--card)}
+.heat th{padding:4px;text-align:center}
+.heat th.nm{text-align:left;padding-right:10px;font-size:.85rem;color:var(--ink);font-weight:500;position:sticky;left:0;background:var(--card);z-index:1}
+.hc{display:block;width:38px;height:30px;line-height:30px;text-align:center;font-family:var(--f-mono);font-size:.72rem;border-radius:3px}
+.hc.ok{background:var(--moss-soft);color:var(--moss)}
+.hc.no{background:var(--ochre-soft);color:var(--ochre);font-weight:700}
+.hc.bl{background:var(--blank);color:var(--muted)}
+.hc.slow{box-shadow:inset 0 0 0 2px currentColor}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);align-items:center}
+.legend .hc{width:26px;height:18px;line-height:18px;display:inline-block;vertical-align:middle;margin-right:4px}
+.topic td.n{min-width:56px}
+.pill{font-family:var(--f-mono);font-size:.8rem;padding:2px 6px;border-radius:3px}
+.pill.g{background:var(--moss-soft);color:var(--moss)}
+.pill.m{background:var(--indigo-soft);color:var(--indigo)}
+.pill.b{background:var(--ochre-soft);color:var(--ochre)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <div class="eyebrow">TRML 競速練習・老師用</div>
+    <h1>練習統計</h1>
+  </div>
+  <div id="demoNote" class="demo" hidden>範例模式：還沒接上試算表，下面是假資料，只用來看版面。</div>
+
+  <div class="sheet" id="login">
+    <div class="row">
+      <label class="f" for="key">老師密碼<input type="password" id="key" autocomplete="current-password"></label>
+      <button id="btnLoad">讀取成績</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </div>
+
+  <div class="sheet filters" id="filters" hidden>
+    <div class="row">
+      <label class="f" for="fSet">卷子<select id="fSet"></select></label>
+      <label class="f" for="fTeam">隊伍<select id="fTeam"></select></label>
+      <label class="chk"><input type="checkbox" id="fFirst" checked> 只算第一次作答</label>
+      <button id="btnReload" type="button">重新讀取</button>
+    </div>
+  </div>
+
+  <div id="main" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="sheet">
+      <div class="kpis" id="kpis"></div>
+    </div>
+    <div class="cols">
+      <div class="sheet">
+        <h2>隊伍總分</h2>
+        <div class="muted" style="font-size:.85rem">競速賽是四人加總，所以看的是合計，不是平均。</div>
+        <div class="tbl-wrap"><table id="tTeams"></table></div>
+      </div>
+      <div class="sheet">
+        <h2>每個人</h2>
+        <div class="tbl-wrap"><table id="tPeople"></table></div>
+      </div>
+    </div>
+    <div class="sheet">
+      <h2>每一題</h2>
+      <div class="muted" style="font-size:.85rem">依答對率由低到高排。答對率低、答錯的人又花很久，通常就是該在午休講的題目。</div>
+      <div class="tbl-wrap"><table id="tQs"></table></div>
+    </div>
+    <div class="sheet">
+      <h2>誰卡在哪一題</h2>
+      <div class="legend">
+        <span><span class="hc ok">42</span>答對（秒）</span><span><span class="hc no">95</span>答錯</span><span><span class="hc bl">–</span>空白</span>
+        <span><span class="hc no slow">180</span>外框：超過 30 秒，而且是這份卷子每題平均用時的兩倍以上</span>
+      </div>
+      <div class="tbl-wrap"><table class="heat" id="tHeat"></table></div>
+    </div>
+    <div class="sheet" id="topicBox">
+      <h2>題型答對率</h2>
+      <div class="muted" style="font-size:.85rem">題型來自 questions 工作表的「題型」欄。這一格只算所選卷子裡出現的題目。</div>
+      <div class="tbl-wrap"><table class="topic" id="tTopic"></table></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+'use strict';
+var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'';
+var DEMO=!API;
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmt(sec){sec=Math.max(0,Math.round(sec||0));var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
+function pct(x){return isFinite(x)?Math.round(x*100)+'%':'–';}
+function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function save(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+var data=null;
+
+/* ---------- 範例資料 ---------- */
+function demoData(){
+  var seed=7; function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
+  var teams={'範例一隊':['王小明','林小華','陳小安','李小青'],'範例二隊':['張小宇','黃小晴','吳小哲','劉小芸']};
+  var qs=[['D1','1009','代數變形'],['D2','3','數列'],['D3','28','數論'],['D4','9','圓'],['D5','156','數論'],['D6','9/10','代數變形'],['D7','3√2','面積與相似']];
+  var diff=[.55,.35,.5,.7,.3,.8,.85], base=[70,90,60,45,120,40,35];
+  var subs=[],resp=[],n=0;
+  Object.keys(teams).forEach(function(t,ti){teams[t].forEach(function(nm,ni){
+    var skill=.75+((ti*4+ni)%5)*.12, aid='demo'+(n++), sc=0, used=0;
+    qs.forEach(function(q,qi){
+      var ok=rnd()<diff[qi]*skill, sec=Math.round(base[qi]*(.5+rnd()*1.3)*(ok?1:1.4)), blank=!ok&&rnd()<.3;
+      if(ok)sc++; used+=sec;
+      resp.push({attemptId:aid,setId:'demo',team:t,name:nm,attemptNo:1,qid:q[0],answer:blank?'':(ok?q[1]:String(Math.round(rnd()*50))),correct:ok,seconds:sec});
+    });
+    subs.push({time:'2026/10/20 下午 9:'+(10+n),attemptId:aid,setId:'demo',team:t,name:nm,attemptNo:1,score:sc,total:qs.length,usedSec:Math.min(used,480)});
+  });});
+  return {ok:true,sets:[{id:'demo',title:'範例卷　改寫自歷屆競速題',minutes:8,qids:qs.map(function(q){return q[0];}),open:true}],
+    questions:qs.map(function(q){return {qid:q[0],answer:q[1],topic:q[2]};}),
+    roster:[].concat.apply([],Object.keys(teams).map(function(t){return teams[t].map(function(n){return {team:t,name:n};});})),
+    submissions:subs,responses:resp};
+}
+
+/* ---------- 讀資料 ---------- */
+function fetchReport(){
+  if(DEMO){data=demoData();afterLoad();return;}
+  var key=$('key').value.trim();
+  if(!key){$('status').textContent='先輸入密碼。';return;}
+  $('status').textContent='讀取中…';
+  fetch(API+'?action=report&key='+encodeURIComponent(key)).then(function(r){return r.json();}).then(function(d){
+    if(!d.ok) throw new Error(d.error||'讀取失敗');
+    save('trml-key',key); data=d; $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; afterLoad();
+  }).catch(function(e){$('status').innerHTML='<span class="err">'+esc(e.message)+'</span>';});
+}
+function afterLoad(){
+  $('filters').hidden=false; $('main').hidden=false;
+  var prevSet=$('fSet').value, prevTeam=$('fTeam').value;
+  var used={}; data.submissions.forEach(function(s){used[s.setId]=1;});
+  var sets=data.sets.filter(function(s){return used[s.id];});
+  if(!sets.length) sets=data.sets;
+  $('fSet').innerHTML=sets.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title||s.id)+'</option>';}).join('');
+  if(prevSet&&sets.some(function(s){return s.id===prevSet;})) $('fSet').value=prevSet;
+  var teams=[]; data.roster.forEach(function(r){if(teams.indexOf(r.team)<0)teams.push(r.team);});
+  $('fTeam').innerHTML='<option value="">全部隊伍</option>'+teams.map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
+  if(prevTeam) $('fTeam').value=prevTeam;
+  render();
+}
+['fSet','fTeam','fFirst'].forEach(function(id){$(id).addEventListener('change',render);});
+$('btnLoad').onclick=fetchReport; $('btnReload').onclick=fetchReport;
+$('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport();});
+
+/* ---------- 計算與畫表 ---------- */
+function render(){
+  if(!data) return;
+  var setId=$('fSet').value, team=$('fTeam').value, first=$('fFirst').checked;
+  var set=data.sets.filter(function(s){return s.id===setId;})[0]||{qids:[],title:setId};
+  var qinfo={}; data.questions.forEach(function(q){qinfo[q.qid]=q;});
+  var qids=set.qids&&set.qids.length?set.qids:uniq(data.responses.filter(function(r){return r.setId===setId;}).map(function(r){return r.qid;}));
+
+  // 每人取一次作答：第一次或最近一次
+  var pick={};
+  data.submissions.forEach(function(s){
+    if(s.setId!==setId) return;
+    var k=s.team+'|'+s.name, cur=pick[k];
+    if(!cur) pick[k]={sub:s,count:1};
+    else { cur.count++; if(first? s.attemptNo<cur.sub.attemptNo : s.attemptNo>cur.sub.attemptNo) cur.sub=s; }
+  });
+  var people=data.roster.filter(function(r){return !team||r.team===team;}).map(function(r){
+    var p=pick[r.team+'|'+r.name]; return {team:r.team,name:r.name,sub:p?p.sub:null,count:p?p.count:0};
+  });
+  var aids={}; people.forEach(function(p){if(p.sub)aids[p.sub.attemptId]=p;});
+  var R={}; data.responses.forEach(function(r){ if(aids[r.attemptId]) R[r.attemptId+'|'+r.qid]=r; });
+  var done=people.filter(function(p){return p.sub;});
+
+  // KPI
+  var avgScore=done.length?done.reduce(function(a,p){return a+p.sub.score;},0)/done.length:NaN;
+  var allSec=[]; done.forEach(function(p){qids.forEach(function(q){var r=R[p.sub.attemptId+'|'+q];if(r)allSec.push(r.seconds);});});
+  var avgQ=allSec.length?allSec.reduce(function(a,b){return a+b;},0)/allSec.length:0;
+  $('kpis').innerHTML=kpi(done.length+'<small style="font-size:1rem;color:var(--muted)"> / '+people.length+'</small>','已交卷人數')+
+    kpi(isFinite(avgScore)?avgScore.toFixed(1)+'<small style="font-size:1rem;color:var(--muted)"> / '+qids.length+'</small>':'–','平均得分')+
+    kpi(fmt(avgQ),'每題平均用時')+kpi(set.minutes?set.minutes+' 分':'–','這份卷子的時間');
+
+  // 隊伍
+  var tm={}; people.forEach(function(p){var t=tm[p.team]||(tm[p.team]={n:0,d:0,sum:0});t.n++;if(p.sub){t.d++;t.sum+=p.sub.score;}});
+  var tlist=Object.keys(tm).sort(function(a,b){return tm[b].sum-tm[a].sum;});
+  $('tTeams').innerHTML='<tr><th>隊伍</th><th class="n">已交</th><th class="n">合計</th><th class="n">滿分</th><th class="n">合計比例</th></tr>'+
+    tlist.map(function(t){var x=tm[t],full=x.n*qids.length;return '<tr><td>'+esc(t)+'</td><td class="n">'+x.d+'/'+x.n+'</td><td class="n"><b>'+x.sum+'</b></td><td class="n">'+full+'</td><td class="n">'+pct(x.sum/full)+'</td></tr>';}).join('');
+
+  // 每個人
+  var plist=people.slice().sort(function(a,b){return (b.sub?b.sub.score:-1)-(a.sub?a.sub.score:-1)||a.team.localeCompare(b.team);});
+  $('tPeople').innerHTML='<tr><th>姓名</th><th>隊伍</th><th class="n">得分</th><th class="n">用時</th><th class="n">交過幾次</th><th>交卷時間</th></tr>'+
+    plist.map(function(p){var s=p.sub;return '<tr><td>'+esc(p.name)+'</td><td>'+esc(p.team)+'</td>'+
+      (s?'<td class="n"><b>'+s.score+'</b>/'+s.total+'</td><td class="n">'+fmt(s.usedSec)+'</td><td class="n">'+p.count+'</td><td class="muted">'+esc(s.time)+'</td>'
+        :'<td class="n muted">未交</td><td></td><td></td><td></td>')+'</tr>';}).join('');
+
+  // 每一題
+  var qstat=qids.map(function(q,i){
+    var rs=done.map(function(p){return R[p.sub.attemptId+'|'+q];}).filter(Boolean);
+    var ok=rs.filter(function(r){return r.correct;}), no=rs.filter(function(r){return !r.correct;});
+    var wrong={}; no.forEach(function(r){if(r.answer)wrong[r.answer]=(wrong[r.answer]||0)+1;});
+    var top=Object.keys(wrong).sort(function(a,b){return wrong[b]-wrong[a];})[0];
+    return {i:i,q:q,info:qinfo[q]||{},n:rs.length,rate:rs.length?ok.length/rs.length:NaN,
+      avg:mean(rs.map(function(r){return r.seconds;})),avgNo:mean(no.map(function(r){return r.seconds;})),
+      blank:no.filter(function(r){return !r.answer;}).length,top:top?top+'（'+wrong[top]+' 人）':''};
+  });
+  var qsorted=qstat.slice().sort(function(a,b){return (isNaN(a.rate)?2:a.rate)-(isNaN(b.rate)?2:b.rate)||b.avg-a.avg;});
+  $('tQs').innerHTML='<tr><th class="n">第幾題</th><th>題號</th><th>題型</th><th>答對率</th><th class="n">平均用時</th><th class="n">答錯的人平均用時</th><th class="n">空白</th><th>最常見的錯答</th><th>正確答案</th></tr>'+
+    qsorted.map(function(s){return '<tr><td class="n">'+(s.i+1)+'</td><td>'+esc(s.q)+'</td><td>'+esc(s.info.topic||'')+'</td>'+
+      '<td><span class="bartrack"><span class="bar" style="width:'+(isNaN(s.rate)?0:s.rate*100)+'%"></span></span><span class="'+(s.rate<.5?'low':'')+'">'+pct(s.rate)+'</span></td>'+
+      '<td class="n">'+fmt(s.avg)+'</td><td class="n">'+(isNaN(s.avgNo)?'–':fmt(s.avgNo))+'</td><td class="n">'+s.blank+'</td><td>'+esc(s.top)+'</td><td>'+esc(showAns(s.info.answer))+'</td></tr>';}).join('');
+
+  // 熱圖
+  $('tHeat').innerHTML='<tr><th class="nm">　</th>'+qids.map(function(q,i){return '<th title="'+esc(q)+'">'+(i+1)+'</th>';}).join('')+'<th>得分</th></tr>'+
+    plist.filter(function(p){return p.sub;}).map(function(p){
+      return '<tr><th class="nm">'+esc(p.name)+' <span class="muted" style="font-size:.75rem">'+esc(p.team)+'</span></th>'+qids.map(function(q,i){
+        var r=R[p.sub.attemptId+'|'+q];
+        if(!r) return '<td><span class="hc bl">–</span></td>';
+        var cls=r.correct?'ok':(r.answer?'no':'bl'), slow=(r.seconds>=30&&r.seconds>2*avgQ)?' slow':'';
+        var tip='第 '+(i+1)+' 題　作答：'+(r.answer||'（空白）')+'　'+fmt(r.seconds);
+        return '<td><span class="hc '+cls+slow+'" title="'+esc(tip)+'">'+(cls==='bl'&&!r.seconds?'–':r.seconds)+'</span></td>';
+      }).join('')+'<td class="n"><b>'+p.sub.score+'</b></td></tr>';
+    }).join('');
+
+  // 題型
+  var topics=uniq(qids.map(function(q){return (qinfo[q]||{}).topic;}).filter(Boolean));
+  $('topicBox').hidden=!topics.length;
+  if(topics.length){
+    $('tTopic').innerHTML='<tr><th>姓名</th>'+topics.map(function(t){var c=qids.filter(function(q){return (qinfo[q]||{}).topic===t;}).length;return '<th class="n">'+esc(t)+'<br><span style="font-size:.7rem">'+c+' 題</span></th>';}).join('')+'</tr>'+
+      plist.filter(function(p){return p.sub;}).map(function(p){
+        return '<tr><td>'+esc(p.name)+'</td>'+topics.map(function(t){
+          var qs=qids.filter(function(q){return (qinfo[q]||{}).topic===t;});
+          var ok=qs.filter(function(q){var r=R[p.sub.attemptId+'|'+q];return r&&r.correct;}).length, rate=ok/qs.length;
+          return '<td class="n"><span class="pill '+(rate>=.75?'g':rate>=.4?'m':'b')+'">'+ok+'/'+qs.length+'</span></td>';
+        }).join('')+'</tr>';
+      }).join('');
+  }
+}
+function showAns(a){return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
+function kpi(v,l){return '<div class="kpi"><b>'+v+'</b><span>'+l+'</span></div>';}
+function mean(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:NaN;}
+function uniq(a){var o=[];a.forEach(function(x){if(o.indexOf(x)<0)o.push(x);});return o;}
+
+if(DEMO){ $('demoNote').hidden=false; $('login').hidden=true; fetchReport(); }
+else { var k=load('trml-key'); if(k){ $('key').value=k; fetchReport(); } }
+})();
+</script>
+
+</body>
+</html>
