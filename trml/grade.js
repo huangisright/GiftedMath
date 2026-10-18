@@ -13,7 +13,8 @@
   'use strict';
 
   function toHalfWidth(s) {
-    s = String(s == null ? '' : s);
+    s = String(s == null ? '' : s)
+      .replace(/²/g, '^2').replace(/³/g, '^3');
     if (s.normalize) s = s.normalize('NFKC');
     return s;
   }
@@ -30,7 +31,7 @@
       .replace(/√/g, 'sqrt')
       .replace(/sqrt\{/g, 'sqrt(').replace(/\}/g, ')').replace(/\{/g, '(');
     // 去掉尾端單位
-    s = s.replace(/(平方公分|立方公分|平方公尺|公分|公尺|公里|cm\^?[23]?|度|°|個|種|人|元|分鐘|分|秒|條|塊|次|天|歲|題|組|根|張|頁|位|顆|隻|輛|本|支|台)+$/, '');
+    s = s.replace(/(%|％|平方公分|立方公分|平方公尺|公分|公尺|公里|cm\^?[23]?|度|°|個|種|人|元|分鐘|分|秒|條|塊|次|天|歲|題|組|根|張|頁|位|顆|隻|輛|本|支|台)+$/, '');
     // 開頭的「x=」「答:」之類
     s = s.replace(/^(答[:：]?|ans[:：]?)/, '');
     s = s.replace(/^[a-z]=/, '');
