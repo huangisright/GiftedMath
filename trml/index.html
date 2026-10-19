@@ -113,6 +113,7 @@ td.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
     <div class="row">
       <label class="f" for="team">隊伍<select id="team"></select></label>
       <label class="f" for="name">姓名<select id="name"></select></label>
+      <label class="f" for="pin" id="pinWrap">代碼<input type="text" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="老師給的代碼"></label>
     </div>
   </div>
   <div id="loadErr" class="err" hidden></div>
@@ -213,7 +214,7 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){retur
 
 /* ---------- 讀名單與卷子 ---------- */
 function boot(){
-  if(DEMO){ $('demoNote').hidden=false; cfg=DEMO_DATA; renderLogin(); return; }
+  if(DEMO){ $('demoNote').hidden=false; $('pinWrap').hidden=true; cfg=DEMO_DATA; renderLogin(); return; }
   $('sets').innerHTML='<div class="muted">讀取中…</div>';
   fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
     if(!d.ok) throw new Error(d.error||'讀取失敗');
@@ -229,8 +230,11 @@ function renderLogin(){
   var ts=$('team'); ts.innerHTML='<option value="">選隊伍</option>'+cfg.teams.map(function(t){return '<option>'+esc(t.team)+'</option>';}).join('');
   if(who.team) ts.value=who.team;
   fillNames(who.name);
-  ts.onchange=function(){ fillNames(); renderSets(); };
-  $('name').onchange=function(){ save(WHO_KEY,{team:ts.value,name:$('name').value}); renderSets(); };
+  if(who.pin) $('pin').value=who.pin;
+  var remember=function(){ save(WHO_KEY,{team:ts.value,name:$('name').value,pin:$('pin').value.trim()}); };
+  ts.onchange=function(){ fillNames(); $('pin').value=''; remember(); renderSets(); };
+  $('name').onchange=function(){ $('pin').value=''; remember(); renderSets(); };
+  $('pin').oninput=remember;
   renderSets(); renderResume(); renderPending();
 }
 function fillNames(sel){
@@ -258,7 +262,23 @@ function askStart(set){
     '<div class="row"><button class="primary" id="go">開始計時</button><button id="cancel">先不要</button></div>';
   c.scrollIntoView({block:'center',behavior:'smooth'});
   $('cancel').onclick=function(){ c.hidden=true; };
-  $('go').onclick=function(){ c.hidden=true; startRun(set); };
+  $('go').onclick=function(){
+    if(DEMO){ c.hidden=true; startRun(set); return; }
+    var btn=$('go'); btn.disabled=true; btn.textContent='確認代碼中…';
+    fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'login',team:$('team').value,name:$('name').value,pin:$('pin').value.trim()})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.ok){ c.hidden=true; startRun(set); return; }
+        btn.disabled=false; btn.textContent='開始計時';
+        var msg=d.error||'代碼不對，請再確認一次。';
+        var e=c.querySelector('.err'); if(!e){ e=document.createElement('div'); e.className='err'; c.appendChild(e); }
+        e.textContent=msg; $('pin').focus();
+      })
+      .catch(function(){ btn.disabled=false; btn.textContent='開始計時';
+        var e=c.querySelector('.err'); if(!e){ e=document.createElement('div'); e.className='err'; c.appendChild(e); }
+        e.textContent='連不上題庫，請確認網路後再按一次。'; });
+  };
 }
 function renderResume(){
   var r=load(RUN_KEY), box=$('resume');
@@ -284,7 +304,7 @@ function renderPending(){
 /* ---------- 作答 ---------- */
 function startRun(set){
   var now=Date.now();
-  run={ set:set, team:$('team').value, name:$('name').value, startedAt:now, deadline:now+set.minutes*60000,
+  run={ set:set, team:$('team').value, name:$('name').value, pin:$('pin').value.trim(), startedAt:now, deadline:now+set.minutes*60000,
         answers:{}, secs:{}, cur:0, clientId:'c'+now.toString(36)+Math.random().toString(36).slice(2,8) };
   set.questions.forEach(function(q){ run.answers[q.qid]=''; run.secs[q.qid]=0; });
   save(RUN_KEY,run); enterRun();
@@ -386,7 +406,7 @@ function submit(auto){
   account(); clearInterval(timer);
   run._sending=true;
   var used=Math.min(run.set.minutes*60,(Math.min(Date.now(),run.deadline)-run.startedAt)/1000);
-  var payload={ action:'submit', setId:run.set.id, setTitle:run.set.title, team:run.team, name:run.name, clientId:run.clientId,
+  var payload={ action:'submit', setId:run.set.id, setTitle:run.set.title, team:run.team, name:run.name, pin:run.pin||'', clientId:run.clientId,
     startedAt:run.startedAt, usedSec:Math.round(used), auto:!!auto,
     responses:run.set.questions.map(function(q){ return {qid:q.qid, answer:(run.answers[q.qid]||'').trim(), seconds:Math.round(run.secs[q.qid]||0)}; }) };
   var snapshot=run;
