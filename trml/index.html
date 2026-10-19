@@ -54,6 +54,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .set .meta{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
 .set .done{font-size:.8rem;color:var(--moss)}
 .set button{margin-top:auto;align-self:flex-start}
+.set.locked{background:transparent;border-style:dashed}
+.set .note{font-size:.85rem;color:var(--muted)}
+.set .lock{font-size:.85rem;color:var(--ochre);font-weight:700}
+.set .unlock{display:flex;gap:6px;margin-top:auto}
+.set .unlock input{font-family:var(--f-mono);padding:7px 9px;flex:1 1 auto;min-width:0}
+.set .unlock button{padding:7px 12px;white-space:nowrap}
+.set .err{font-size:.82rem}
 .confirm{border:1px dashed var(--indigo);background:var(--indigo-soft);border-radius:6px;padding:16px}
 
 /* 作答 */
@@ -204,7 +211,7 @@ var DEMO_ANS = {D1:'1009',D2:'3',D3:'28',D4:'9',D5:'156',D6:'9/10',D7:'3√2'};
 /* ---------- 儲存（只是方便：重新整理不會掉答案） ---------- */
 function load(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
 function save(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
-var RUN_KEY='trml-run', PEND_KEY='trml-pending', HIST_KEY='trml-history', WHO_KEY='trml-who';
+var RUN_KEY='trml-run', PEND_KEY='trml-pending', HIST_KEY='trml-history', WHO_KEY='trml-who', PASS_KEY='trml-pass';
 
 var cfg=null, run=null, timer=null, lastTick=0;
 
@@ -218,7 +225,7 @@ function boot(){
   $('sets').innerHTML='<div class="muted">讀取中…</div>';
   fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
     if(!d.ok) throw new Error(d.error||'讀取失敗');
-    cfg=d; renderLogin();
+    cfg=d; renderLogin(); autoUnlock();
   }).catch(function(e){
     $('sets').innerHTML=''; $('loadErr').hidden=false;
     $('loadErr').textContent='讀不到題庫：'+e.message+'。請確認網路，或請老師檢查設定。';
@@ -242,18 +249,48 @@ function fillNames(sel){
   $('name').innerHTML='<option value="">選姓名</option>'+(t?t.members.map(function(n){return '<option>'+esc(n)+'</option>';}).join(''):'');
   if(sel) $('name').value=sel;
 }
+function isOpen(s){ return !!s.questions; }
 function renderSets(){
   var hist=load(HIST_KEY)||{}, team=$('team').value, name=$('name').value, ready=!!(team&&name);
   if(!cfg.sets.length){ $('sets').innerHTML='<div class="muted">目前沒有開放的卷子。</div>'; return; }
-  $('sets').innerHTML=cfg.sets.map(function(s,i){
-    var n=hist[s.id+'|'+team+'|'+name];
-    return '<div class="set"><b>'+esc(s.title)+'</b><div class="meta">'+s.questions.length+' 題・'+s.minutes+' 分鐘</div>'+
+  // 開放的排前面，鎖住的排後面
+  var order=cfg.sets.map(function(s,i){return i;}).sort(function(a,b){ return (isOpen(cfg.sets[b])?1:0)-(isOpen(cfg.sets[a])?1:0) || a-b; });
+  $('sets').innerHTML=order.map(function(i){
+    var s=cfg.sets[i], n=hist[s.id+'|'+team+'|'+name], cnt=s.questions?s.questions.length:(s.count||'');
+    var head='<b>'+esc(s.title)+'</b><div class="meta">'+cnt+' 題・'+s.minutes+' 分鐘</div>'+(s.note?'<div class="note">'+esc(s.note)+'</div>':'');
+    if(isOpen(s)) return '<div class="set">'+head+
       (n?'<div class="done">這台裝置上已交過 '+n.count+' 次，最近一次 '+n.score+'/'+n.total+'</div>':'')+
-      '<button class="primary" data-i="'+i+'"'+(ready?'':' disabled')+'>開始</button></div>';
+      '<button class="primary" data-start="'+i+'"'+(ready?'':' disabled')+'>開始</button></div>';
+    if(s.status==='scheduled') return '<div class="set locked">'+head+'<div class="lock">'+esc(s.openDate||'')+' 開放</div></div>';
+    return '<div class="set locked">'+head+'<div class="lock">需要通關密碼</div>'+
+      '<div class="unlock"><input type="text" id="pass-'+i+'" autocomplete="off" spellcheck="false" placeholder="通關密碼" aria-label="'+esc(s.title)+' 的通關密碼"><button data-unlock="'+i+'">解鎖</button></div>'+
+      '<div class="err" id="perr-'+i+'"></div></div>';
   }).join('') + (ready?'':'<div class="muted">先選隊伍和姓名。</div>');
-  Array.prototype.forEach.call($('sets').querySelectorAll('button'),function(b){
-    b.onclick=function(){ askStart(cfg.sets[+b.dataset.i]); };
+  Array.prototype.forEach.call($('sets').querySelectorAll('[data-start]'),function(b){
+    b.onclick=function(){ askStart(cfg.sets[+b.dataset.start]); };
   });
+  Array.prototype.forEach.call($('sets').querySelectorAll('[data-unlock]'),function(b){
+    var i=+b.dataset.unlock, inp=$('pass-'+i);
+    b.onclick=function(){ unlock(i, inp.value.trim()); };
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.isComposing) unlock(i, inp.value.trim()); });
+  });
+}
+function unlock(i, pass, silent){
+  var s=cfg.sets[i]; if(!pass) return;
+  var err=$('perr-'+i); if(err&&!silent) err.textContent='確認中…';
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'unlock',setId:s.id,pass:pass})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.ok){ if(!silent&&$('perr-'+i)) $('perr-'+i).textContent=d.error||'通關密碼不對'; return; }
+      s.questions=d.questions; s.setPass=pass;
+      var m=load(PASS_KEY)||{}; m[s.id]=pass; save(PASS_KEY,m);
+      renderSets();
+    })
+    .catch(function(){ if(!silent&&$('perr-'+i)) $('perr-'+i).textContent='連不上題庫，請確認網路後再試。'; });
+}
+function autoUnlock(){
+  var m=load(PASS_KEY)||{};
+  cfg.sets.forEach(function(s,i){ if(!s.questions && s.status==='locked' && m[s.id]) unlock(i,m[s.id],true); });
 }
 function askStart(set){
   var c=$('confirm'); c.hidden=false;
@@ -304,7 +341,7 @@ function renderPending(){
 /* ---------- 作答 ---------- */
 function startRun(set){
   var now=Date.now();
-  run={ set:set, team:$('team').value, name:$('name').value, pin:$('pin').value.trim(), startedAt:now, deadline:now+set.minutes*60000,
+  run={ set:set, setPass:set.setPass||'', team:$('team').value, name:$('name').value, pin:$('pin').value.trim(), startedAt:now, deadline:now+set.minutes*60000,
         answers:{}, secs:{}, cur:0, clientId:'c'+now.toString(36)+Math.random().toString(36).slice(2,8) };
   set.questions.forEach(function(q){ run.answers[q.qid]=''; run.secs[q.qid]=0; });
   save(RUN_KEY,run); enterRun();
@@ -406,7 +443,7 @@ function submit(auto){
   account(); clearInterval(timer);
   run._sending=true;
   var used=Math.min(run.set.minutes*60,(Math.min(Date.now(),run.deadline)-run.startedAt)/1000);
-  var payload={ action:'submit', setId:run.set.id, setTitle:run.set.title, team:run.team, name:run.name, pin:run.pin||'', clientId:run.clientId,
+  var payload={ action:'submit', setId:run.set.id, setTitle:run.set.title, team:run.team, name:run.name, pin:run.pin||'', setPass:run.setPass||'', clientId:run.clientId,
     startedAt:run.startedAt, usedSec:Math.round(used), auto:!!auto,
     responses:run.set.questions.map(function(q){ return {qid:q.qid, answer:(run.answers[q.qid]||'').trim(), seconds:Math.round(run.secs[q.qid]||0)}; }) };
   var snapshot=run;
