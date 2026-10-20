@@ -829,10 +829,15 @@ function lab3(reset) {
   if (reset) q3rows = 5;
   const N = Math.min(q3rows, 18);
 
-  const numTerms = num.map((c, i) => (c === 0 ? null : (c === 1 && i > 0 ? "" : c) + xpow(i)))
-    .filter(Boolean);
-  const numStr = numTerms.length === 0 ? "0"
-    : numTerms.length === 1 ? numTerms[0] : "(" + numTerms.join(" ＋ ") + ")";
+  // 分子：常數項只寫數字，係數 ±1 不寫 1，負號用「−」
+  const nz = num.map((c, i) => [c, i]).filter((t) => t[0] !== 0);
+  const numBody = nz.map((t, q) => {
+    const c = t[0], i = t[1], m = Math.abs(c);
+    const sgn = c < 0 ? (q === 0 ? "−" : " − ") : (q === 0 ? "" : " ＋ ");
+    return sgn + (i === 0 ? m : (m === 1 ? "" : m) + xpow(i));
+  }).join("");
+  const numStr = nz.length === 0 ? "0" : nz.length === 1 ? numBody : "(" + numBody + ")";
+  const fmtN = (v) => (v < 0 ? "−" + (-v) : String(v));
   $("q3eq").innerHTML =
     numStr + " / (1 " +
     den.map((c, i) => (c === 0 ? "" : (c > 0 ? " − " : " ＋ ") + (Math.abs(c) === 1 ? "" : Math.abs(c)) + xpow(i + 1))).join("") + ")";
@@ -848,22 +853,24 @@ function lab3(reset) {
       const idx = k - 1 - j;
       if (idx >= 0 && d !== 0) {
         v += d * a[idx];
-        terms.push((d === 1 ? "" : d) + "a" + sub(idx));
+        terms.push((d > 0 ? " − " : " ＋ ") + (Math.abs(d) === 1 ? "" : Math.abs(d)) + "a" + sub(idx));
       }
     });
     a.push(v);
     const st = document.createElement("div");
     st.className = "stp" + (k === N - 1 ? " now" : "");
-    const lhs = "a" + sub(k) + (terms.length ? " − " + terms.join(" − ") : "");
+    const lhs = "a" + sub(k) + terms.join("");
     st.innerHTML =
       '<div class="sx">' + xpow(k) + "</div>" +
-      '<div class="se">' + lhs + " ＝ " + (num[k] || 0) + "</div>" +
-      '<div class="sv">' + v + "</div>";
+      '<div class="se">' + lhs + " ＝ " + fmtN(num[k] || 0) + "</div>" +
+      '<div class="sv">' + fmtN(v) + "</div>";
     box.appendChild(st);
   }
   const m = $("q3msg");
   m.className = "msg good";
-  m.innerHTML = "係數：<b class='mono'>" + a.join(", ") + (N < 18 ? ", ⋯" : "") + "</b>";
+  m.innerHTML = "係數：<b class='mono'>" + a.map(fmtN).join(", ") + ", ⋯</b>" +
+    (N >= 18 ? "　（逼到 x¹⁷ 先停，再下去數字太長放不下）" : "");
+  $("q3more").disabled = N >= 18;
 }
 function sub(n) {
   const S = "₀₁₂₃₄₅₆₇₈₉";
@@ -1015,7 +1022,7 @@ document.querySelectorAll("[data-q3]").forEach((b) => {
     $("q3d").value = d; $("q3n").value = n; lab3(true);
   });
 });
-$("q3more").addEventListener("click", () => { q3rows = Math.min(18, q3rows + 2); lab3(false); });
+$("q3more").addEventListener("click", () => { q3rows = Math.min(18, q3rows + 1); lab3(false); });
 $("q3reset").addEventListener("click", () => lab3(true));
 $("q4n").addEventListener("input", lab4);
 $("q5x").addEventListener("input", lab5);
