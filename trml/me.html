@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRML 我的分析</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap stack">
+  <a class="back" href="./">← 回首頁</a>
+  <div class="stack" style="gap:6px">
+    <div class="eyebrow">TRML 國中數學競賽・練習紀錄</div>
+    <h1>我的分析</h1>
+    <div class="muted">看自己哪些題型強、哪些要加強，還有寫錯的題目。只有輸入自己的代碼才看得到。</div>
+  </div>
+  <div class="sheet stack">
+    <div class="row">
+      <label class="f" for="team">隊伍<select id="team"></select></label>
+      <label class="f" for="name">姓名<select id="name"></select></label>
+      <label class="f" for="pin">代碼<input type="text" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="老師給的代碼"></label>
+    </div>
+    <div class="row"><button class="primary" id="go">看分析</button><span id="msg" class="muted"></span></div>
+  </div>
+  <div id="out"></div>
+</div>
+<script src="config.js"></script>
+<script src="profile.js"></script>
+<script>
+(function(){
+'use strict';
+var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'', IMG=(window.TRML_CONFIG&&window.TRML_CONFIG.imgBase)||'img/';
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var teams=[];
+function fillNames(sel){ var t=teams.filter(function(x){return x.team===$('team').value;})[0];
+  $('name').innerHTML='<option value="">選姓名</option>'+(t?t.members.map(function(n){return '<option>'+esc(n)+'</option>';}).join(''):''); if(sel) $('name').value=sel; }
+if(!API){ $('msg').textContent='還沒接上題庫。'; return; }
+fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
+  if(!d.ok) throw new Error(d.error);
+  teams=d.teams; var who=load('trml-who')||{};
+  $('team').innerHTML='<option value="">選隊伍</option>'+teams.map(function(t){return '<option>'+esc(t.team)+'</option>';}).join('');
+  if(who.team) $('team').value=who.team; fillNames(who.name); if(who.pin) $('pin').value=who.pin;
+  $('team').onchange=function(){ fillNames(); $('pin').value=''; };
+  if(who.team&&who.name) go();
+}).catch(function(e){ $('msg').innerHTML='<span class="err">讀不到名單：'+esc(e.message)+'</span>'; });
+function go(){
+  var b={action:'profile',team:$('team').value,name:$('name').value,pin:$('pin').value.trim()};
+  if(!b.team||!b.name){ $('msg').textContent='先選隊伍和姓名。'; return; }
+  $('msg').textContent='讀取中…'; $('go').disabled=true;
+  fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
+    $('go').disabled=false;
+    if(!d.ok){ $('msg').innerHTML='<span class="err">'+esc(d.error||'讀取失敗')+'</span>'; return; }
+    save('trml-who',{team:b.team,name:b.name,pin:b.pin});
+    $('msg').textContent=d.me.name+'・'+d.me.team+'・'+d.me.year+' 年度';
+    TRMLProfile.render($('out'),d,{imgBase:IMG});
+  }).catch(function(){ $('go').disabled=false; $('msg').innerHTML='<span class="err">連不上題庫，請確認網路後再試。</span>'; });
+}
+$('go').onclick=go;
+$('pin').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.isComposing) go(); });
+})();
+</script>
+</body>
+</html>

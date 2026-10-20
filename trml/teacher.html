@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TRML 競速練習統計</title>
+<title>TRML 練習統計</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,15 +75,29 @@ th.n{text-align:right}
 .pill.g{background:var(--moss-soft);color:var(--moss)}
 .pill.m{background:var(--indigo-soft);color:var(--indigo)}
 .pill.b{background:var(--ochre-soft);color:var(--ochre)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{background:transparent;color:var(--muted);border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 14px;font-weight:500}
+.tabs button.on{color:var(--indigo);border-bottom-color:var(--indigo);font-weight:700}
+.tabs button .cnt{font-family:var(--f-mono);font-size:.75rem;background:var(--ochre-soft);color:var(--ochre);border-radius:8px;padding:0 6px;margin-left:4px}
+.grade{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;border:1px solid var(--line);border-radius:6px;padding:14px;background:var(--card)}
+@media (max-width:820px){.grade{grid-template-columns:minmax(0,1fr)}}
+.grade img.q{max-width:100%;height:auto;background:#fff;border-radius:2px}
+.grade .work{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--paper);border-radius:4px;padding:10px;font-size:.95rem;max-height:320px;overflow:auto}
+.grade .ph{display:flex;gap:8px;flex-wrap:wrap}
+.grade .ph a{font-size:.9rem;color:var(--indigo)}
+.grade input[type=number]{font:inherit;width:5em;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink)}
+.grade .done{color:var(--moss);font-weight:700}
+.sub{font-size:.85rem;color:var(--muted)}
+button.ghost{background:transparent;color:var(--indigo)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div style="display:flex;flex-direction:column;gap:4px">
-    <div class="eyebrow">TRML 競速練習・老師用</div>
+    <div class="eyebrow">TRML 練習・老師用</div>
     <h1>練習統計</h1>
   </div>
-  <div id="demoNote" class="demo" hidden>範例模式：還沒接上試算表，下面是假資料，只用來看版面。</div>
+  <div id="demoNote" class="demo" hidden>範例模式：還沒接上試算表。</div>
 
   <div class="sheet" id="login">
     <div class="row">
@@ -93,211 +107,330 @@ th.n{text-align:right}
     </div>
   </div>
 
-  <div class="sheet filters" id="filters" hidden>
-    <div class="row">
-      <label class="f" for="fSet">卷子<select id="fSet"></select></label>
-      <label class="f" for="fTeam">隊伍<select id="fTeam"></select></label>
-      <label class="chk"><input type="checkbox" id="fFirst" checked> 只算第一次作答</label>
-      <button id="btnReload" type="button">重新讀取</button>
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="sheet filters" id="filters">
+      <div class="row">
+        <label class="f" for="fYear">年度<select id="fYear"></select></label>
+        <label class="f" for="fSet" id="wSet">卷子<select id="fSet"></select></label>
+        <label class="f" for="fTeam" id="wTeam">隊伍<select id="fTeam"></select></label>
+        <label class="f" for="fStu" id="wStu" hidden>學生<select id="fStu"></select></label>
+        <label class="chk" id="wFirst"><input type="checkbox" id="fFirst" checked> 只算第一次作答</label>
+        <label class="chk" id="wDone" hidden><input type="checkbox" id="fDone"> 也顯示已批改的</label>
+        <button id="btnReload" type="button">重新讀取</button>
+      </div>
     </div>
-  </div>
 
-  <div id="main" hidden style="display:flex;flex-direction:column;gap:18px">
-    <div class="sheet">
-      <div class="kpis" id="kpis"></div>
-    </div>
-    <div class="cols">
-      <div class="sheet">
-        <h2>隊伍總分</h2>
-        <div class="muted" style="font-size:.85rem">競速賽是四人加總，所以看的是合計，不是平均。</div>
-        <div class="tbl-wrap"><table id="tTeams"></table></div>
+    <div id="vStats" style="display:flex;flex-direction:column;gap:18px">
+      <div class="sheet"><div class="kpis" id="kpis"></div></div>
+      <div class="cols">
+        <div class="sheet">
+          <h2>隊伍總分</h2>
+          <div class="sub" id="teamNote"></div>
+          <div class="tbl-wrap"><table id="tTeams"></table></div>
+        </div>
+        <div class="sheet">
+          <h2 id="peopleTitle">每個人</h2>
+          <div class="tbl-wrap"><table id="tPeople"></table></div>
+        </div>
       </div>
       <div class="sheet">
-        <h2>每個人</h2>
-        <div class="tbl-wrap"><table id="tPeople"></table></div>
+        <h2>每一題</h2>
+        <div class="sub">依答對率由低到高排。答對率低、答錯的人又花很久，通常就是該在午休講的題目。</div>
+        <div class="tbl-wrap"><table id="tQs"></table></div>
+      </div>
+      <div class="sheet">
+        <h2 id="heatTitle">誰卡在哪一題</h2>
+        <div class="legend" id="heatLegend"></div>
+        <div class="tbl-wrap"><table class="heat" id="tHeat"></table></div>
+      </div>
+      <div class="sheet" id="topicBox">
+        <h2>題型答對率</h2>
+        <div class="sub">題型來自 questions 工作表的「題型」欄。只算所選卷子裡出現的題目；要看一個人跨卷子的強弱，到「學生檔案」。</div>
+        <div class="tbl-wrap"><table class="topic" id="tTopic"></table></div>
       </div>
     </div>
-    <div class="sheet">
-      <h2>每一題</h2>
-      <div class="muted" style="font-size:.85rem">依答對率由低到高排。答對率低、答錯的人又花很久，通常就是該在午休講的題目。</div>
-      <div class="tbl-wrap"><table id="tQs"></table></div>
+
+    <div id="vStudent" hidden style="display:flex;flex-direction:column;gap:18px">
+      <div class="sheet" id="stuHead"></div>
+      <div id="stuOut"></div>
     </div>
-    <div class="sheet">
-      <h2>誰卡在哪一題</h2>
-      <div class="legend">
-        <span><span class="hc ok">42</span>答對（秒）</span><span><span class="hc no">95</span>答錯</span><span><span class="hc bl">–</span>空白</span>
-        <span><span class="hc no slow">180</span>外框：超過 30 秒，而且是這份卷子每題平均用時的兩倍以上</span>
-      </div>
-      <div class="tbl-wrap"><table class="heat" id="tHeat"></table></div>
-    </div>
-    <div class="sheet" id="topicBox">
-      <h2>題型答對率</h2>
-      <div class="muted" style="font-size:.85rem">題型來自 questions 工作表的「題型」欄。這一格只算所選卷子裡出現的題目。</div>
-      <div class="tbl-wrap"><table class="topic" id="tTopic"></table></div>
+
+    <div id="vGrade" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="sub">團體賽的證明題（questions 表答案寫「人工」的題目）在這裡給分，每題 0～8 分。存檔後會寫回試算表，那一隊的總分跟著更新。</div>
+      <div id="gradeList" style="display:flex;flex-direction:column;gap:14px"></div>
     </div>
   </div>
 </div>
 
 <script src="config.js"></script>
+<script src="profile.js"></script>
 <script>
 (function(){
 'use strict';
-var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'';
-var DEMO=!API;
+var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'', IMG=(window.TRML_CONFIG&&window.TRML_CONFIG.imgBase)||'img/';
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function fmt(sec){sec=Math.max(0,Math.round(sec||0));var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
 function pct(x){return isFinite(x)?Math.round(x*100)+'%':'–';}
-function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
-function save(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function lget(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lset(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function mean(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:NaN;}
+function uniq(a){var o=[];a.forEach(function(x){if(o.indexOf(x)<0)o.push(x);});return o;}
+function kpi(v,l){return '<div class="kpi"><b>'+v+'</b><span>'+l+'</span></div>';}
+function small(t){return '<small style="font-size:1rem;color:var(--muted)">'+t+'</small>';}
+function isManual(spec){return /^人工/.test(String(spec||'').trim());}
+function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
-var data=null;
-
-/* ---------- 範例資料 ---------- */
-function demoData(){
-  var seed=7; function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
-  var teams={'範例一隊':['王小明','林小華','陳小安','李小青'],'範例二隊':['張小宇','黃小晴','吳小哲','劉小芸']};
-  var qs=[['D1','1009','代數變形'],['D2','3','數列'],['D3','28','數論'],['D4','9','圓'],['D5','156','數論'],['D6','9/10','代數變形'],['D7','3√2','面積與相似']];
-  var diff=[.55,.35,.5,.7,.3,.8,.85], base=[70,90,60,45,120,40,35];
-  var subs=[],resp=[],n=0;
-  Object.keys(teams).forEach(function(t,ti){teams[t].forEach(function(nm,ni){
-    var skill=.75+((ti*4+ni)%5)*.12, aid='demo'+(n++), sc=0, used=0;
-    qs.forEach(function(q,qi){
-      var ok=rnd()<diff[qi]*skill, sec=Math.round(base[qi]*(.5+rnd()*1.3)*(ok?1:1.4)), blank=!ok&&rnd()<.3;
-      if(ok)sc++; used+=sec;
-      resp.push({attemptId:aid,setId:'demo',team:t,name:nm,attemptNo:1,qid:q[0],answer:blank?'':(ok?q[1]:String(Math.round(rnd()*50))),correct:ok,seconds:sec});
-    });
-    subs.push({time:'2026/10/20 下午 9:'+(10+n),attemptId:aid,setId:'demo',team:t,name:nm,attemptNo:1,score:sc,total:qs.length,usedSec:Math.min(used,480)});
-  });});
-  return {ok:true,sets:[{id:'demo',title:'範例卷　改寫自歷屆競速題',minutes:8,qids:qs.map(function(q){return q[0];}),open:true}],
-    questions:qs.map(function(q){return {qid:q[0],answer:q[1],topic:q[2]};}),
-    roster:[].concat.apply([],Object.keys(teams).map(function(t){return teams[t].map(function(n){return {team:t,name:n};});})),
-    submissions:subs,responses:resp};
-}
+var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
+var TABS=[['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
-  if(DEMO){data=demoData();afterLoad();return;}
+  if(!API){ $('demoNote').hidden=false; return; }
   var key=$('key').value.trim();
   if(!key){$('status').textContent='先輸入密碼。';return;}
   $('status').textContent='讀取中…';
   fetch(API+'?action=report&key='+encodeURIComponent(key)).then(function(r){return r.json();}).then(function(d){
     if(!d.ok) throw new Error(d.error||'讀取失敗');
-    save('trml-key',key); data=d; $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; afterLoad();
+    lset('trml-key',key); data=d; $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; afterLoad();
   }).catch(function(e){$('status').innerHTML='<span class="err">'+esc(e.message)+'</span>';});
 }
 function afterLoad(){
-  $('filters').hidden=false; $('main').hidden=false;
-  var prevSet=$('fSet').value, prevTeam=$('fTeam').value;
-  var used={}; data.submissions.forEach(function(s){used[s.setId]=1;});
-  var sets=data.sets.filter(function(s){return used[s.id];});
-  if(!sets.length) sets=data.sets;
-  $('fSet').innerHTML=sets.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title||s.id)+'</option>';}).join('');
-  if(prevSet&&sets.some(function(s){return s.id===prevSet;})) $('fSet').value=prevSet;
-  var teams=[]; data.roster.forEach(function(r){if(teams.indexOf(r.team)<0)teams.push(r.team);});
-  $('fTeam').innerHTML='<option value="">全部隊伍</option>'+teams.map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
-  if(prevTeam) $('fTeam').value=prevTeam;
-  render();
+  $('app').hidden=false;
+  qinfo={}; data.questions.forEach(function(q){qinfo[q.qid]=q;});
+  var years=uniq(data.roster.map(function(r){return r.year;}).concat(data.submissions.map(function(s){return s.year;})).filter(Boolean)).sort().reverse();
+  var py=$('fYear').value;
+  $('fYear').innerHTML=years.map(function(y){return '<option>'+esc(y)+'</option>';}).join('');
+  $('fYear').value=py&&years.indexOf(py)>=0?py:(years.indexOf(data.year)>=0?data.year:years[0]);
+  renderTabs(); refill(); render();
 }
-['fSet','fTeam','fFirst'].forEach(function(id){$(id).addEventListener('change',render);});
+function renderTabs(){
+  var pend=data.responses.filter(function(r){return /待批改/.test(r.graded);}).length;
+  $('tabs').innerHTML=TABS.map(function(t){return '<button role="tab" data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'" aria-selected="'+(tab===t[0])+'">'+t[1]+(t[0]==='批改'&&pend?'<span class="cnt">'+pend+'</span>':'')+'</button>';}).join('');
+  Array.prototype.forEach.call($('tabs').querySelectorAll('button'),function(b){ b.onclick=function(){ tab=b.getAttribute('data-t'); lset('trml-tab',tab); renderTabs(); refill(); render(); }; });
+}
+// 依分頁換篩選欄
+function refill(){
+  var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
+  $('wSet').hidden=!kindTab&&tab!=='批改'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
+  $('vStats').hidden=!kindTab; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改';
+  var kind=tab==='批改'?'團體':tab;
+  if(kindTab||tab==='批改'){
+    var used={}; data.submissions.forEach(function(s){ if(s.year===y) used[s.setId]=1; });
+    var sets=data.sets.filter(function(s){return s.kind===kind;});
+    var withData=sets.filter(function(s){return used[s.id];});
+    var list=(withData.length?withData:sets);
+    var prev=$('fSet').value;
+    $('fSet').innerHTML=(tab==='批改'?'<option value="">全部卷子</option>':'')+list.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title||s.id)+(used[s.id]?'':'（還沒人交）')+'</option>';}).join('');
+    if(prev&&list.some(function(s){return s.id===prev;})) $('fSet').value=prev;
+  }
+  var teams=uniq(data.roster.filter(function(r){return r.year===y;}).map(function(r){return r.team;}));
+  var pt=$('fTeam').value;
+  $('fTeam').innerHTML='<option value="">全部隊伍</option>'+teams.map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
+  if(pt&&teams.indexOf(pt)>=0) $('fTeam').value=pt;
+  if(tab==='學生'){
+    var ps=$('fStu').value;
+    var stu=data.roster.filter(function(r){return r.year===y;});
+    $('fStu').innerHTML=stu.map(function(r){return '<option value="'+esc(r.id)+'">'+esc(r.team+'・'+r.name)+'</option>';}).join('');
+    if(ps&&stu.some(function(r){return r.id===ps;})) $('fStu').value=ps;
+  }
+}
+['fYear'].forEach(function(id){$(id).addEventListener('change',function(){refill();render();});});
+['fSet','fTeam','fFirst','fStu','fDone'].forEach(function(id){$(id).addEventListener('change',render);});
 $('btnLoad').onclick=fetchReport; $('btnReload').onclick=fetchReport;
 $('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport();});
 
-/* ---------- 計算與畫表 ---------- */
 function render(){
   if(!data) return;
-  var setId=$('fSet').value, team=$('fTeam').value, first=$('fFirst').checked;
-  var set=data.sets.filter(function(s){return s.id===setId;})[0]||{qids:[],title:setId};
-  var qinfo={}; data.questions.forEach(function(q){qinfo[q.qid]=q;});
-  var qids=set.qids&&set.qids.length?set.qids:uniq(data.responses.filter(function(r){return r.setId===setId;}).map(function(r){return r.qid;}));
+  if(tab==='學生') return renderStudent();
+  if(tab==='批改') return renderGrade();
+  renderStats(tab);
+}
 
-  // 每人取一次作答：第一次或最近一次
+/* ---------- 各賽別統計 ---------- */
+function renderStats(kind){
+  var y=$('fYear').value, setId=$('fSet').value, team=$('fTeam').value, first=$('fFirst').checked;
+  var set=data.sets.filter(function(s){return s.id===setId;})[0];
+  if(!set){ $('kpis').innerHTML='<span class="muted">這個賽別還沒有卷子。</span>'; ['tTeams','tPeople','tQs','tHeat','tTopic'].forEach(function(id){$(id).innerHTML='';}); return; }
+  var qids=set.qids;
+  var isTeam=kind==='團體';
+  // 單位：個人（競速、個人賽）或隊伍（團體賽）
+  var rosterY=data.roster.filter(function(r){return r.year===y&&(!team||r.team===team);});
+  var units=isTeam?uniq(rosterY.map(function(r){return r.team;})).map(function(t){return {key:t,team:t,name:t};})
+                  :rosterY.map(function(r){return {key:r.id,team:r.team,name:r.name};});
   var pick={};
   data.submissions.forEach(function(s){
-    if(s.setId!==setId) return;
-    var k=s.team+'|'+s.name, cur=pick[k];
+    if(s.setId!==setId||s.year!==y) return;
+    var k=isTeam?s.team:s.sid, cur=pick[k];
     if(!cur) pick[k]={sub:s,count:1};
     else { cur.count++; if(first? s.attemptNo<cur.sub.attemptNo : s.attemptNo>cur.sub.attemptNo) cur.sub=s; }
   });
-  var people=data.roster.filter(function(r){return !team||r.team===team;}).map(function(r){
-    var p=pick[r.team+'|'+r.name]; return {team:r.team,name:r.name,sub:p?p.sub:null,count:p?p.count:0};
-  });
-  var aids={}; people.forEach(function(p){if(p.sub)aids[p.sub.attemptId]=p;});
+  units.forEach(function(u){ var p=pick[u.key]; u.sub=p?p.sub:null; u.count=p?p.count:0; });
+  var aids={}; units.forEach(function(u){if(u.sub)aids[u.sub.attemptId]=u;});
   var R={}; data.responses.forEach(function(r){ if(aids[r.attemptId]) R[r.attemptId+'|'+r.qid]=r; });
-  var done=people.filter(function(p){return p.sub;});
+  var done=units.filter(function(u){return u.sub;});
+  var max=done.length?done[0].sub.max:(kind==='個人'?Math.ceil(qids.length/2)*3:qids.length);
 
-  // KPI
-  var avgScore=done.length?done.reduce(function(a,p){return a+p.sub.score;},0)/done.length:NaN;
-  var allSec=[]; done.forEach(function(p){qids.forEach(function(q){var r=R[p.sub.attemptId+'|'+q];if(r)allSec.push(r.seconds);});});
-  var avgQ=allSec.length?allSec.reduce(function(a,b){return a+b;},0)/allSec.length:0;
-  $('kpis').innerHTML=kpi(done.length+'<small style="font-size:1rem;color:var(--muted)"> / '+people.length+'</small>','已交卷人數')+
-    kpi(isFinite(avgScore)?avgScore.toFixed(1)+'<small style="font-size:1rem;color:var(--muted)"> / '+qids.length+'</small>':'–','平均得分')+
-    kpi(fmt(avgQ),'每題平均用時')+kpi(set.minutes?set.minutes+' 分':'–','這份卷子的時間');
+  var avgScore=mean(done.map(function(u){return u.sub.score;}));
+  var allSec=[]; done.forEach(function(u){qids.forEach(function(q){var r=R[u.sub.attemptId+'|'+q];if(r)allSec.push(r.seconds);});});
+  var avgQ=mean(allSec)||0;
+  var pend=done.reduce(function(a,u){return a+(u.sub.pending||0);},0);
+  $('kpis').innerHTML=kpi(done.length+small(' / '+units.length),isTeam?'已交卷隊數':'已交卷人數')+
+    kpi(isFinite(avgScore)?avgScore.toFixed(1)+small(' / '+max):'–','平均得分')+
+    kpi(fmt(avgQ),kind==='個人'?'每題平均用時（參考）':'每題平均用時')+
+    kpi(set.minutes+' 分'+(kind==='個人'?small(' × '+Math.ceil(qids.length/2)+' 回合'):''),'時間')+
+    (isTeam?kpi(String(pend),'證明題待批改'):'');
 
   // 隊伍
-  var tm={}; people.forEach(function(p){var t=tm[p.team]||(tm[p.team]={n:0,d:0,sum:0});t.n++;if(p.sub){t.d++;t.sum+=p.sub.score;}});
+  $('teamNote').textContent=isTeam?'團體賽一隊一份；證明題批改後分數才完整。':'競速賽和個人賽都是四人加總，所以看的是合計，不是平均。';
+  var tm={}; units.forEach(function(u){var t=tm[u.team]||(tm[u.team]={n:0,d:0,sum:0});t.n++;if(u.sub){t.d++;t.sum+=u.sub.score;}});
   var tlist=Object.keys(tm).sort(function(a,b){return tm[b].sum-tm[a].sum;});
-  $('tTeams').innerHTML='<tr><th>隊伍</th><th class="n">已交</th><th class="n">合計</th><th class="n">滿分</th><th class="n">合計比例</th></tr>'+
-    tlist.map(function(t){var x=tm[t],full=x.n*qids.length;return '<tr><td>'+esc(t)+'</td><td class="n">'+x.d+'/'+x.n+'</td><td class="n"><b>'+x.sum+'</b></td><td class="n">'+full+'</td><td class="n">'+pct(x.sum/full)+'</td></tr>';}).join('');
+  $('tTeams').innerHTML='<tr><th>隊伍</th><th class="n">已交</th><th class="n">合計</th><th class="n">滿分</th><th class="n">比例</th></tr>'+
+    tlist.map(function(t){var x=tm[t],full=x.n*max;return '<tr><td>'+esc(t)+'</td><td class="n">'+x.d+'/'+x.n+'</td><td class="n"><b>'+x.sum+'</b></td><td class="n">'+full+'</td><td class="n">'+pct(x.sum/full)+'</td></tr>';}).join('');
 
-  // 每個人
-  var plist=people.slice().sort(function(a,b){return (b.sub?b.sub.score:-1)-(a.sub?a.sub.score:-1)||a.team.localeCompare(b.team);});
-  $('tPeople').innerHTML='<tr><th>姓名</th><th>隊伍</th><th class="n">得分</th><th class="n">用時</th><th class="n">交過幾次</th><th>交卷時間</th></tr>'+
-    plist.map(function(p){var s=p.sub;return '<tr><td>'+esc(p.name)+'</td><td>'+esc(p.team)+'</td>'+
-      (s?'<td class="n"><b>'+s.score+'</b>/'+s.total+'</td><td class="n">'+fmt(s.usedSec)+'</td><td class="n">'+p.count+'</td><td class="muted">'+esc(s.time)+'</td>'
-        :'<td class="n muted">未交</td><td></td><td></td><td></td>')+'</tr>';}).join('');
+  // 每個人／每隊
+  $('peopleTitle').textContent=isTeam?'每一隊':'每個人';
+  var plist=units.slice().sort(function(a,b){return (b.sub?b.sub.score:-1)-(a.sub?a.sub.score:-1)||a.team.localeCompare(b.team);});
+  var nR=Math.ceil(qids.length/2);
+  var roundsOf=function(u){ var out=[]; for(var i=0;i<nR;i++){ var a=R[u.sub.attemptId+'|'+qids[2*i]], b=R[u.sub.attemptId+'|'+qids[2*i+1]]; var c=(a&&a.correct?1:0)+(b&&b.correct?1:0); out.push(c===2?3:c); } return out; };
+  $('tPeople').innerHTML='<tr><th>'+(isTeam?'隊伍':'姓名')+'</th>'+(isTeam?'<th>交卷的人</th>':'<th>隊伍</th>')+'<th class="n">得分</th>'+
+    (kind==='個人'?Array.apply(null,Array(nR)).map(function(_,i){return '<th class="n">第'+(i+1)+'回</th>';}).join(''):'')+
+    '<th class="n">用時</th><th class="n">交過幾次</th><th>交卷時間</th></tr>'+
+    plist.map(function(u){var s=u.sub;
+      return '<tr><td>'+esc(u.name)+'</td><td>'+esc(isTeam?(s?s.name:''):u.team)+'</td>'+
+      (s?'<td class="n"><b>'+s.score+'</b>/'+s.max+(s.pending?' <span class="low">待批改 '+s.pending+'</span>':'')+'</td>'+
+        (kind==='個人'?roundsOf(u).map(function(p){return '<td class="n">'+p+'</td>';}).join(''):'')+
+        '<td class="n">'+fmt(s.usedSec)+'</td><td class="n">'+u.count+'</td><td class="muted">'+esc(s.time)+'</td>'
+        :'<td class="n muted">未交</td>'+(kind==='個人'?Array(nR+1).join('<td></td>'):'')+'<td></td><td></td><td></td>')+'</tr>';}).join('');
 
   // 每一題
   var qstat=qids.map(function(q,i){
-    var rs=done.map(function(p){return R[p.sub.attemptId+'|'+q];}).filter(Boolean);
+    var info=qinfo[q]||{}, man=isManual(info.answer);
+    var rs=done.map(function(u){return R[u.sub.attemptId+'|'+q];}).filter(Boolean);
     var ok=rs.filter(function(r){return r.correct;}), no=rs.filter(function(r){return !r.correct;});
-    var wrong={}; no.forEach(function(r){if(r.answer)wrong[r.answer]=(wrong[r.answer]||0)+1;});
+    var wrong={}; if(!man) no.forEach(function(r){if(r.answer)wrong[r.answer]=(wrong[r.answer]||0)+1;});
     var top=Object.keys(wrong).sort(function(a,b){return wrong[b]-wrong[a];})[0];
-    return {i:i,q:q,info:qinfo[q]||{},n:rs.length,rate:rs.length?ok.length/rs.length:NaN,
+    var graded=rs.filter(function(r){return r.points!=null;});
+    return {i:i,q:q,info:info,man:man,n:rs.length,
+      rate:man?(graded.length?mean(graded.map(function(r){return r.points/8;})):NaN):(rs.length?ok.length/rs.length:NaN),
       avg:mean(rs.map(function(r){return r.seconds;})),avgNo:mean(no.map(function(r){return r.seconds;})),
-      blank:no.filter(function(r){return !r.answer;}).length,top:top?top+'（'+wrong[top]+' 人）':''};
+      blank:no.filter(function(r){return !r.answer&&!r.photos;}).length,top:top?top+'（'+wrong[top]+(isTeam?' 隊）':' 人）'):''};
   });
   var qsorted=qstat.slice().sort(function(a,b){return (isNaN(a.rate)?2:a.rate)-(isNaN(b.rate)?2:b.rate)||b.avg-a.avg;});
-  $('tQs').innerHTML='<tr><th class="n">第幾題</th><th>題號</th><th>題型</th><th>答對率</th><th class="n">平均用時</th><th class="n">答錯的人平均用時</th><th class="n">空白</th><th>最常見的錯答</th><th>正確答案</th></tr>'+
+  $('tQs').innerHTML='<tr><th class="n">第幾題</th><th>題號</th><th>題型</th><th>答對率</th><th class="n">平均用時</th><th class="n">答錯的平均用時</th><th class="n">空白</th><th>最常見的錯答</th><th>正確答案</th></tr>'+
     qsorted.map(function(s){return '<tr><td class="n">'+(s.i+1)+'</td><td>'+esc(s.q)+'</td><td>'+esc(s.info.topic||'')+'</td>'+
-      '<td><span class="bartrack"><span class="bar" style="width:'+(isNaN(s.rate)?0:s.rate*100)+'%"></span></span><span class="'+(s.rate<.5?'low':'')+'">'+pct(s.rate)+'</span></td>'+
-      '<td class="n">'+fmt(s.avg)+'</td><td class="n">'+(isNaN(s.avgNo)?'–':fmt(s.avgNo))+'</td><td class="n">'+s.blank+'</td><td>'+esc(s.top)+'</td><td>'+esc(showAns(s.info.answer))+'</td></tr>';}).join('');
+      '<td><span class="bartrack"><span class="bar" style="width:'+(isNaN(s.rate)?0:s.rate*100)+'%"></span></span><span class="'+(s.rate<.5?'low':'')+'">'+(s.man?(isNaN(s.rate)?'待批改':'平均 '+pct(s.rate)+' 的分數'):pct(s.rate))+'</span></td>'+
+      '<td class="n">'+fmt(s.avg)+'</td><td class="n">'+(isNaN(s.avgNo)||s.man?'–':fmt(s.avgNo))+'</td><td class="n">'+s.blank+'</td><td>'+esc(s.top)+'</td><td>'+esc(showAns(s.info.answer))+'</td></tr>';}).join('');
 
   // 熱圖
+  $('heatTitle').textContent=isTeam?'每一隊每一題':'誰卡在哪一題';
+  $('heatLegend').innerHTML='<span><span class="hc ok">42</span>答對（秒）</span><span><span class="hc no">95</span>答錯</span><span><span class="hc bl">–</span>空白</span>'+
+    (isTeam?'<span><span class="hc bl" style="border:1px dashed var(--indigo)">待</span>證明題待批改；批改後顯示得分</span>':'<span><span class="hc no slow">180</span>外框：超過 30 秒，而且是這份卷子每題平均用時的兩倍以上</span>');
   $('tHeat').innerHTML='<tr><th class="nm">　</th>'+qids.map(function(q,i){return '<th title="'+esc(q)+'">'+(i+1)+'</th>';}).join('')+'<th>得分</th></tr>'+
-    plist.filter(function(p){return p.sub;}).map(function(p){
-      return '<tr><th class="nm">'+esc(p.name)+' <span class="muted" style="font-size:.75rem">'+esc(p.team)+'</span></th>'+qids.map(function(q,i){
-        var r=R[p.sub.attemptId+'|'+q];
+    plist.filter(function(u){return u.sub;}).map(function(u){
+      return '<tr><th class="nm">'+esc(u.name)+(isTeam?'':' <span class="muted" style="font-size:.75rem">'+esc(u.team)+'</span>')+'</th>'+qids.map(function(q,i){
+        var r=R[u.sub.attemptId+'|'+q];
         if(!r) return '<td><span class="hc bl">–</span></td>';
-        var cls=r.correct?'ok':(r.answer?'no':'bl'), slow=(r.seconds>=30&&r.seconds>2*avgQ)?' slow':'';
+        if(isManual((qinfo[q]||{}).answer)){
+          if(r.points==null) return '<td><span class="hc bl" style="border:1px dashed var(--indigo)" title="待批改">待</span></td>';
+          return '<td><span class="hc '+(r.points>=6?'ok':'no')+'" title="證明題 '+r.points+'/8">'+r.points+'</span></td>';
+        }
+        var cls=r.correct?'ok':(r.answer?'no':'bl'), slow=(!isTeam&&r.seconds>=30&&r.seconds>2*avgQ)?' slow':'';
         var tip='第 '+(i+1)+' 題　作答：'+(r.answer||'（空白）')+'　'+fmt(r.seconds);
         return '<td><span class="hc '+cls+slow+'" title="'+esc(tip)+'">'+(cls==='bl'&&!r.seconds?'–':r.seconds)+'</span></td>';
-      }).join('')+'<td class="n"><b>'+p.sub.score+'</b></td></tr>';
+      }).join('')+'<td class="n"><b>'+u.sub.score+'</b></td></tr>';
     }).join('');
 
   // 題型
   var topics=uniq(qids.map(function(q){return (qinfo[q]||{}).topic;}).filter(Boolean));
-  $('topicBox').hidden=!topics.length;
-  if(topics.length){
+  $('topicBox').hidden=isTeam||!topics.length;
+  if(!isTeam&&topics.length){
     $('tTopic').innerHTML='<tr><th>姓名</th>'+topics.map(function(t){var c=qids.filter(function(q){return (qinfo[q]||{}).topic===t;}).length;return '<th class="n">'+esc(t)+'<br><span style="font-size:.7rem">'+c+' 題</span></th>';}).join('')+'</tr>'+
-      plist.filter(function(p){return p.sub;}).map(function(p){
-        return '<tr><td>'+esc(p.name)+'</td>'+topics.map(function(t){
+      plist.filter(function(u){return u.sub;}).map(function(u){
+        return '<tr><td>'+esc(u.name)+'</td>'+topics.map(function(t){
           var qs=qids.filter(function(q){return (qinfo[q]||{}).topic===t;});
-          var ok=qs.filter(function(q){var r=R[p.sub.attemptId+'|'+q];return r&&r.correct;}).length, rate=ok/qs.length;
+          var ok=qs.filter(function(q){var r=R[u.sub.attemptId+'|'+q];return r&&r.correct;}).length, rate=ok/qs.length;
           return '<td class="n"><span class="pill '+(rate>=.75?'g':rate>=.4?'m':'b')+'">'+ok+'/'+qs.length+'</span></td>';
         }).join('')+'</tr>';
       }).join('');
   }
 }
-function showAns(a){return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
-function kpi(v,l){return '<div class="kpi"><b>'+v+'</b><span>'+l+'</span></div>';}
-function mean(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:NaN;}
-function uniq(a){var o=[];a.forEach(function(x){if(o.indexOf(x)<0)o.push(x);});return o;}
 
-if(DEMO){ $('demoNote').hidden=false; $('login').hidden=true; fetchReport(); }
-else { var k=load('trml-key'); if(k){ $('key').value=k; fetchReport(); } }
+/* ---------- 學生檔案（跨卷子、跨年度） ---------- */
+function renderStudent(){
+  var sid=$('fStu').value, y=$('fYear').value;
+  if(!sid){ $('stuHead').innerHTML='<span class="muted">這個年度的名單是空的。</span>'; $('stuOut').innerHTML=''; return; }
+  var me=data.roster.filter(function(r){return r.id===sid&&r.year===y;})[0]||{};
+  var myTeams={}, yearsIn=[];
+  data.roster.forEach(function(r){ if(r.id===sid){ myTeams[r.year+'|'+r.team]=1; yearsIn.push(r.year+' '+r.team); } });
+  var titles={}; data.sets.forEach(function(s){titles[s.id]=s.title;});
+  var subs=data.submissions.filter(function(s){ return s.kind==='團體'?myTeams[s.year+'|'+s.team]:s.sid===sid; })
+    .map(function(s){ var o={}; for(var k in s) o[k]=s[k]; o.title=titles[s.setId]||s.setId; return o; });
+  var ids={}; subs.forEach(function(s){ids[s.attemptId]=1;});
+  var resps=data.responses.filter(function(r){return ids[r.attemptId];});
+  var qi={}; resps.forEach(function(r){ var q=qinfo[r.qid]||{}; qi[r.qid]={topic:q.topic||'',img:q.img||''}; });
+  var topics={}, sp={n:0,sec:0};
+  data.responses.forEach(function(r){
+    if(r.year!==me.year||r.attemptNo!==1||r.kind==='團體') return;
+    var t=(qinfo[r.qid]||{}).topic||'未分類', x=topics[t]||(topics[t]={n:0,ok:0,sec:0});
+    x.n++; if(r.correct) x.ok++; x.sec+=r.seconds;
+    if(r.kind==='競速'){sp.n++;sp.sec+=r.seconds;}
+  });
+  $('stuHead').innerHTML='<h2>'+esc(me.name||sid)+'</h2><div class="sub">學生編號 '+esc(sid)+'・'+esc(uniq(yearsIn).join('、'))+'。題型比較的是 '+esc(me.year)+' 年度所有人的第一次作答。</div>';
+  TRMLProfile.render($('stuOut'),{me:me,subs:subs,resps:resps,qinfo:qi,cls:{year:me.year,topics:topics,speedSec:sp.n?sp.sec/sp.n:null}},{imgBase:IMG,teacher:true});
+}
+
+/* ---------- 證明題批改 ---------- */
+function renderGrade(){
+  var y=$('fYear').value, setId=$('fSet').value, team=$('fTeam').value, showDone=$('fDone').checked;
+  var subBy={}; data.submissions.forEach(function(s){subBy[s.attemptId]=s;});
+  var titles={}; data.sets.forEach(function(s){titles[s.id]=s.title;});
+  var list=data.responses.filter(function(r){
+    if(r.kind!=='團體'||r.year!==y) return false;
+    if(!isManual((qinfo[r.qid]||{}).answer)&&!/批改/.test(r.graded)) return false;
+    if(setId&&r.setId!==setId) return false;
+    if(team&&r.team!==team) return false;
+    return showDone||r.points==null;
+  });
+  if(!list.length){ $('gradeList').innerHTML='<div class="sheet"><span class="muted">'+(showDone?'沒有證明題的作答。':'沒有待批改的證明題。')+'</span></div>'; return; }
+  $('gradeList').innerHTML=list.map(function(r,i){
+    var s=subBy[r.attemptId]||{}, info=qinfo[r.qid]||{}, src=info.img?(/^(https?:|\/)/.test(info.img)?info.img:IMG+info.img):IMG+r.qid+'.png';
+    var photos=String(r.photos||'').split(/\s+/).filter(Boolean);
+    return '<div class="grade">'+
+      '<div style="display:flex;flex-direction:column;gap:8px"><div><b>'+esc(r.team)+'</b>　<span class="sub">'+esc(titles[r.setId]||r.setId)+'・'+esc(r.qid)+'・'+esc(r.name)+' 交・'+esc(s.time||'')+(r.attemptNo>1?'・第 '+r.attemptNo+' 次':'')+'</span></div>'+
+        '<img class="q" loading="lazy" src="'+esc(src)+'" alt="'+esc(r.qid)+' 題目">'+
+        '<div class="sub">參考答案：'+esc(String(info.answer||'').replace(/^人工[:：]?/,'')||'（沒填）')+'</div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        (r.answer?'<div class="work">'+esc(r.answer)+'</div>':'<div class="sub">沒有打字作答。</div>')+
+        (photos.length?'<div class="ph">'+photos.map(function(u,k){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">照片 '+(k+1)+' ↗</a>';}).join('')+'</div>':'<div class="sub">沒有上傳照片（可能是交紙本）。</div>')+
+        '<div class="row" style="align-items:center"><label class="f" for="pt-'+i+'">得分（0～8）<input type="number" id="pt-'+i+'" min="0" max="8" step="1" value="'+(r.points==null?'':r.points)+'"></label>'+
+        '<label class="f" for="nt-'+i+'" style="flex:1 1 160px">備註（可不填）<input type="text" id="nt-'+i+'" value="'+esc(String(r.graded||'').replace(/^已批改：?|^待批改/,''))+'"></label>'+
+        '<button data-g="'+i+'">存分數</button><span id="gs-'+i+'" class="'+(r.points!=null?'done':'sub')+'">'+(r.points!=null?'已批改 '+r.points+' 分':'')+'</span></div>'+
+      '</div></div>';
+  }).join('');
+  Array.prototype.forEach.call($('gradeList').querySelectorAll('[data-g]'),function(b){
+    var i=+b.getAttribute('data-g'), r=list[i];
+    b.onclick=function(){
+      var v=$('pt-'+i).value.trim(), pts=Number(v);
+      if(v===''||!(pts>=0&&pts<=8)){ $('gs-'+i).innerHTML='<span class="err">請填 0～8</span>'; return; }
+      b.disabled=true; $('gs-'+i).textContent='存檔中…';
+      fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'grade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,points:pts,note:$('nt-'+i).value.trim()})})
+        .then(function(x){return x.json();}).then(function(d){
+          b.disabled=false;
+          if(!d.ok){ $('gs-'+i).innerHTML='<span class="err">'+esc(d.error||'存檔失敗')+'</span>'; return; }
+          r.points=pts; r.graded='已批改';
+          var s=subBy[r.attemptId]; if(s){ s.score=d.total; s.pending=d.pending; }
+          $('gs-'+i).className='done'; $('gs-'+i).textContent='已批改 '+pts+' 分・這隊現在 '+d.total+' 分'+(d.pending?'（還有 '+d.pending+' 題待批）':'');
+          renderTabs();
+        }).catch(function(){ b.disabled=false; $('gs-'+i).innerHTML='<span class="err">連不上，請再按一次</span>'; });
+    };
+  });
+}
+
+if(!API){ $('demoNote').hidden=false; $('login').hidden=true; }
+else { var k=lget('trml-key'); if(k){ $('key').value=k; fetchReport(); } }
 })();
 </script>
-
 </body>
 </html>

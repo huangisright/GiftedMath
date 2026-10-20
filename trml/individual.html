@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRML 個人賽練習</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-kind="個人">
+<div id="v-login" class="wrap stack">
+  <a class="back" href="./">← 回首頁</a>
+  <div class="stack" style="gap:6px">
+    <div class="eyebrow">TRML 國中數學競賽・個人賽練習</div>
+    <h1>個人賽</h1>
+    <div class="muted">四個回合，每回合兩題。回合時間到自動進下一回合；兩題全對 3 分、對一題 1 分。</div>
+  </div>
+  <div id="demoNote" class="demo" hidden>範例模式：還沒接上題庫，下面是示範用的題目與名單，作答紀錄不會送出。</div>
+  <div id="resume" class="confirm" hidden></div>
+  <div class="sheet stack">
+    <div class="row">
+      <label class="f" for="team">隊伍<select id="team"></select></label>
+      <label class="f" for="name">姓名<select id="name"></select></label>
+      <label class="f" for="pin" id="pinWrap">代碼<input type="text" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="老師給的代碼"></label>
+    </div>
+  </div>
+  <div id="loadErr" class="err" hidden></div>
+  <div class="stack" style="gap:10px">
+    <h2>可以寫的卷子</h2>
+    <div id="sets" class="sets"></div>
+  </div>
+  <div id="confirm" class="confirm stack" hidden></div>
+  <div id="pending" class="confirm" hidden></div>
+</div>
+
+<div id="v-run" hidden>
+  <div class="bar"><div class="in">
+    <div class="ttl"><b id="rTitle"></b><span id="rWho" class="muted"></span>　<span class="muted" id="rCount"></span></div>
+    <div class="clock" id="clock">--:--</div>
+    <button class="warn" id="btnSubmit">交卷</button>
+  </div></div>
+  <div class="wrap stack">
+    <div id="subConfirm" class="confirm stack" hidden></div>
+    <div id="runBody" class="stack"></div>
+    <div class="stack" style="gap:8px" id="cellsBox">
+      <div class="eyebrow" id="cellsLabel">答案格</div>
+      <div class="cells" id="cells"></div>
+    </div>
+  </div>
+</div>
+
+<div id="v-result" class="wrap stack" hidden>
+  <div class="stack" style="gap:6px">
+    <div class="eyebrow" id="resWho"></div>
+    <h1 id="resTitle"></h1>
+  </div>
+  <div class="sheet stack">
+    <div class="score">
+      <div class="big" id="resScore"></div>
+      <div class="stack" style="gap:2px">
+        <div>用時 <b class="mono" id="resUsed"></b></div>
+        <div class="muted" id="resNote"></div>
+      </div>
+    </div>
+    <div class="cells" id="resCells"></div>
+  </div>
+  <div class="sheet stack">
+    <h2>每一題</h2>
+    <div class="muted" id="resSlow"></div>
+    <div class="tbl-wrap"><table id="resTable"></table></div>
+  </div>
+  <div class="row"><button class="primary" id="btnBack">回到卷子清單</button><a class="back" href="me.html" style="align-self:center">看我的分析 →</a></div>
+</div>
+
+<script src="config.js"></script>
+<script src="grade.js"></script>
+<script src="run.js"></script>
+</body>
+</html>
