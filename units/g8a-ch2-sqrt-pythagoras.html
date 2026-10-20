@@ -310,16 +310,17 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
 
   <div class="lab" id="lab-long">
     <h4>實驗台 4　把直式開方法畫成正方形</h4>
-    <p class="why">左邊是課本的直式，右邊是同一件事的圖。每按一次「下一位」，正方形就長大一圈，長出來的那一圈，正好是 2<span class="math">ab</span>＋<span class="math">b</span><sup>2</sup>。</p>
+    <p class="why">左邊是課本的直式，右邊是同一件事的圖。每按一次「下一位」，正方形就長大一圈，長出來的那一圈，正好是 2<span class="math">ab</span>＋<span class="math">b</span><sup>2</sup>。不是完全平方數的話，可以補 00 一直往小數位試下去；圈會越來越薄，所以圖每一步放大 10 倍、只看右上角，綠色虛線是 √n 真正的位置。</p>
     <div class="ctl">
       <label>要開方的數 <input type="number" id="lgN" value="1849" min="1" max="99999999" step="1"></label>
       <button id="lgNext">下一位</button>
       <button id="lgAll" class="ghost">全部展開</button>
       <button id="lgReset" class="ghost">重來</button>
+      <label><input type="checkbox" id="lgWhole"> 看全貌</label>
     </div>
     <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start" id="lgGrid">
       <div><div class="scrollx"><table id="lgTbl"></table></div></div>
-      <div><svg id="lgSvg" viewBox="0 0 320 348" role="img" aria-label="開方過程的正方形分割圖"></svg></div>
+      <div><svg id="lgSvg" viewBox="0 0 320 370" role="img" aria-label="開方過程的正方形分割圖"></svg></div>
     </div>
     <div class="verdict" id="lgOut"></div>
   </div>
@@ -643,79 +644,141 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
 
   /* ══════ 4　直式開方法 ══════ */
   (function () {
-    const N = $("lgN"), T = $("lgTbl"), sv = $("lgSvg"), O = $("lgOut");
+    const N = $("lgN"), T = $("lgTbl"), sv = $("lgSvg"), O = $("lgOut"), Z = $("lgWhole"), NX = $("lgNext");
     if (!N) return;
+    const MAXDEC = 6;
     let st = null;
     function init() {
-      let n = Math.max(1, Math.floor(+N.value || 1849));
+      let n = Math.floor(+N.value);
+      if (!(n >= 1)) n = 1;
+      if (n > 99999999) n = 99999999;
       const s = String(n), pairs = [];
       for (let i = s.length; i > 0; i -= 2) pairs.unshift(s.slice(Math.max(0, i - 2), i));
-      st = { n: n, pairs: pairs, k: 0, root: 0, rem: 0, rows: [], full: Math.floor(Math.sqrt(n)) };
+      st = { n: n, pairs: pairs, m: pairs.length, k: 0, root: 0, rem: 0, rows: [] };
       render();
     }
+    const canNext = () => st.k < st.m || (st.rem !== 0 && st.k < st.m + MAXDEC);
     function next() {
-      if (st.k >= st.pairs.length) return;
-      const cur = st.rem * 100 + parseInt(st.pairs[st.k], 10);
+      if (!canNext()) return;
+      const pair = st.k < st.m ? parseInt(st.pairs[st.k], 10) : 0;
+      const cur = st.rem * 100 + pair;
       let d = 0;
-      if (st.k === 0) { while ((d + 1) * (d + 1) <= cur) d++; }
-      else { while ((20 * st.root + d + 1) * (d + 1) <= cur) d++; }
-      const trial = st.k === 0 ? d * d : (20 * st.root + d) * d;
-      st.rows.push({ i: st.k + 1, bring: cur, twice: st.k === 0 ? "—" : String(20 * st.root), d: d, trial: trial, rem: cur - trial, prev: st.root });
+      while ((20 * st.root + d + 1) * (d + 1) <= cur) d++;
+      const trial = (20 * st.root + d) * d;
+      st.rows.push({ k: st.k, bring: cur, twice: st.k === 0 ? "—" : String(20 * st.root), d: d, trial: trial, rem: cur - trial, prev: st.root });
       st.root = st.root * 10 + d; st.rem = cur - trial; st.k += 1;
       render();
     }
-    function render() {
-      let h = "<tr><th>步</th><th>帶下來</th><th>商的兩倍</th><th>試的位 d</th><th>(2×商＋d)×d</th><th>餘</th><th>目前的商</th></tr>";
-      let r0 = 0;
-      st.rows.forEach((r) => {
-        r0 = r.prev * 10 + r.d;
-        h += `<tr><td>${r.i}</td><td class="mono">${r.bring}</td><td class="mono">${r.twice}</td><td class="mono">${r.d}</td><td class="mono">${r.trial}</td><td class="mono">${r.rem}</td><td class="mono"><b>${r0}</b></td></tr>`;
-      });
-      T.innerHTML = h || "<tr><th>按「下一位」開始</th></tr>";
-      // 圖：正方形逐圈長大
-      clear(sv);
-      const S = 300, P = 10, full = Math.max(1, st.full);
-      sv.appendChild(el("rect", { x: P, y: P, width: S, height: S }, { fill: "none", stroke: "var(--line)", strokeWidth: "1", strokeDasharray: "4 4" }));
-      let a = 0;
-      st.rows.forEach((r, idx) => {
-        const scale = Math.pow(10, st.pairs.length - 1 - idx);
-        const aNew = (r.prev * 10 + r.d) * scale, aOld = r.prev * 10 * scale;
-        const uOld = (aOld / full) * S, uNew = (aNew / full) * S;
-        if (idx === 0) {
-          sv.appendChild(el("rect", { x: P, y: P + S - uNew, width: uNew, height: uNew }, { fill: "var(--blue)", fillOpacity: ".22", stroke: "var(--blue)", strokeWidth: "1.2" }));
-          if (uNew > 34) sv.appendChild(txt(P + uNew / 2, P + S - uNew / 2 + 5, "a² ＝ " + (aNew * aNew), { size: 12, fill: "var(--blue)", bold: true }));
-        } else {
-          const t = uNew - uOld;
-          sv.appendChild(el("rect", { x: P + uOld, y: P + S - uOld, width: t, height: uOld }, { fill: "var(--orange)", fillOpacity: ".3", stroke: "var(--orange)", strokeWidth: "1" }));
-          sv.appendChild(el("rect", { x: P, y: P + S - uNew, width: uOld, height: t }, { fill: "var(--orange)", fillOpacity: ".3", stroke: "var(--orange)", strokeWidth: "1" }));
-          sv.appendChild(el("rect", { x: P + uOld, y: P + S - uNew, width: t, height: t }, { fill: "var(--sand)", fillOpacity: ".85", stroke: "var(--orange)", strokeWidth: "1" }));
-          if (t > 14) sv.appendChild(txt(P + uOld + t / 2, P + S - uNew + t / 2 + 4, "b²", { size: 11, fill: "var(--orange)", bold: true }));
-          if (uOld > 60 && t > 12) {
-            sv.appendChild(txt(P + uOld + t / 2, P + S - uOld / 2, "ab", { size: 10, fill: "var(--orange)", bold: true }));
-            sv.appendChild(txt(P + uOld / 2, P + S - uNew + t / 2 + 4, "ab", { size: 10, fill: "var(--orange)", bold: true }));
-          }
-        }
-        a = aNew;
-      });
-      if (st.rows.length) sv.appendChild(txt(P + S / 2, P + S + 26, "目前邊長 " + a + "　面積 " + a * a + "　（原數 " + st.n + "）", { size: 12, fill: "var(--mute)" }));
-      const done = st.k >= st.pairs.length;
-      O.innerHTML = !st.rows.length
-        ? "按「下一位」，看正方形一圈一圈長出來。"
-        : (done
-          ? (st.rem === 0
-            ? (function () {
-              const L = st.rows[st.rows.length - 1], sc2 = 1, aO = L.prev * 10, bO = L.d;
-              const parts = st.rows.length > 1
-                ? `拆開看：a² ＝ ${aO * aO}，兩條 2ab ＝ 2×${aO}×${bO} ＝ ${2 * aO * bO}，b² ＝ ${bO * bO}；合計 ${aO * aO + 2 * aO * bO + bO * bO} ＝ ${st.n}。`
-                : "";
-              return `<b class="ok">√${st.n} ＝ ${st.root}，整除。</b>${parts}橘色那兩條就是 2ab，沙色那一小塊就是 b²。課本要你「把商乘以 2 寫在旁邊」，那個 2 就是<b>兩條橘色長方形</b>。`;
-            })()
-            : `<b>整數部分是 ${st.root}，餘 ${st.rem}。</b>還想再準一點，就繼續往小數位補「00」，這時候它就變成十分逼近法的加速版。`)
-          : `<b>還沒完。</b>下一步要帶下來的是 ${st.pairs[st.k]}，旁邊要寫的是商的兩倍 ${2 * st.root}。`);
+    // R 是目前算出的 kk 位數字，第一位在 10^(m−1) 的位置
+    function sideOf(R, kk) {
+      const m = st.m, s = String(R);
+      if (kk <= m) return s + "0".repeat(m - kk);
+      return s.slice(0, m) + "." + s.slice(m);
     }
-    $("lgNext").onclick = next;
-    $("lgAll").onclick = () => { while (st.k < st.pairs.length) next(); };
-    $("lgReset").onclick = init; N.onchange = init;
+    function areaOf(R, kk) {
+      const m = st.m, A = BigInt(R) * BigInt(R);
+      if (kk <= m) return (A * BigInt(10) ** BigInt(2 * (m - kk))).toString();
+      const dd = 2 * (kk - m), s = A.toString().padStart(dd + 1, "0");
+      return s.slice(0, s.length - dd) + "." + s.slice(s.length - dd);
+    }
+    function placeOf(k) {
+      const e = st.m - 1 - k;
+      return e >= 0 ? "1" + "0".repeat(e) : "0." + "0".repeat(-e - 1) + "1";
+    }
+    const S = 300, P = 10;
+    function zoomView(r) {
+      const k = r.k, A = r.prev * 10, d = r.d, c = k === 0 ? 0 : 5, span = k === 0 ? 10 : 15, u = S / span;
+      const X = (x) => P + x * u, Y = (y) => P + S - y * u;
+      for (let i = 0; i <= span; i++) {
+        sv.appendChild(el("line", { x1: X(i), y1: Y(0), x2: X(i), y2: Y(span) }, { stroke: "var(--line)", strokeWidth: ".6" }));
+        sv.appendChild(el("line", { x1: X(0), y1: Y(i), x2: X(span), y2: Y(i) }, { stroke: "var(--line)", strokeWidth: ".6" }));
+      }
+      const box = (x0, y0, x1, y1, fill, op, stroke) => sv.appendChild(el("rect", { x: X(x0), y: Y(y1), width: (x1 - x0) * u, height: (y1 - y0) * u }, { fill: fill, fillOpacity: op, stroke: stroke, strokeWidth: "1.2" }));
+      if (k === 0) {
+        if (d) box(0, 0, d, d, "var(--blue)", ".22", "var(--blue)");
+        if (d >= 2) sv.appendChild(txt(X(d / 2), Y(d / 2) + 5, "a² ＝ " + areaOf(d, 1), { size: 12, fill: "var(--blue)", bold: true }));
+      } else {
+        box(0, 0, c, c, "var(--blue)", ".22", "var(--blue)");
+        sv.appendChild(txt(X(c / 2), Y(c / 2) - 4, "a²", { size: 13, fill: "var(--blue)", bold: true }));
+        sv.appendChild(txt(X(c / 2), Y(c / 2) + 14, "a ＝ " + sideOf(r.prev, k), { size: 11, fill: "var(--blue)" }));
+        if (d) {
+          box(c, 0, c + d, c, "var(--orange)", ".3", "var(--orange)");
+          box(0, c, c, c + d, "var(--orange)", ".3", "var(--orange)");
+          box(c, c, c + d, c + d, "var(--sand)", ".85", "var(--orange)");
+          sv.appendChild(txt(X(c + d / 2), Y(c / 2) + 4, "ab", { size: 11, fill: "var(--orange)", bold: true }));
+          sv.appendChild(txt(X(c / 2), Y(c + d / 2) + 4, "ab", { size: 11, fill: "var(--orange)", bold: true }));
+          sv.appendChild(txt(X(c + d / 2), Y(c + d / 2) + 4, "b²", { size: 11, fill: "var(--orange)", bold: true }));
+        }
+      }
+      // 再多一格就超過
+      const f = c + d + 1;
+      sv.appendChild(el("polyline", { points: [X(0), Y(f), X(f), Y(f), X(f), Y(0)].join(" ") }, { fill: "none", stroke: "var(--mute)", strokeWidth: "1.2", strokeDasharray: "5 4" }));
+      sv.appendChild(txt(X(f) - 4, Y(f) + 13, (k === 0 ? "試 " : "b 試 ") + (d + 1) + " 就超過", { size: 10, fill: "var(--mute)", anchor: "end" }));
+      // √n 真正的位置
+      const g = Math.sqrt(st.n) * Math.pow(10, k + 1 - st.m) - (k === 0 ? 0 : A - 5);
+      if (g >= 0 && g <= span) {
+        sv.appendChild(el("polyline", { points: [X(0), Y(g), X(g), Y(g), X(g), Y(0)].join(" ") }, { fill: "none", stroke: "var(--green)", strokeWidth: "1.6", strokeDasharray: "2 3" }));
+        const right = g > span - 2;
+        sv.appendChild(txt(right ? X(g) - 4 : X(g) + 4, Y(0) - 6, "√" + st.n, { size: 11, fill: "var(--green)", bold: true, anchor: right ? "end" : "start" }));
+      }
+      return k === 0 ? "一小格 ＝ " + placeOf(0) : "只看右上角：一小格 ＝ " + placeOf(k) + "（上一步的 1/10）";
+    }
+    function wholeView() {
+      const full = Math.sqrt(st.n), sc = S / full;
+      st.rows.forEach((r) => {
+        const p = Math.pow(10, st.m - 1 - r.k), aO = r.prev * 10 * p, aN = (r.prev * 10 + r.d) * p;
+        const uO = aO * sc, uN = aN * sc, t = uN - uO;
+        if (r.k === 0) {
+          sv.appendChild(el("rect", { x: P, y: P + S - uN, width: uN, height: uN }, { fill: "var(--blue)", fillOpacity: ".22", stroke: "var(--blue)", strokeWidth: "1.2" }));
+          if (uN > 60) sv.appendChild(txt(P + uN / 2, P + S - uN / 2 + 5, "a²", { size: 13, fill: "var(--blue)", bold: true }));
+        } else if (t > 0) {
+          sv.appendChild(el("rect", { x: P + uO, y: P + S - uO, width: t, height: uO }, { fill: "var(--orange)", fillOpacity: ".3", stroke: "var(--orange)", strokeWidth: ".8" }));
+          sv.appendChild(el("rect", { x: P, y: P + S - uN, width: uO, height: t }, { fill: "var(--orange)", fillOpacity: ".3", stroke: "var(--orange)", strokeWidth: ".8" }));
+          sv.appendChild(el("rect", { x: P + uO, y: P + S - uN, width: t, height: t }, { fill: "var(--sand)", fillOpacity: ".85", stroke: "var(--orange)", strokeWidth: ".8" }));
+        }
+      });
+      sv.appendChild(el("rect", { x: P, y: P, width: S, height: S }, { fill: "none", stroke: "var(--green)", strokeWidth: "1.4", strokeDasharray: "2 3" }));
+      return st.k > st.m ? "全貌（真實比例）：小數那幾圈薄到看不見" : "全貌（真實比例）：綠框是 √" + st.n;
+    }
+    function render() {
+      const m = st.m;
+      let h = "<tr><th>步</th><th>帶下來</th><th>商的兩倍</th><th>試的位 d</th><th>(2×商＋d)×d</th><th>餘</th><th>目前的商</th></tr>";
+      st.rows.forEach((r) => {
+        const stp = r.k < m ? String(r.k + 1) : (r.k + 1) + '<br><small style="color:var(--mute);white-space:nowrap">小數 ' + (r.k - m + 1) + "</small>";
+        h += `<tr><td>${stp}</td><td class="mono">${r.bring}</td><td class="mono">${r.twice}</td><td class="mono">${r.d}</td><td class="mono">${r.trial}</td><td class="mono">${r.rem}</td><td class="mono"><b>${r.k + 1 <= m ? String(r.prev * 10 + r.d) : sideOf(r.prev * 10 + r.d, r.k + 1)}</b></td></tr>`;
+      });
+      T.innerHTML = st.rows.length ? h : "<tr><th>按「下一位」開始</th></tr>";
+      NX.disabled = !canNext();
+      clear(sv);
+      if (!st.rows.length) {
+        sv.appendChild(el("rect", { x: P, y: P, width: S, height: S }, { fill: "none", stroke: "var(--line)", strokeWidth: "1", strokeDasharray: "4 4" }));
+      } else {
+        const cap = Z && Z.checked ? wholeView() : zoomView(st.rows[st.rows.length - 1]);
+        sv.appendChild(txt(P + S / 2, 330, cap, { size: 12, fill: "var(--mute)" }));
+        sv.appendChild(txt(P + S / 2, 348, "目前邊長 " + sideOf(st.root, st.k), { size: 12, fill: "var(--ink)" }));
+        sv.appendChild(txt(P + S / 2, 365, "面積 " + areaOf(st.root, st.k) + "（原數 " + st.n + "）", { size: 12, fill: "var(--mute)" }));
+      }
+      const k = st.k, n = st.n;
+      let msg;
+      if (!st.rows.length) msg = "按「下一位」，看正方形一圈一圈長出來。";
+      else if (k < m) msg = `<b>還沒完。</b>下一步要帶下來的是 ${st.pairs[k]}，旁邊要寫的是商的兩倍 ${2 * st.root}。`;
+      else if (st.rem === 0 && k === m) {
+        const L = st.rows[st.rows.length - 1], aO = L.prev * 10, bO = L.d;
+        const parts = st.rows.length > 1
+          ? `拆開看：a² ＝ ${aO * aO}，兩條 2ab ＝ 2×${aO}×${bO} ＝ ${2 * aO * bO}，b² ＝ ${bO * bO}；合計 ${aO * aO + 2 * aO * bO + bO * bO} ＝ ${n}。`
+          : "";
+        msg = `<b class="ok">√${n} ＝ ${st.root}，整除。</b>${parts}橘色那兩條就是 2ab，沙色那一小塊就是 b²。課本要你「把商乘以 2 寫在旁邊」，那個 2 就是<b>兩條橘色長方形</b>。`;
+      } else if (k === m) msg = `<b>整數部分是 ${st.root}，餘 ${st.rem}。</b>${n} 不是完全平方數，還可以繼續：按「下一位」，在後面補一組 00，往小數第 1 位試下去。`;
+      else if (k < m + MAXDEC) msg = `<b>√${n} ≈ ${sideOf(st.root, k)}…（到小數第 ${k - m} 位）</b>每多一位，正方形只多長一圈更薄的邊，所以畫面每一步放大 10 倍才看得到。試的方法完全一樣：補 00、寫商的兩倍、試 d。綠色虛線是 √${n} 真正的位置，正方形永遠追不上它。`;
+      else msg = `<b>√${n} ≈ ${sideOf(st.root, k)}…，先停在小數第 ${MAXDEC} 位。</b>餘數永遠不會變成 0，這個方法可以一直做下去：√${n} 不是有限小數。`;
+      O.innerHTML = msg;
+    }
+    NX.onclick = next;
+    $("lgAll").onclick = () => { while (canNext()) next(); };
+    $("lgReset").onclick = init;
+    N.addEventListener("input", init);
+    N.addEventListener("change", init);
+    if (Z) Z.addEventListener("change", render);
     init();
   })();
 
