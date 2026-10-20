@@ -1086,39 +1086,39 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
     const sv = $("spSvg"), KIND = $("spKind"), RN = $("spN"), VN = $("spNv"),
       RD = $("spD"), VD = $("spDv"), RA = $("spA"), VA = $("spAv"), O = $("spOut");
     if (!sv) return;
-    function spiral(n) {
-      const g = el("g"), U = 26;
-      let P = [0, 0], Q = [U, 0];
+    const VW = 640, VH = 380;
+    // 先在數學座標（y 向上）算好形狀，最後才換成畫面座標，字和線粗就不會跟著圖一起放大
+    function spiralModel(n) {
+      const shapes = [], spokes = [];
+      let P = [0, 0], Q = [1, 0], th = 0;
+      spokes.push({ j: 1, v: Q, th: 0 });
       for (let k = 1; k < n; k++) {
-        const vx = Q[0] - P[0], vy = Q[1] - P[1], L = Math.hypot(vx, vy);
-        const nx = -vy / L * U, ny = vx / L * U;
-        const R = [Q[0] + nx, Q[1] + ny];
-        g.appendChild(el("polygon", { points: `${P[0]},${P[1]} ${Q[0]},${Q[1]} ${R[0]},${R[1]}` },
-          { fill: k % 2 ? "var(--blue)" : "var(--orange)", fillOpacity: ".16", stroke: "var(--blue)", strokeWidth: "1" }));
-        if (k <= 8 || k % 2 === 0) {
-          const mx = (P[0] + R[0]) / 2, my = (P[1] + R[1]) / 2;
-          g.appendChild(txt(mx, my, "√" + (k + 1), { size: 10, fill: "var(--mute)" }));
-        }
+        const L = Math.hypot(Q[0], Q[1]);
+        const R = [Q[0] - Q[1] / L, Q[1] + Q[0] / L];
+        shapes.push({ pts: [P, Q, R], fill: k % 2 ? "var(--blue)" : "var(--orange)", op: ".16", stroke: "var(--blue)", sw: 1.2 });
+        th += Math.atan(1 / Math.sqrt(k));
+        spokes.push({ j: k + 1, v: R, th: th });
         Q = R;
       }
-      return g;
+      return { shapes: shapes, spokes: spokes, thEnd: th };
     }
-    function tree(depth, angDeg) {
-      const g = el("g"), ang = angDeg * Math.PI / 180;
+    function treeModel(depth, angDeg) {
+      const shapes = [], tris = [], ang = angDeg * Math.PI / 180;
       function sq(x, y, s, rot, d) {
-        if (d > depth || s < 1.2) return;
+        if (d > depth) return;
         const co = Math.cos(rot), si = Math.sin(rot);
-        const P = [[x, y], [x + s * co, y + s * si], [x + s * (co - si), y + s * (si + co)], [x - s * si, y + s * co]];
-        g.appendChild(el("polygon", { points: P.map((p) => p.join(",")).join(" ") },
-          { fill: d % 2 ? "var(--green)" : "var(--blue)", fillOpacity: String(0.1 + 0.07 * (depth - d + 1) / depth), stroke: "var(--green)", strokeWidth: "0.9" }));
+        const B = [x, y], C = [x + s * co, y + s * si], D = [x + s * (co - si), y + s * (si + co)], A = [x - s * si, y + s * co];
+        shapes.push({ pts: [B, C, D, A], fill: d % 2 ? "var(--green)" : "var(--blue)", op: String(0.12 + 0.18 * (depth - d) / Math.max(depth - 1, 1)), stroke: "var(--green)", sw: d <= 3 ? 1.2 : 0.8 });
+        if (d === depth) return;
+        // 正方形頂邊 A→D 上蓋一個直角三角形，直角在 apex
         const s1 = s * Math.cos(ang), s2 = s * Math.sin(ang);
-        const topL = P[3], topR = P[2];
-        sq(topL[0], topL[1], s1, rot - ang, d + 1);
-        const apex = [topL[0] + s1 * Math.cos(rot - ang), topL[1] + s1 * Math.sin(rot - ang)];
-        sq(apex[0], apex[1], s2, rot + (Math.PI / 2 - ang), d + 1);
+        const apex = [A[0] + s1 * Math.cos(rot + ang), A[1] + s1 * Math.sin(rot + ang)];
+        tris.push({ pts: [A, D, apex], fill: "var(--sand)", op: ".9", stroke: "var(--green)", sw: d <= 3 ? 1.2 : 0.8 });
+        sq(A[0], A[1], s1, rot + ang, d + 1);
+        sq(apex[0], apex[1], s2, rot + ang - Math.PI / 2, d + 1);
       }
-      sq(0, 0, 46, 0, 1);
-      return g;
+      sq(0, 0, 1, 0, 1);
+      return { shapes: shapes.concat(tris), spokes: [] };
     }
     function draw() {
       const kind = KIND.value;
@@ -1126,24 +1126,48 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
       $("spDWrap").hidden = kind !== "tree";
       $("spAWrap").hidden = kind !== "tree";
       clear(sv);
-      let g;
-      if (kind === "spiral") { const n = +RN.value; VN.textContent = n; g = spiral(n); }
-      else { const d = +RD.value, a = +RA.value; VD.textContent = d; VA.textContent = a; g = tree(d, a); }
-      sv.appendChild(g);
-      const bb = g.getBBox(), pad = 16, VW = 640, VH = 380;
-      const k = Math.min((VW - 2 * pad) / Math.max(bb.width, 1), (VH - 2 * pad) / Math.max(bb.height, 1));
-      // SVG 的 y 向下，把圖翻正
-      g.setAttribute("transform",
-        `translate(${pad - bb.x * k + (VW - 2 * pad - bb.width * k) / 2} ${VH - pad + bb.y * k + (bb.height * k - (VH - 2 * pad)) / 2}) scale(${k} ${-k})`);
-      g.querySelectorAll("text").forEach((t) => {
-        const tx = +t.getAttribute("x"), ty = +t.getAttribute("y");
-        t.setAttribute("transform", `translate(${tx} ${ty}) scale(1 -1) translate(${-tx} ${-ty})`);
+      // 手機上 SVG 會被縮小，字要按比例放大才看得清楚
+      const shown = sv.getBoundingClientRect().width || VW;
+      const fs = Math.min(24, Math.max(12, 12 * VW / shown)), lw = Math.max(1, VW / shown);
+      let M, n = 0;
+      if (kind === "spiral") { n = +RN.value; VN.textContent = n; M = spiralModel(n); }
+      else { const d = +RD.value, a = +RA.value; VD.textContent = d; VA.textContent = a; M = treeModel(d, a); }
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      M.shapes.forEach((s) => s.pts.forEach((p) => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }));
+      const pad = kind === "spiral" ? fs * 2.4 : 14;
+      const k = Math.min((VW - 2 * pad) / (x1 - x0), (VH - 2 * pad) / (y1 - y0));
+      const ox = (VW - k * (x1 - x0)) / 2, oy = (VH - k * (y1 - y0)) / 2;
+      const X = (p) => ox + (p[0] - x0) * k, Y = (p) => VH - oy - (p[1] - y0) * k;
+      M.shapes.forEach((s) => {
+        sv.appendChild(el("polygon", { points: s.pts.map((p) => X(p).toFixed(2) + "," + Y(p).toFixed(2)).join(" ") },
+          { fill: s.fill, fillOpacity: s.op, stroke: s.stroke, strokeWidth: String(s.sw * lw), strokeLinejoin: "round" }));
       });
+      if (kind === "spiral") {
+        // 只標最外面一圈的斜邊（裡面那幾圈會被後來的三角形蓋住）；字放在頂點外側，不壓線
+        const vis = M.spokes.filter((s) => s.j >= 2 && M.thEnd - s.th < 2 * Math.PI - 0.15);
+        const gap = k; // 相鄰兩個外頂點在畫面上大約隔一個單位長
+        const every = gap >= fs * 2.6 ? 1 : gap >= fs * 1.4 ? 2 : 3;
+        vis.forEach((s) => {
+          if (s.j !== n && s.j !== vis[0].j && (s.j % every) !== 0) return;
+          const L = Math.hypot(s.v[0], s.v[1]), ux = s.v[0] / L, uy = s.v[1] / L, off = fs * 1.15;
+          const px = X(s.v) + ux * off, py = Y(s.v) - uy * off + fs * 0.35;
+          const t = txt(px, py, "√" + s.j, { size: fs, fill: s.j === n ? "var(--blue)" : "var(--ink)", bold: s.j === n });
+          t.style.paintOrder = "stroke"; t.style.stroke = "var(--card)"; t.style.strokeWidth = String(fs * 0.3); t.style.strokeLinejoin = "round";
+          sv.appendChild(t);
+          sv.appendChild(el("line", { x1: X(s.v), y1: Y(s.v), x2: X(s.v) + ux * fs * 0.45, y2: Y(s.v) - uy * fs * 0.45 }, { stroke: "var(--mute)", strokeWidth: String(lw) }));
+        });
+        if (M.thEnd < 2 * Math.PI - 0.15) {
+          const t = txt(X([0.68, 0]), Y([0, 0.16]) + fs * 0.35, "1", { size: fs, fill: "var(--mute)", bold: true });
+          sv.appendChild(t);
+        }
+      }
       O.innerHTML = kind === "spiral"
-        ? `<b>每一個三角形都在用一次畢氏定理。</b>第 k 個三角形的兩股是 √k 和 1，斜邊就是 √(k＋1)。所以這條螺線把 √2、√3、√4…… 一次全部畫了出來，長度量不出來的數，可以<b>畫</b>得出來。`
-        : `<b>每一個分叉都是一次畢氏定理。</b>母正方形的邊長平方 ＝ 兩個子正方形邊長的平方和，所以每一層的<b>總面積都相等</b>。把角度拉到 45° 以外，樹會歪，但這件事不會變。`;
+        ? `<b>每一個三角形都在用一次畢氏定理。</b>第 k 個三角形的兩股是 √k 和 1，斜邊就是 √(k＋1)。所以這條螺線把 √2、√3、√4…… 一次全部畫了出來，長度量不出來的數，可以<b>畫</b>得出來。轉過一圈以後，新的三角形會蓋住裡面那一圈，所以圖上只標最外圈的長度。`
+        : `<b>每一個分叉都是一次畢氏定理。</b>沙色的直角三角形，斜邊貼著母正方形，兩股各長出一個子正方形：母正方形的面積 ＝ 兩個子正方形面積的和，所以每一層的<b>總面積都相等</b>。把角度拉離 45°，樹會歪，但這件事不會變。`;
     }
-    KIND.onchange = draw; RN.oninput = draw; RD.oninput = draw; RA.oninput = draw; draw();
+    KIND.onchange = draw; RN.oninput = draw; RD.oninput = draw; RA.oninput = draw;
+    window.addEventListener("resize", draw);
+    draw();
   })();
 
   /* ══════ 主題切換 ══════ */
