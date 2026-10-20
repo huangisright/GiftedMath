@@ -16,13 +16,13 @@
   <div class="stack" style="gap:6px">
     <div class="eyebrow">TRML 國中數學競賽・練習紀錄</div>
     <h1>我的分析</h1>
-    <div class="muted">看自己哪些題型強、哪些要加強，還有寫錯的題目。只有輸入自己的代碼才看得到。</div>
+    <div class="muted">看自己哪些題型強、哪些要加強，還有寫錯的題目。要輸入老師發給你的<b>分析密碼</b>（每個人不一樣，不是小組代碼），只有你自己看得到。</div>
   </div>
   <div class="sheet stack">
     <div class="row">
       <label class="f" for="team">隊伍<select id="team"></select></label>
       <label class="f" for="name">姓名<select id="name"></select></label>
-      <label class="f" for="pin">代碼<input type="text" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="老師給的代碼"></label>
+      <label class="f" for="pin">分析密碼<input type="password" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="老師發的 4 碼"></label>
     </div>
     <div class="row"><button class="primary" id="go">看分析</button><span id="msg" class="muted"></span></div>
   </div>
@@ -46,18 +46,18 @@ fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
   if(!d.ok) throw new Error(d.error);
   teams=d.teams; var who=load('trml-who')||{};
   $('team').innerHTML='<option value="">選隊伍</option>'+teams.map(function(t){return '<option>'+esc(t.team)+'</option>';}).join('');
-  if(who.team) $('team').value=who.team; fillNames(who.name); if(who.pin) $('pin').value=who.pin;
-  $('team').onchange=function(){ fillNames(); $('pin').value=''; };
-  if(who.team&&who.name) go();
+  if(who.team) $('team').value=who.team; fillNames(who.name);
+  $('team').onchange=function(){ fillNames(); $('pin').value=''; $('out').innerHTML=''; };
+  $('name').onchange=function(){ $('pin').value=''; $('out').innerHTML=''; };
 }).catch(function(e){ $('msg').innerHTML='<span class="err">讀不到名單：'+esc(e.message)+'</span>'; });
 function go(){
-  var b={action:'profile',team:$('team').value,name:$('name').value,pin:$('pin').value.trim()};
+  var b={action:'profile',team:$('team').value,name:$('name').value,apin:$('pin').value.trim()};
   if(!b.team||!b.name){ $('msg').textContent='先選隊伍和姓名。'; return; }
+  if(!b.apin){ $('msg').textContent='請輸入分析密碼。'; return; }
   $('msg').textContent='讀取中…'; $('go').disabled=true;
   fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(b)}).then(function(r){return r.json();}).then(function(d){
     $('go').disabled=false;
     if(!d.ok){ $('msg').innerHTML='<span class="err">'+esc(d.error||'讀取失敗')+'</span>'; return; }
-    save('trml-who',{team:b.team,name:b.name,pin:b.pin});
     $('msg').textContent=d.me.name+'・'+d.me.team+'・'+d.me.year+' 年度';
     TRMLProfile.render($('out'),d,{imgBase:IMG});
   }).catch(function(){ $('go').disabled=false; $('msg').innerHTML='<span class="err">連不上題庫，請確認網路後再試。</span>'; });
