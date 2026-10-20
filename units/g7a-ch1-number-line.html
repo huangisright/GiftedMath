@@ -861,7 +861,7 @@ function l3() {
   rows.forEach((r, i) => {
     h += '<div class="r">';
     r.forEach((v, j) => {
-      const given = (i === 3 && j >= 2);
+      const given = (i === 3 && j < 2);
       let cls = "c" + (given ? " given" : "");
       if (i === 0) cls += (v === 20 ? " ok" : " no");
       const t = sym ? symRows[i][j] : (ok ? fmt(v) : "?");
