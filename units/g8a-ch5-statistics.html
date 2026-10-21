@@ -457,7 +457,7 @@ table.dt tr.hi td{background:var(--orange-soft);color:var(--orange);font-weight:
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">八年級　資料與不確定性　數理資優班　·　互動實驗台</div>
+  <div class="eyebrow">八年級　資料與不確定性　數理資優班　·　互動探索站</div>
   <h1>中間的那個人在哪裡</h1>
   <p class="sub">統計資料處理　·　從平均數的爭議到累積相對次數折線圖</p>
   <p class="thesis">整理資料就是有計畫地丟東西。你還能回答什麼問題，被你丟掉的東西決定。</p>
@@ -489,7 +489,7 @@ table.dt tr.hi td{background:var(--orange-soft);color:var(--orange);font-weight:
     <span class="lab-no">1</span>
     <div>
       <p class="lab-title">把尾巴拉長：形狀決定平均和中位數差多少</p>
-      <p class="lab-why">七下看過：一個人就能把平均拉走。這一台換一個問法——<b>整筆資料的形狀</b>慢慢變歪，40 個人的平均數和中位數會怎麼分開？</p>
+      <p class="lab-why">七下看過：一個人就能把平均拉走。這一站換一個問法——<b>整筆資料的形狀</b>慢慢變歪，40 個人的平均數和中位數會怎麼分開？</p>
     </div>
   </div>
   <div class="lab-body">
@@ -671,7 +671,7 @@ table.dt tr.hi td{background:var(--orange-soft);color:var(--orange);font-weight:
 
 <script>
 /* ============================================================
-   中間的那個人在哪裡　·　互動實驗台
+   中間的那個人在哪裡　·　互動探索站
    ============================================================ */
 const $ = (id) => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
@@ -1181,7 +1181,7 @@ function qnorm(p) {           // 標準常態分位數（Acklam 近似）
       bars(A, [["甲班", 10, css("--indigo"), "10 人"], ["乙班", 0.35, css("--orange"), "0.35"]], { lo: 0, hi: 12, cap: "「乙班遠遠落後」" });
       bars(Bv, [["甲班", 0.40, css("--indigo"), "40％"], ["乙班", 0.35, css("--orange"), "35％"]], { lo: 0, hi: 0.5, cap: "80 分以上的比例" });
       V.innerHTML = "<b>它偷換了單位。</b>一邊是人數、一邊是比例，兩根柱子放在同一個縱軸上根本不是同一件事……" +
-        "這就是實驗台 4 的錯誤換成了圖。誠實的做法：<b>兩班都用相對次數</b>；如果要用次數，就一起標明總人數。";
+        "這就是第 4 站的錯誤換成了圖。誠實的做法：<b>兩班都用相對次數</b>；如果要用次數，就一起標明總人數。";
     },
   };
   segbind("g6seg", (v) => SCEN[v]());

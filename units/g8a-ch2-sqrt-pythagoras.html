@@ -84,7 +84,7 @@ th{background:var(--blue);color:#fff;text-align:left;padding:9px 12px;font-weigh
 td{border-top:1px solid var(--cardline);padding:9px 12px;vertical-align:top;font-variant-numeric:tabular-nums}
 tr:nth-child(even) td{background:color-mix(in srgb,var(--card) 94%,var(--blue))}
 
-/* 實驗台 */
+/* 探索站 */
 .lab{background:var(--card);border:1px solid var(--cardline);border-radius:14px;padding:20px;margin:22px 0;box-shadow:var(--shadow)}
 .lab > h4{margin:0 0 4px;font-size:17px;color:var(--orange);display:flex;align-items:center;gap:.5em}
 .lab > h4::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--orange);flex:none}
@@ -220,7 +220,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
 
 <section id="s0">
   <p>這一章有兩個主角。前半是<b>開方</b>：平方把邊長變成面積，開方要把面積翻回邊長。後半是<b>畢氏定理</b>：它表面上在講三段長度，骨子裡在講三個正方形的面積。把這兩件事接起來的，是你上一章剛學完的 <span class="math">(a+b)</span><sup>2</sup>。</p>
-  <div class="note b"><span class="vt">這個網頁只做紙上做不到的事</span>下面每一台實驗台，都是為了讓你「看見一個過程」，而不是「得到一個答案」。答案課本上就有；過程只有在這裡看得到。</div>
+  <div class="note b"><span class="vt">這個網頁只做紙上做不到的事</span>下面每一站，都是為了讓你「看見一個過程」，而不是「得到一個答案」。答案課本上就有；過程只有在這裡看得到。</div>
 </section>
 
 <!-- ══════════ 1 ══════════ -->
@@ -247,7 +247,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </ul>
 
   <div class="lab" id="lab-abs">
-    <h4>實驗台 1　平方再開方，會回到原地嗎？</h4>
+    <h4>第 1 站　平方再開方，會回到原地嗎？</h4>
     <p class="why">拉動滑桿改變 <span class="math">a</span>，看 <span class="math">a</span> → <span class="math">a</span><sup>2</sup> → √(<span class="math">a</span><sup>2</sup>) 這條路。負的那一半會發生什麼事？</p>
     <div class="ctl">
       <label><span class="math">a</span> ＝ <input type="range" id="absA" min="-60" max="60" value="-35"><b id="absAv" class="mono"></b></label>
@@ -263,7 +263,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <p class="lede">√2 不是「算不完」，是「不可能寫成分數」。</p>
 
   <div class="lab" id="lab-squeeze">
-    <h4>實驗台 2　十分逼近器</h4>
+    <h4>第 2 站　十分逼近器</h4>
     <p class="why">每按一次，區間就縮小成十分之一。完全平方數會停下來，其他的永遠停不下來，這件事在紙上要算很久才感覺得到。</p>
     <div class="ctl">
       <label>要開方的數 <input type="number" id="sqN" value="2" min="2" max="9999" step="1"></label>
@@ -285,7 +285,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <div class="note">矛盾不是出在算式，是出在「最簡」這個詞。<b>只要能一直往下降，就不存在最底層。</b></div>
 
   <div class="lab" id="lab-incom">
-    <h4>實驗台 3　切不完的正方形（不可公度）</h4>
+    <h4>第 3 站　切不完的正方形（不可公度）</h4>
     <p class="why">七上你用輾轉相除法切正方形求最大公因數。同一個動作拿來切「邊長 1、對角線 √2」這一組，你會看到它永遠切不完，而且每次剩下的形狀都和原來一模一樣。</p>
     <div class="ctl">
       <label>長邊 ÷ 短邊 ＝
@@ -309,7 +309,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <p>課本教的直式開方法看起來像口訣：「商乘以 2 寫在旁邊、試除、再往下拉兩位」。它其實就是 <span class="math">(a+b)</span><sup>2</sup> ＝ <span class="math">a</span><sup>2</sup>＋2<span class="math">ab</span>＋<span class="math">b</span><sup>2</sup> 拆成一位一位在用。</p>
 
   <div class="lab" id="lab-long">
-    <h4>實驗台 4　把直式開方法畫成正方形</h4>
+    <h4>第 4 站　把直式開方法畫成正方形</h4>
     <p class="why">左邊是課本的直式，右邊是同一件事的圖。每按一次「下一位」，正方形就長大一圈，長出來的那一圈，正好是 2<span class="math">ab</span>＋<span class="math">b</span><sup>2</sup>。不是完全平方數的話，可以補 00 一直往小數位試下去；圈會越來越薄，所以圖每一步放大 10 倍、只看右上角，綠色虛線是 √n 真正的位置。</p>
     <div class="ctl">
       <label>要開方的數 <input type="number" id="lgN" value="1849" min="1" max="99999999" step="1"></label>
@@ -332,7 +332,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <p class="lede">七上《分母是單位》那句話，原封不動搬到根號上面。</p>
 
   <div class="lab" id="lab-unit">
-    <h4>實驗台 5　同單位才能合併</h4>
+    <h4>第 5 站　同單位才能合併</h4>
     <p class="why">點一下把根式丟進袋子。系統會自動化成最簡根式，再依「單位」分堆，不同堆之間永遠加不起來。</p>
     <div class="ctl" id="unitChips"></div>
     <div class="ctl"><button id="unitClear" class="ghost">清空</button></div>
@@ -341,8 +341,8 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </div>
 
   <div class="lab" id="lab-rat">
-    <h4>實驗台 6　分母有理化＝平方差公式在工作</h4>
-    <p class="why">改分母的三個數字，看共軛怎麼把根號平方掉。這台的重點不是答案，是中間那一行 <span class="math">(a+b)(a−b)</span> ＝ <span class="math">a</span><sup>2</sup>−<span class="math">b</span><sup>2</sup>。</p>
+    <h4>第 6 站　分母有理化＝平方差公式在工作</h4>
+    <p class="why">改分母的三個數字，看共軛怎麼把根號平方掉。這一站的重點不是答案，是中間那一行 <span class="math">(a+b)(a−b)</span> ＝ <span class="math">a</span><sup>2</sup>−<span class="math">b</span><sup>2</sup>。</p>
     <div class="ctl">
       <label>分子 <input type="number" id="ratP" value="3" step="1"></label>
       <label>分母 <input type="number" id="ratA" value="0" step="1"> ＋ <input type="number" id="ratB" value="1" step="1"> √<input type="number" id="ratC" value="5" min="1" step="1"></label>
@@ -358,7 +358,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <p><span class="math">a</span><sup>2</sup>＋<span class="math">b</span><sup>2</sup>＝<span class="math">c</span><sup>2</sup> 這一行，<b>三個項都是面積</b>。把它讀成「長度的關係」，就會犯下 <span class="math">a</span>＋<span class="math">b</span>＝<span class="math">c</span> 那種錯。</p>
 
   <div class="lab" id="lab-rearr">
-    <h4>實驗台 7　重排證明：兩種擺法，同一個大正方形</h4>
+    <h4>第 7 站　重排證明：兩種擺法，同一個大正方形</h4>
     <p class="why">兩個大正方形都是 <span class="math">(a+b)</span><sup>2</sup>。左邊擺出 <span class="math">a</span><sup>2</sup>＋<span class="math">b</span><sup>2</sup>，右邊擺出 <span class="math">c</span><sup>2</sup>，扣掉的四個三角形一模一樣。拉滑桿改變形狀，等式不會壞。</p>
     <div class="ctl">
       <label><span class="math">a</span> ＝ <input type="range" id="reA" min="20" max="80" value="60"><b id="reAv" class="mono"></b></label>
@@ -377,7 +377,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   <p><span class="math">a</span><sup>2</sup>＋<span class="math">b</span><sup>2</sup>＝<span class="math">c</span><sup>2</sup> 裡藏著三個沒明講的前提：三邊上蓋的是<b>正方形</b>、圖畫在<b>平面</b>上、那個角是<b>直角</b>。一次拿掉一個，就得到三個推廣。</p>
 
   <div class="lab" id="lab-door1">
-    <h4>實驗台 8　第一扇門：把正方形換掉</h4>
+    <h4>第 8 站　第一扇門：把正方形換掉</h4>
     <p class="why">三邊上改蓋任意三個彼此相似的圖形，面積關係一樣成立。切換形狀看看數字會不會壞。</p>
     <div class="ctl">
       <label>三邊上蓋
@@ -396,7 +396,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </div>
 
   <div class="lab" id="lab-lune">
-    <h4>實驗台 9　月牙定理：答案裡沒有 π</h4>
+    <h4>第 9 站　月牙定理：答案裡沒有 π</h4>
     <p class="why">先猜：兩個月牙的面積和，和三角形比誰大？猜完再按「量給我看」。（希波克拉底，約西元前 440 年）</p>
     <div class="ctl">
       <label><span class="math">a</span> ＝ <input type="range" id="luA" min="25" max="80" value="60"><b id="luAv" class="mono"></b></label>
@@ -408,7 +408,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </div>
 
   <div class="lab" id="lab-door3">
-    <h4>實驗台 10　第三扇門：把直角換掉</h4>
+    <h4>第 10 站　第三扇門：把直角換掉</h4>
     <p class="why">把夾角從 20° 拉到 160°，看 <span class="math">c</span><sup>2</sup> 和 <span class="math">a</span><sup>2</sup>＋<span class="math">b</span><sup>2</sup> 的差距怎麼變。那個差距就是 2<span class="math">ab</span>·cos <span class="math">C</span>——「直角壞掉要付的錢」。</p>
     <div class="ctl">
       <label>夾角 <span class="math">C</span> ＝ <input type="range" id="d3C" min="20" max="160" value="90"><b id="d3Cv" class="mono"></b>°</label>
@@ -418,7 +418,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </div>
 
   <div class="lab" id="lab-triple">
-    <h4>實驗台 11　畢氏數機器</h4>
+    <h4>第 11 站　畢氏數機器</h4>
     <p class="why">畢氏數不是碰運氣找到的，是被乘法公式生出來的。輸入 <span class="math">m</span> ＞ <span class="math">n</span>，機器就吐一組。</p>
     <div class="ctl">
       <label><span class="math">m</span> ＝ <input type="number" id="tpM" value="3" min="2" max="40"></label>
@@ -430,7 +430,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
   </div>
 
   <div class="lab" id="lab-spiral">
-    <h4>實驗台 12　√n 螺線與畢氏樹</h4>
+    <h4>第 12 站　√n 螺線與畢氏樹</h4>
     <p class="why">回家作業的預覽。先在這裡拉一次，再拿方格紙畫，你會知道自己要畫什麼。</p>
     <div class="ctl">
       <label>圖形 <select id="spKind"><option value="spiral">√n 螺線</option><option value="tree">畢氏樹</option></select></label>
@@ -473,7 +473,7 @@ footer.ft{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);colo
 <button class="theme" id="themeBtn">深色／淺色</button>
 
 <script>
-/* a2_script.js — 《把面積翻回邊長》互動版 12 個實驗台 */
+/* a2_script.js — 《把面積翻回邊長》互動版 12 個探索站 */
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);

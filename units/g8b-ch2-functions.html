@@ -469,7 +469,7 @@ input[type=range]{accent-color:var(--indigo);width:160px}
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">八年級　函數　數理資優班學習單　·　互動實驗台</div>
+  <div class="eyebrow">八年級　函數　數理資優班學習單　·　互動探索站</div>
   <h1>它不會改口</h1>
   <p class="sub">函數與函數圖形　·　從終極密碼到一次函數與鉛直線測試</p>
   <p class="thesis">函數不是一條式子，是一種讀法，而且它不會改口。</p>
@@ -493,7 +493,7 @@ input[type=range]{accent-color:var(--indigo);width:160px}
   <div class="pillar-tag" style="color:var(--indigo)"><span class="dot" style="background:var(--indigo)"></span>支點一　函數是一種讀法</div>
   <h2>同一條式子，可以檢查，也可以索取</h2>
   <p class="lede">七年級下學期看 <span class="mono">2x ＋ y ＝ 7</span> 的圖形時，問的是「<b>哪些 (x, y) 滿足它</b>」，那是在<b>檢查</b>。這一章改問「<b>給我一個 x，y 是多少</b>」，那是在<b>索取</b>。圖一模一樣，變的是你站在哪一邊問問題。</p>
-  <p>下面兩台實驗：第一台讓你親手餵一台機器，第二台讓你自己造一台壞掉的機器。</p>
+  <p>下面兩站：第一站讓你親手餵一台機器，第二站讓你自己造一台壞掉的機器。</p>
 </section>
 
 <!-- LAB 1 -->
@@ -537,7 +537,7 @@ input[type=range]{accent-color:var(--indigo);width:160px}
     <span class="lab-no">2</span>
     <div>
       <p class="lab-title">對應關係判別器：自己造一台壞掉的機器</p>
-      <p class="lab-why">點格子開關箭頭。壞法只有兩種，這台會當場告訴你是哪一種，而「<b>多對一</b>」不是壞法，很多人以為是。</p>
+      <p class="lab-why">點格子開關箭頭。壞法只有兩種，這一站會當場告訴你是哪一種，而「<b>多對一</b>」不是壞法，很多人以為是。</p>
     </div>
   </div>
   <div class="lab-body">
@@ -605,7 +605,7 @@ input[type=range]{accent-color:var(--indigo);width:160px}
     <span class="lab-no">4</span>
     <div>
       <p class="lab-title">讀圖的兩個方向</p>
-      <p class="lab-why">左邊那根線往上找，右邊那根線往旁邊找。<b>左邊永遠是 1，右邊會跳來跳去</b>——這台實驗只做這一件事，但這是整章最值錢的一件事。</p>
+      <p class="lab-why">左邊那根線往上找，右邊那根線往旁邊找。<b>左邊永遠是 1，右邊會跳來跳去</b>——這一站只做這一件事，但這是整章最值錢的一件事。</p>
     </div>
   </div>
   <div class="lab-body">
@@ -720,7 +720,7 @@ input[type=range]{accent-color:var(--indigo);width:160px}
 
 <script>
 /* ================================================================
-   八下2 函數　互動實驗台
+   八下2 函數　互動探索站
 ================================================================ */
 const $ = id => document.getElementById(id);
 const CIN = "var(--indigo)", CORG = "var(--orange)", CGRN = "var(--green)",
@@ -854,7 +854,7 @@ function m1draw() {
   s += txt(8, 18, M.label, { color: CIN, bold: true, size: 13 });
   $("m1fig").innerHTML = svgWrap(pl, s);
   const note = {
-    lin: "一次函數：<b>每往右 1，往上 2</b>。這個 2 等一下在第 5 台會變成「公差」。",
+    lin: "一次函數：<b>每往右 1，往上 2</b>。這個 2 等一下在第 5 站會變成「公差」。",
     sq: "<b>多對一是合法的</b>：餵 3 和餵 −3 都吐 9。但正因為這樣，把它倒過來就會一對多，這就是 √ 只取正根的理由。",
     inv: "把滑桿拉到 <b>x ＝ 0</b>：機器拒絕回答。<b>定義域不是找麻煩，它是規格表。</b>「除法要買門票」，這是你第幾次看到它了？",
     con: "不管餵什麼都吐 5。這是<b>最極端的多對一</b>，但門檻沒有禁止它……<b>它是函數</b>，而且它的圖形是一條水平線。",
