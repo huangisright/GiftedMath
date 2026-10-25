@@ -153,8 +153,8 @@ button.ghost{background:transparent;color:var(--indigo)}
 
     <div id="vStudent" hidden style="display:flex;flex-direction:column;gap:18px">
       <details class="sheet" id="apinBox">
-        <summary style="cursor:pointer;font-weight:700">「我的分析」的分析密碼（每人一組，發給學生）</summary>
-        <div class="sub">學生看自己的分析要輸入這組密碼，不是小組代碼，所以隊友之間看不到彼此的分析。要換某人的密碼：到 roster 工作表把他的「分析密碼」清空，重新讀取這頁就會產生新的一組。</div>
+        <summary style="cursor:pointer;font-weight:700">「我的分析」的分析密碼（學生忘記時在這裡查）</summary>
+        <div class="sub">學生第一次交卷時，結果畫面會顯示一次他的分析密碼（「已顯示」欄記錄時間），之後不再顯示，隊友冒名交卷也看不到。學生忘了就在這裡查給他。如果有人說第一次不是自己交的：到 roster 工作表把他的「分析密碼」清空，系統會產生新密碼，他下次交卷時會再顯示一次。</div>
         <div class="row"><button type="button" id="btnSlips">列印成小紙條</button></div>
         <div class="tbl-wrap"><table id="tApin"></table></div>
       </details>
@@ -366,7 +366,7 @@ function renderStats(kind){
 /* ---------- 學生檔案（跨卷子、跨年度） ---------- */
 function renderApins(){
   var y=$('fYear').value, list=data.roster.filter(function(r){return r.year===y;});
-  $('tApin').innerHTML='<tr><th>隊伍</th><th>姓名</th><th>分析密碼</th></tr>'+list.map(function(r){return '<tr><td>'+esc(r.team)+'</td><td>'+esc(r.name)+'</td><td class="n">'+esc(r.apin||'（重新讀取後產生）')+'</td></tr>';}).join('');
+  $('tApin').innerHTML='<tr><th>隊伍</th><th>姓名</th><th>分析密碼</th><th>已顯示</th></tr>'+list.map(function(r){return '<tr><td>'+esc(r.team)+'</td><td>'+esc(r.name)+'</td><td class="n">'+esc(r.apin||'（重新讀取後產生）')+'</td><td class="muted">'+esc(r.shown||'還沒')+'</td></tr>';}).join('');
   $('btnSlips').onclick=function(){
     var w=window.open('','_blank'); if(!w) return;
     var url=location.href.replace(/teacher\.html.*$/,'me.html');

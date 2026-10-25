@@ -418,6 +418,13 @@ function renderResult(p,d,set){
   if(kind==='團體'&&d.pending) notes.push('證明題 '+d.pending+' 題等老師批改，現在的分數還沒算進去。');
   if(d.attemptNo>1) notes.push('老師的統計以第一次為準。');
   $('resNote').textContent=notes.join('');
+  var pb=$('pinBox');
+  if(!pb){ pb=document.createElement('div'); pb.id='pinBox'; pb.className='confirm stack'; pb.style.borderColor='var(--ochre)'; pb.style.background='var(--ochre-soft)';
+    var anchor=$('v-result').querySelector('.sheet'); anchor.parentNode.insertBefore(pb,anchor); }
+  pb.hidden=!d.apin;
+  if(d.apin) pb.innerHTML='<div><b>'+esc(p.name)+'，這是你的「我的分析」密碼：</b></div>'+
+    '<div style="font-family:var(--f-mono);font-size:2.4rem;font-weight:700;letter-spacing:.2em;color:var(--ochre)">'+esc(d.apin)+'</div>'+
+    '<div>請現在記下來或截圖。<b>這組密碼只會顯示這一次</b>，之後交卷不會再出現；忘了再問老師。用它在首頁的「我的分析」看自己的強弱項，只有你自己看得到。</div>';
   var resp={}; p.responses.forEach(function(r){resp[r.qid]=r;});
   $('resCells').innerHTML=d.results.map(function(r,i){return '<div class="cell '+(r.manual?'wait':r.correct?'ok':'no')+'">'+(i+1)+'</div>';}).join('');
   var max=Math.max.apply(null,p.responses.map(function(r){return r.seconds;}).concat([1]));
