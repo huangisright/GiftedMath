@@ -387,7 +387,7 @@ function renderStudent(){
     .map(function(s){ var o={}; for(var k in s) o[k]=s[k]; o.title=titles[s.setId]||s.setId; return o; });
   var ids={}; subs.forEach(function(s){ids[s.attemptId]=1;});
   var resps=data.responses.filter(function(r){return ids[r.attemptId];});
-  var qi={}; resps.forEach(function(r){ var q=qinfo[r.qid]||{}; qi[r.qid]={topic:q.topic||'',img:q.img||''}; });
+  var qi={}; resps.forEach(function(r){ var q=qinfo[r.qid]||{}; qi[r.qid]={topic:q.topic||'',img:q.img||'',sol:q.sol||''}; });
   var topics={}, sp={n:0,sec:0};
   data.responses.forEach(function(r){
     if(r.year!==me.year||r.attemptNo!==1||r.kind==='團體') return;

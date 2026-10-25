@@ -32,7 +32,9 @@ var CSS='.pf{display:flex;flex-direction:column;gap:16px}'+
 '.pf .tbl-wrap{overflow-x:auto} .pf table{border-collapse:collapse;width:100%;font-size:.88rem}'+
 '.pf th,.pf td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}'+
 '.pf th{font-weight:500;color:var(--muted);font-size:.76rem}'+
-'.pf td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}';
+'.pf td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}'+
+'.pf details.sol{border-top:1px solid var(--line);padding-top:6px}.pf details.sol summary{cursor:pointer;color:var(--indigo);font-size:.88rem}'+
+'.pf details.sol img{display:block;max-width:100%;height:auto;margin-top:6px;background:#fff}';
 function injectCss(){ if(document.getElementById('pf-css')) return; var s=document.createElement('style'); s.id='pf-css'; s.textContent=CSS; document.head.appendChild(s); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function pct(x){ return isFinite(x)?Math.round(x*100)+'%':'–'; }
@@ -136,7 +138,8 @@ function render(el,data,opts){
     h+='<div class="sheet stack"><h2>答錯的題目</h2><div class="muted" style="font-size:.85rem">弱的題型排前面'+(P.wrong.length>shown.length?'，先列 '+shown.length+' 題（共 '+P.wrong.length+' 題）':'')+'。可以挑幾題重算一次，算不出來再問老師。</div><div class="wq">'+
       shown.map(function(r){ var q=data.qinfo[r.qid]||{}, src=q.img?(/^(https?:|\/)/.test(q.img)?q.img:IMG+q.img):IMG+r.qid+'.png';
         return '<figure><img loading="lazy" src="'+esc(src)+'" alt="'+esc(r.qid)+' 題目"><figcaption>'+esc(r.qid)+'・'+esc(q.topic||'')+'・'+(r.kind==='個人'?'個人賽':'競速')+
-          '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+'</figcaption></figure>'; }).join('')+'</div></div>';
+          '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+'</figcaption>'+
+          (q.sol?'<details class="sol" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+'</figure>'; }).join('')+'</div></div>';
   }
 
   h+='<div class="sheet stack"><h2>作答紀錄</h2>'+(P.subs.length?'<div class="tbl-wrap"><table><tr><th>交卷時間</th><th>年度</th><th>賽別</th><th>卷子</th><th class="n">第幾次</th><th class="n">得分</th><th class="n">用時</th></tr>'+
@@ -144,6 +147,14 @@ function render(el,data,opts){
       '<td class="n"><b>'+s.score+'</b>/'+s.max+(s.pending?' <span class="muted">待批改 '+s.pending+'</span>':'')+'</td><td class="n">'+fmt(s.usedSec)+'</td></tr>'; }).join('')+'</table></div>':'<div class="muted">還沒有交卷紀錄。</div>')+'</div>';
   h+='</div>';
   el.innerHTML=h;
+  Array.prototype.forEach.call(el.querySelectorAll('details.sol'),function(dt){
+    dt.addEventListener('toggle',function(){
+      if(!dt.open||dt._loaded) return; dt._loaded=true;
+      var b=dt.querySelector('.solbody'), im=new Image(); im.alt='詳解';
+      im.onerror=function(){ b.innerHTML='<span style="color:var(--muted)">這題的詳解還沒放上來。</span>'; };
+      im.src=dt.getAttribute('data-src'); b.appendChild(im);
+    });
+  });
 }
 root.TRMLProfile={render:render,compute:compute};
 })(typeof window!=='undefined'?window:this);

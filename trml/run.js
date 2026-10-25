@@ -445,6 +445,27 @@ function renderResult(p,d,set){
       '<td class="mono">'+fmt(x.seconds)+'</td>'+
       '<td><span class="tbar'+(r.correct?'':' no')+'" style="width:'+(100*x.seconds/max).toFixed(1)+'%"></span></td></tr>';
   }).join('');
+  renderSols(d.results);
+}
+/* 詳解：交卷後才拿得到圖檔位置；點開才載入圖片 */
+function renderSols(results){
+  var box=$('resSol');
+  if(!box){ box=document.createElement('div'); box.id='resSol'; box.className='sheet stack';
+    var tbl=$('resTable').closest('.sheet'); tbl.parentNode.insertBefore(box,tbl.nextSibling); }
+  var has=results.some(function(r){return r.sol;});
+  box.hidden=!has; if(!has){ box.innerHTML=''; return; }
+  box.innerHTML='<h2>詳解</h2><div class="muted" style="font-size:.88rem">點題號展開。先自己再想一次，真的想不出來再看。</div>'+
+    results.map(function(r,i){ if(!r.sol) return '';
+      var mark=r.manual?'<span class="muted">證明題</span>':(r.correct?'<span class="mark-ok">○</span>':'<span class="mark-no">×</span>');
+      return '<details class="sol" data-src="'+esc(IMG_BASE.replace(/img\/$/,'')+r.sol)+'"><summary>第 '+(i+1)+' 題　'+mark+'</summary><div class="solbody"></div></details>'; }).join('');
+  each('details.sol',box,function(dt){
+    dt.addEventListener('toggle',function(){
+      if(!dt.open||dt._loaded) return; dt._loaded=true;
+      var b=dt.querySelector('.solbody'), im=new Image(); im.alt=dt.querySelector('summary').textContent+' 詳解';
+      im.onerror=function(){ b.innerHTML='<span class="muted">這題的詳解還沒放上來。</span>'; };
+      im.src=dt.getAttribute('data-src'); b.appendChild(im);
+    });
+  });
 }
 $('btnBack').onclick=function(){ show('v-login'); renderSets(); renderResume(); renderPending(); };
 
