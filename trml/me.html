@@ -29,6 +29,7 @@
   <div id="out"></div>
 </div>
 <script src="config.js"></script>
+<script src="note.js"></script>
 <script src="profile.js"></script>
 <script>
 (function(){
@@ -59,7 +60,7 @@ function go(){
     $('go').disabled=false;
     if(!d.ok){ $('msg').innerHTML='<span class="err">'+esc(d.error||'讀取失敗')+'</span>'; return; }
     $('msg').textContent=d.me.name+'・'+d.me.team+'・'+d.me.year+' 年度';
-    TRMLProfile.render($('out'),d,{imgBase:IMG});
+    TRMLProfile.render($('out'),d,{imgBase:IMG,api:API,auth:{team:b.team,name:b.name,apin:b.apin}});
   }).catch(function(){ $('go').disabled=false; $('msg').innerHTML='<span class="err">連不上題庫，請確認網路後再試。</span>'; });
 }
 $('go').onclick=go;

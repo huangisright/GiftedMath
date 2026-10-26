@@ -162,6 +162,11 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div id="stuOut"></div>
     </div>
 
+    <div id="vNotes" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="sub">學生看完詳解後留的回饋：這題難不難、卡在哪、想法或另解。只有學生自己和老師看得到；覺得好的另解按「分享」，之後交過這題的同學在詳解下方就看得到（照片能不能公開要看學校帳號的設定）。</div>
+      <div class="sheet"><h2>每一題的感受</h2><div class="tbl-wrap"><table id="tNoteQ"></table></div></div>
+      <div id="noteList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
     <div id="vGrade" hidden style="display:flex;flex-direction:column;gap:14px">
       <div class="sub">團體賽的證明題（questions 表答案寫「人工」的題目）在這裡給分，每題 0～8 分。存檔後會寫回試算表，那一隊的總分跟著更新。</div>
       <div id="gradeList" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -170,6 +175,7 @@ button.ghost{background:transparent;color:var(--indigo)}
 </div>
 
 <script src="config.js"></script>
+<script src="note.js"></script>
 <script src="profile.js"></script>
 <script>
 (function(){
@@ -189,7 +195,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['批改','證明題批改']];
+var TABS=[['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -219,9 +225,15 @@ function renderTabs(){
 // 依分頁換篩選欄
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
-  $('wSet').hidden=!kindTab&&tab!=='批改'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('vStats').hidden=!kindTab; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改';
+  $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
+  $('vStats').hidden=!kindTab; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
   var kind=tab==='批改'?'團體':tab;
+  if(tab==='回饋'){
+    var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
+    var pv=$('fSet').value;
+    $('fSet').innerHTML='<option value="">全部卷子</option>'+data.sets.filter(function(s){return cnt[s.id];}).map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title||s.id)+'（'+cnt[s.id]+' 則）</option>';}).join('');
+    if(pv&&cnt[pv]) $('fSet').value=pv;
+  }
   if(kindTab||tab==='批改'){
     var used={}; data.submissions.forEach(function(s){ if(s.year===y) used[s.setId]=1; });
     var sets=data.sets.filter(function(s){return s.kind===kind;});
@@ -251,6 +263,7 @@ function render(){
   if(!data) return;
   if(tab==='學生') return renderStudent();
   if(tab==='批改') return renderGrade();
+  if(tab==='回饋') return renderNotes();
   renderStats(tab);
 }
 
@@ -396,7 +409,51 @@ function renderStudent(){
     if(r.kind==='競速'){sp.n++;sp.sec+=r.seconds;}
   });
   $('stuHead').innerHTML='<h2>'+esc(me.name||sid)+'</h2><div class="sub">學生編號 '+esc(sid)+'・'+esc(uniq(yearsIn).join('、'))+'。題型比較的是 '+esc(me.year)+' 年度所有人的第一次作答。</div>';
-  TRMLProfile.render($('stuOut'),{me:me,subs:subs,resps:resps,qinfo:qi,cls:{year:me.year,topics:topics,speedSec:sp.n?sp.sec/sp.n:null}},{imgBase:IMG,teacher:true});
+  var myN={}; (data.notes||[]).forEach(function(n){ if(n.sid===sid) myN[n.qid]={diff:n.diff,stuck:n.stuck,text:n.text,nphotos:n.photos.length,time:n.time}; });
+  TRMLProfile.render($('stuOut'),{me:me,subs:subs,resps:resps,qinfo:qi,notes:myN,cls:{year:me.year,topics:topics,speedSec:sp.n?sp.sec/sp.n:null}},{imgBase:IMG,teacher:true});
+}
+
+/* ---------- 學生回饋 ---------- */
+function renderNotes(){
+  var y=$('fYear').value, setId=$('fSet').value, team=$('fTeam').value;
+  var ns=(data.notes||[]).filter(function(n){return n.year===y&&(!setId||n.setId===setId)&&(!team||n.team===team);});
+  if(!ns.length){ $('tNoteQ').innerHTML='<tr><td class="muted">還沒有回饋。</td></tr>'; $('noteList').innerHTML=''; return; }
+  var by={}, order=[];
+  ns.forEach(function(n){ if(!by[n.qid]){by[n.qid]=[];order.push(n.qid);} by[n.qid].push(n); });
+  order.sort();
+  var STK=['看不懂題目','沒有想法','方法對但算錯','粗心','看完詳解還是不懂'];
+  $('tNoteQ').innerHTML='<tr><th>題號</th><th>題型</th><th class="n">回饋</th><th class="n">簡單</th><th class="n">剛好</th><th class="n">難</th>'+STK.map(function(s){return '<th class="n">'+s+'</th>';}).join('')+'<th class="n">另解／想法</th></tr>'+
+    order.map(function(q){ var L=by[q], c=function(f){return L.filter(f).length;};
+      var hard=c(function(n){return n.diff==='難';});
+      return '<tr><td>'+esc(q)+'</td><td>'+esc((qinfo[q]||{}).topic||'')+'</td><td class="n">'+L.length+'</td>'+
+        ['簡單','剛好','難'].map(function(d){var k=c(function(n){return n.diff===d;});return '<td class="n'+(d==='難'&&k&&k>=L.length/2?' low':'')+'">'+(k||'')+'</td>';}).join('')+
+        STK.map(function(s){var k=c(function(n){return n.stuck.indexOf(s)>=0;});return '<td class="n">'+(k||'')+'</td>';}).join('')+
+        '<td class="n">'+(c(function(n){return n.text||n.photos.length;})||'')+'</td></tr>'; }).join('');
+  var withText=ns.filter(function(n){return n.text||n.photos.length;}).sort(function(a,b){return a.qid<b.qid?-1:a.qid>b.qid?1:0;});
+  $('noteList').innerHTML=withText.map(function(n,i){
+    var src=(qinfo[n.qid]||{}).img?IMG+qinfo[n.qid].img:IMG+n.qid+'.png';
+    return '<div class="grade"><div style="display:flex;flex-direction:column;gap:8px"><div><b>'+esc(n.name)+'</b>　<span class="sub">'+esc(n.team)+'・'+esc(n.qid)+'・'+esc(n.time)+'</span></div>'+
+      '<img class="q" loading="lazy" src="'+esc(src)+'" alt="'+esc(n.qid)+' 題目"></div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px">'+
+        '<div class="sub">'+(n.diff?'難易度：<b>'+esc(n.diff)+'</b>　':'')+(n.stuck.length?'卡在：'+esc(n.stuck.join('、')):'')+'</div>'+
+        (n.text?'<div class="work">'+esc(n.text)+'</div>':'')+
+        (n.photos.length?'<div class="ph">'+n.photos.map(function(u,k){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">照片 '+(k+1)+' ↗</a>';}).join('')+'</div>':'')+
+        '<div class="row" style="align-items:center"><button type="button" class="'+(n.shared?'ghost':'')+'" data-sh="'+i+'">'+(n.shared?'取消分享':'分享給同學')+'</button><span class="sub" id="shs-'+i+'">'+(n.shared?'已分享':'')+'</span></div>'+
+      '</div></div>';
+  }).join('');
+  Array.prototype.forEach.call($('noteList').querySelectorAll('[data-sh]'),function(b){
+    var i=+b.getAttribute('data-sh'), n=withText[i];
+    b.onclick=function(){
+      b.disabled=true; $('shs-'+i).textContent='處理中…';
+      fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'share',key:lget('trml-key'),year:n.year,sid:n.sid,qid:n.qid,on:!n.shared})})
+        .then(function(r){return r.json();}).then(function(d){
+          b.disabled=false;
+          if(!d.ok){ $('shs-'+i).innerHTML='<span class="err">'+esc(d.error||'失敗')+'</span>'; return; }
+          n.shared=d.shared; b.textContent=n.shared?'取消分享':'分享給同學'; b.className=n.shared?'ghost':'';
+          $('shs-'+i).textContent=(n.shared?'已分享':'已取消')+(d.warn?'。'+d.warn:'');
+        }).catch(function(){ b.disabled=false; $('shs-'+i).innerHTML='<span class="err">連不上，請再按一次</span>'; });
+    };
+  });
 }
 
 /* ---------- 證明題批改 ---------- */

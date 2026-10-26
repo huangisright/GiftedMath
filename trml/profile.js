@@ -139,7 +139,7 @@ function render(el,data,opts){
       shown.map(function(r){ var q=data.qinfo[r.qid]||{}, src=q.img?(/^(https?:|\/)/.test(q.img)?q.img:IMG+q.img):IMG+r.qid+'.png';
         return '<figure><img loading="lazy" src="'+esc(src)+'" alt="'+esc(r.qid)+' 題目"><figcaption>'+esc(r.qid)+'・'+esc(q.topic||'')+'・'+(r.kind==='個人'?'個人賽':'競速')+
           '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+'</figcaption>'+
-          (q.sol?'<details class="sol" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+'</figure>'; }).join('')+'</div></div>';
+          (q.sol?'<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+'</figure>'; }).join('')+'</div></div>';
   }
 
   h+='<div class="sheet stack"><h2>作答紀錄</h2>'+(P.subs.length?'<div class="tbl-wrap"><table><tr><th>交卷時間</th><th>年度</th><th>賽別</th><th>卷子</th><th class="n">第幾次</th><th class="n">得分</th><th class="n">用時</th></tr>'+
@@ -153,6 +153,9 @@ function render(el,data,opts){
       var b=dt.querySelector('.solbody'), im=new Image(); im.alt='詳解';
       im.onerror=function(){ b.innerHTML='<span style="color:var(--muted)">這題的詳解還沒放上來。</span>'; };
       im.src=dt.getAttribute('data-src'); b.appendChild(im);
+      var qid=dt.getAttribute('data-q');
+      if(window.TRMLNote&&qid){ var nb=document.createElement('div'); b.appendChild(nb);
+        TRMLNote.mount(nb,{api:opts.api,auth:opts.auth,readonly:!opts.auth,qid:qid,note:(data.notes||{})[qid],shared:(data.shared||{})[qid]}); }
     });
   });
 }
