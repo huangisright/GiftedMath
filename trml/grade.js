@@ -21,6 +21,7 @@
 
   function normalize(s) {
     s = toHalfWidth(s).trim().toLowerCase();
+    s = s.replace(/根號/g, '√').replace(/或|及|和|；|;/g, ',');
     s = s.replace(/[\s　]+/g, '')
       .replace(/[×＊·⋅]/g, '*')
       .replace(/÷/g, '/')
