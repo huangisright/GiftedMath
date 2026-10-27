@@ -250,7 +250,7 @@ function buildSingle(){
   a.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.isComposing){ e.preventDefault(); go(run.cur+1); }});
   $('proof').addEventListener('input',function(){ run.answers[curQ().qid]=this.value; updateCells(); persist(); });
   $('prev').onclick=function(){ go(run.cur-1); };
-  $('next').onclick=function(){ go(run.cur+1); };
+  $('next').onclick=function(){ if(run.cur>=run.set.questions.length-1){ account(); persist(); $('btnSubmit').click(); } else go(run.cur+1); };
   bindKeys($('keys'));
 }
 function renderQ(){
@@ -261,7 +261,7 @@ function renderQ(){
   if(q.manual){ $('proof').value=run.answers[q.qid]||''; renderPhotos(q); }
   else { var a=$('answer'); a.value=run.answers[q.qid]||''; if(window.matchMedia('(pointer:fine)').matches) a.focus(); }
   $('prev').disabled=run.cur===0;
-  $('next').textContent=run.cur===n-1?'看答案格':'下一題';
+  var last=run.cur===n-1; $('next').textContent=last?'交卷':'下一題'; $('next').className=last?'warn':'primary';
   updateCells();
 }
 function go(i){
