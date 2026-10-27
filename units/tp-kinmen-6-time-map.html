@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>金門離哪裡比較近？｜金門有多大？</title>
+<meta name="description" content="在一般的地圖上，廈門就在對岸，台北遠在東北方。如果把每個地方放在「從金城出發要幾分鐘」的位置上，方向不變，地圖會變成什麼樣子？">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Crimson+Text:ital,wght@0,600;1,400;1,600&display=swap">
+<style>
+
+:root{
+  --paper:#F5F2E8;
+  --grid:rgba(46,90,136,.075);
+  --card:#FFFDF8;
+  --edge:#DFD6C4;
+  --edge-soft:#EBE3D4;
+  --ink:#23282D;
+  --ink-2:#5C554A;
+  --ink-3:#847B6C;
+  --indigo:#2E5A88;
+  --indigo-soft:#E7EEF6;
+  --orange:#C1652F;
+  --orange-soft:#FBEEE1;
+  --green:#4A7C59;
+  --green-soft:#E7F0E9;
+  --crimson:#B23A3A;
+  --black-card:#2B2F35;
+  --shadow:0 1px 2px rgba(72,60,40,.06), 0 6px 18px rgba(72,60,40,.07);
+  --shadow-lift:0 2px 4px rgba(72,60,40,.08), 0 14px 34px rgba(72,60,40,.12);
+  --serif:"Noto Serif TC",'Songti TC','Times New Roman',serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --math:"Crimson Text","Times New Roman",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#161A1E;
+    --grid:rgba(127,169,214,.07);
+    --card:#1F252B;
+    --edge:#333C45;
+    --edge-soft:#2A323A;
+    --ink:#E7E2D6;
+    --ink-2:#B3AC9E;
+    --ink-3:#8B857A;
+    --indigo:#82ADDC;
+    --indigo-soft:#1E2C3B;
+    --orange:#E28B52;
+    --orange-soft:#3A2718;
+    --green:#82B893;
+    --green-soft:#1D2C22;
+    --crimson:#D66B6B;
+    --black-card:#0E1114;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161A1E;
+  --grid:rgba(127,169,214,.07);
+  --card:#1F252B;
+  --edge:#333C45;
+  --edge-soft:#2A323A;
+  --ink:#E7E2D6;
+  --ink-2:#B3AC9E;
+  --ink-3:#8B857A;
+  --indigo:#82ADDC;
+  --indigo-soft:#1E2C3B;
+  --orange:#E28B52;
+  --orange-soft:#3A2718;
+  --green:#82B893;
+  --green-soft:#1D2C22;
+  --crimson:#D66B6B;
+  --black-card:#0E1114;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 26px);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 22px 100px}
+em,.v{font-family:var(--math);font-style:italic;font-size:1.08em;letter-spacing:.01em}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---- header ---- */
+header{padding:58px 0 34px}
+.eyebrow{
+  font-size:12.5px;letter-spacing:.22em;color:var(--orange);
+  font-weight:700;margin-bottom:16px;
+}
+h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(38px,7vw,62px);line-height:1.12;margin:0 0 14px;
+  letter-spacing:.02em;text-wrap:balance;
+}
+.sub{font-size:clamp(16px,2.4vw,19px);color:var(--ink-2);margin:0 0 26px}
+.thesis{
+  border-left:3px solid var(--orange);
+  padding:4px 0 4px 20px;margin:0;
+  font-family:var(--serif);font-size:clamp(16px,2.4vw,19px);
+  line-height:1.85;color:var(--ink);max-width:64ch;
+}
+
+/* ---- nav ---- */
+nav{
+  position:sticky;top:0;z-index:30;
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:11px 0;margin-bottom:8px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--edge-soft);
+}
+nav a{
+  font-size:13.5px;text-decoration:none;color:var(--ink-2);
+  padding:5px 12px;border-radius:999px;border:1px solid transparent;
+  transition:.16s;
+}
+nav a:hover,nav a:focus-visible{color:var(--indigo);border-color:var(--edge);background:var(--card)}
+
+/* ---- sections ---- */
+section{padding:44px 0 8px;scroll-margin-top:64px}
+.pillar-tag{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:12.5px;letter-spacing:.16em;font-weight:700;
+  margin-bottom:12px;
+}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+h2{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(25px,4.2vw,34px);line-height:1.3;margin:0 0 12px;
+  text-wrap:balance;
+}
+h3{font-family:var(--serif);font-size:19px;margin:30px 0 8px;font-weight:500}
+p{margin:0 0 15px;max-width:66ch}
+.lede{font-size:17.5px;color:var(--ink-2);max-width:64ch}
+
+/* ---- lab ---- */
+.lab{
+  background:var(--card);border:1px solid var(--edge);
+  border-radius:5px;box-shadow:var(--shadow);
+  margin:26px 0 30px;overflow:hidden;
+}
+.lab-head{
+  display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding:17px 22px 13px;border-bottom:1px solid var(--edge-soft);
+}
+.lab-no{
+  font-family:var(--math);font-size:13px;font-weight:600;font-style:normal;
+  color:var(--card);background:var(--indigo);
+  width:23px;height:23px;border-radius:50%;
+  display:grid;place-items:center;flex:none;align-self:center;
+}
+.lab-title{font-family:var(--serif);font-weight:700;font-size:18px;margin:0}
+.lab-why{font-size:13.5px;color:var(--ink-3);margin:0}
+.lab-body{padding:22px}
+.lab-foot{
+  padding:14px 22px;background:var(--green-soft);
+  border-top:1px solid var(--edge-soft);
+  font-size:14.5px;color:var(--ink);
+}
+.lab-foot b{color:var(--green)}
+
+/* ---- controls ---- */
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{
+  font-family:var(--sans);font-size:14px;
+  padding:7px 14px;border-radius:4px;
+  border:1px solid var(--edge);background:var(--paper);color:var(--ink);
+  cursor:pointer;transition:.14s;line-height:1.5;
+}
+button:hover:not(:disabled){border-color:var(--indigo);color:var(--indigo)}
+button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
+button.primary:hover{filter:brightness(1.12);color:#fff}
+button.warn{border-color:var(--orange);color:var(--orange)}
+button.ghost{background:transparent}
+input[type=number],input[type=text]{
+  font-family:var(--math);font-size:16px;
+  width:66px;padding:6px 9px;border-radius:4px;
+  border:1px solid var(--edge);background:var(--paper);color:var(--ink);
+}
+input[type=text].wide{width:190px;letter-spacing:.09em;font-family:var(--sans);font-size:15px}
+input:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+label{font-size:13.5px;color:var(--ink-2)}
+input[type=range]{accent-color:var(--indigo);width:160px}
+
+.msg{
+  margin-top:12px;padding:10px 14px;border-radius:4px;font-size:14.5px;
+  border:1px solid var(--edge);background:var(--paper);
+}
+.msg.bad{border-color:var(--orange);background:var(--orange-soft);color:var(--orange)}
+.msg.good{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+
+/* ---- 按鈕與切換 ---- */
+.btn{
+  font-family:var(--sans);font-size:13.5px;padding:5px 11px;border-radius:5px;
+  border:1px solid var(--edge);background:var(--card);color:var(--ink-2);cursor:pointer;
+}
+.btn:hover{border-color:var(--orange);color:var(--orange)}
+.segwrap{display:inline-flex;flex-wrap:wrap;gap:0;border-radius:6px;overflow:hidden;border:1px solid var(--edge)}
+.seg{
+  font-family:var(--sans);font-size:13px;padding:6px 12px;border:none;
+  background:var(--card);color:var(--ink-3);cursor:pointer;border-right:1px solid var(--edge-soft);
+}
+.seg:last-child{border-right:none}
+.seg.on{background:var(--indigo);color:#fff}
+
+.row label{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--ink-2)}
+.row input[type=range]{width:min(230px,58vw);max-width:100%}
+.row input[type=number]{
+  font-family:var(--math);font-size:16px;width:92px;padding:3px 7px;
+  border:1px solid var(--edge);border-radius:5px;background:var(--card);color:var(--ink);
+}
+
+.statrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 2px}
+.statbox{
+  border:1px solid var(--edge-soft);background:var(--card);border-radius:6px;
+  padding:6px 14px;text-align:center;min-width:104px;
+}
+.statbox .k{font-size:11.5px;color:var(--ink-3)}
+.statbox .v{font-family:var(--math);font-size:19px;font-variant-numeric:tabular-nums}
+.statbox.hot{border-color:var(--orange)}
+.statbox.hot .v{color:var(--orange)}
+.statbox.cool{border-color:var(--green)}
+.statbox.cool .v{color:var(--green)}
+.statbox.blue{border-color:var(--indigo)}
+.statbox.blue .v{color:var(--indigo)}
+
+/* ---- 九上2 專用 ---- */
+.hint{font-size:12.5px;color:var(--ink-3);text-align:center;margin:2px 0 0}
+.row .btn{margin-right:6px}
+.statbox.grn{border-color:var(--green)}
+.statbox.grn .v{color:var(--green)}
+
+
+/* ---- 等時線單元：探索站用的畫布與收合區 ---- */
+:root{--violet:#7A5AA6;--teal:#2F7A72;--gold:#9A7414}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--violet:#B497DB;--teal:#6FC2B8;--gold:#D9B34E}}
+:root[data-theme="dark"]{--violet:#B497DB;--teal:#6FC2B8;--gold:#D9B34E}
+.lab canvas{display:block;width:100%;max-width:100%;border:1px solid var(--edge);border-radius:8px;background:var(--card);touch-action:none;margin:12px 0 4px;cursor:pointer}
+.note-s{font-size:12.5px;color:var(--ink-3);margin:2px 0 10px;max-width:none}
+.ask{font-family:var(--serif);font-size:17px;line-height:1.6;margin:10px 0 0;color:var(--ink);max-width:none}
+details.more{margin-top:14px;border-top:1px dashed var(--edge);padding-top:10px}
+details.more summary{cursor:pointer;font-size:13.5px;color:var(--ink-3)}
+details.more summary:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.more-body{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.more-body .hint{font-size:12.5px;color:var(--ink-3);margin:0}
+.ticks{display:flex;flex-wrap:wrap;gap:6px 16px}
+.ticks label{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--ink-2);cursor:pointer}
+.tbl{overflow-x:auto}
+table.mini{border-collapse:collapse;font-size:13.5px;width:100%;max-width:560px}
+table.mini th,table.mini td{padding:4px 8px;border-bottom:1px solid var(--edge-soft);text-align:right;font-variant-numeric:tabular-nums}
+table.mini th:first-child,table.mini td:first-child{text-align:left}
+table.mini th{color:var(--ink-3);font-weight:500}
+ol.order{margin:0;padding-left:1.5em;font-size:14px;columns:2;column-gap:28px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-3)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid var(--edge)}
+select{font-family:var(--sans);font-size:14px;padding:5px 8px;border:1px solid var(--edge);border-radius:6px;background:var(--card);color:var(--ink)}
+.route{font-size:14px;color:var(--ink-2);margin:6px 0 0;max-width:none}
+.warnline{font-size:13.5px;color:var(--orange);min-height:1.4em;margin:4px 0 0}
+section.mod h2{margin-bottom:6px}
+.statbox .v{font-style:normal}
+.more-body .hint{text-align:left}
+.btn.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.row .btn{margin:0}
+#m7pick{gap:6px}
+/* ---- 專題首頁的主題卡 ---- */
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin:30px 0 10px}
+a.mcard{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);
+  background:var(--card);border:1px solid var(--edge);border-radius:8px;padding:16px 18px 14px;box-shadow:var(--shadow);transition:.15s}
+a.mcard:hover,a.mcard:focus-visible{border-color:var(--indigo);box-shadow:var(--shadow-lift);transform:translateY(-2px)}
+a.mcard:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.mcard .tag{font-size:12.5px;letter-spacing:.14em;font-weight:700;display:flex;align-items:center;gap:8px}
+.mcard h3{font-family:var(--serif);font-weight:700;font-size:19px;line-height:1.4;margin:2px 0 0}
+.mcard p{font-size:14px;color:var(--ink-2);margin:0;line-height:1.7}
+.mcard .ft{margin-top:auto;padding-top:10px;border-top:1px solid var(--edge-soft);display:flex;justify-content:space-between;font-size:13px;color:var(--ink-3)}
+.mcard .ft b{color:var(--indigo);font-weight:600}
+/* ---- 主題頁底部的上一個／下一個 ---- */
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:34px 0 0;padding-top:18px;border-top:1px solid var(--edge)}
+.pager a{text-decoration:none;color:var(--indigo);font-size:14.5px;font-weight:600;padding:8px 14px;border:1px solid var(--edge);border-radius:6px;background:var(--card)}
+.pager a:hover{border-color:var(--indigo)}
+.pager .mid{color:var(--ink-2)}
+header.sub-h{padding:46px 0 10px}
+header.sub-h h1{font-size:clamp(32px,6vw,50px)}
+header.sub-h .sub{margin-bottom:6px;max-width:64ch}
+</style>
+</head>
+<body>
+
+
+<style id="backnav">
+.bk-top{
+  max-width:1080px; margin:0 auto; padding:14px 20px 0;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:14px;
+}
+.bk-top a{color:#2E5A88; text-decoration:none; font-weight:600}
+.bk-top a:hover{text-decoration:underline}
+.bk-top .bk-sep{color:#B8AE9C; margin:0 10px}
+.bk-fab{
+  position:fixed; right:16px; bottom:16px; z-index:9999;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 15px; border-radius:24px;
+  background:#FFFDF8; border:1px solid #DFD6C4; color:#2E5A88;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:14px; font-weight:600; text-decoration:none;
+  box-shadow:0 2px 4px rgba(72,60,40,.10), 0 10px 26px rgba(72,60,40,.16);
+}
+.bk-fab:hover{border-color:#2E5A88}
+.bk-fab:focus-visible{outline:2px solid #2E5A88; outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bk-top a{color:#82ADDC}
+  :root:not([data-theme="light"]) .bk-fab{
+    background:#1F252B; border-color:#333C45; color:#82ADDC;
+    box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+  }
+  :root:not([data-theme="light"]) .bk-fab:hover{border-color:#82ADDC}
+}
+:root[data-theme="dark"] .bk-top a{color:#82ADDC}
+:root[data-theme="dark"] .bk-fab{
+  background:#1F252B; border-color:#333C45; color:#82ADDC;
+  box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+}
+@media print{ .bk-top, .bk-fab{display:none !important} }
+@media (max-width:520px){ .bk-fab{right:12px; bottom:12px; padding:8px 13px; font-size:13px} }
+</style>
+<div class="bk-top"><a href="../index.html">← 回目錄</a><span class="bk-sep">｜</span><a href="tp-kinmen-isochrone.html">金門有多大？（專題首頁）</a></div>
+<div class="wrap">
+
+<header class="sub-h">
+  <div class="eyebrow" style="color:var(--violet)">專題　金門有多大？　·　⑥ 時間地圖</div>
+  <h1>金門離哪裡比較近？</h1>
+  <p class="sub">在一般的地圖上，廈門就在對岸，台北遠在東北方。如果把每個地方放在「從金城出發要幾分鐘」的位置上，方向不變，地圖會變成什麼樣子？</p>
+</header>
+
+<div class="lab" id="lab7">
+  <div class="lab-head">
+    <span class="lab-no">7</span>
+    <div>
+      <p class="lab-title">把地圖換成時間</p>
+      <p class="lab-why">拖滑桿，從一般的地圖慢慢變成時間地圖。點一個地方，看它離金城幾公里、要幾分鐘。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <label>一般地圖 <input type="range" id="m7s" min="0" max="100" step="1" value="0"> 時間地圖</label>
+    </div>
+    <div class="ticks">
+      <label><input type="checkbox" id="m7wait"> 加上等候與報到</label>
+      <label><input type="checkbox" id="m7typhoon"> 颱風天</label>
+      <label><input type="checkbox" id="m7bridge"> 大橋封閉</label>
+    </div>
+    <div class="row" id="m7flyrow" hidden>
+      <label>搭飛機提早到機場 <input type="range" id="m7fly" min="0" max="120" step="10" value="60"><b class="num" id="m7flyv"></b></label>
+    </div>
+    <canvas id="m7cv" aria-label="以金城為中心的地圖，可以在一般距離與時間之間切換"></canvas>
+    <p class="note-s" id="m7note"></p>
+    <div class="legend" id="m7legend"></div>
+    <div class="row" id="m7pick" style="margin-top:10px"></div>
+    <div class="statrow" id="m7probe"></div>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家自己定義「變形多大」之後再打開。</p>
+        <div class="tbl"><table class="mini" id="m7tbl"></table></div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　在一般地圖上，從甲地經過乙地再到丙地，不會比甲地直接到丙地近。在時間地圖上，這件事還一定成立嗎？</div>
+</div>
+
+<div class="pager"><a href="tp-kinmen-5-bridge.html">← ⑤ 烈嶼有多遠</a><a class="mid" href="tp-kinmen-isochrone.html">專題首頁</a><a href="tp-kinmen-isochrone.html">回到專題首頁 →</a></div>
+
+</div>
+
+<script>
+/* ================================================================
+   專題　金門有多大？　等時線互動探索站
+   每一站各自包在一個函式裡；共用的只有畫布、配色與小工具。
+================================================================ */
+const $ = id => document.getElementById(id);
+const PAL = {};
+const PAL_KEYS = ['paper', 'card', 'edge', 'edge-soft', 'ink', 'ink-2', 'ink-3', 'indigo', 'indigo-soft',
+  'orange', 'orange-soft', 'green', 'green-soft', 'crimson', 'violet', 'teal', 'gold'];
+function readPal() {
+  const cs = getComputedStyle(document.documentElement);
+  PAL_KEYS.forEach(k => { PAL[k] = cs.getPropertyValue('--' + k).trim(); });
+}
+function rgba(c, a) {
+  const h = (c || '#000000').replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+const sans = () => getComputedStyle(document.body).fontFamily;
+const MATHF = '"Crimson Text","Times New Roman",Georgia,serif';
+function fmt(v, d) {
+  if (v === null || v === undefined || !isFinite(v)) return '—';
+  return v.toFixed(d || 0).replace('-', '−');
+}
+const fmtMin = v => (Math.round(v * 10) / 10).toString().replace('-', '−');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const hhmm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(Math.round(m % 60)).padStart(2, '0');
+
+const REDRAW = [];
+function stage(id, W, H, draw) {
+  const cv = $(id), ctx = cv.getContext('2d');
+  cv.style.aspectRatio = W + ' / ' + H;
+  const s = { cv, ctx, W, H, w: 0, h: 0, k: 1 };
+  s.resize = () => {
+    const r = cv.getBoundingClientRect();
+    if (!r.width) return;
+    const dpr = window.devicePixelRatio || 1;
+    s.w = r.width; s.h = r.width * H / W;
+    cv.width = Math.round(s.w * dpr); cv.height = Math.round(s.h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    s.k = s.w / W;
+    draw();
+  };
+  s.pos = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / s.k, y: (e.clientY - r.top) / s.k }; };
+  new ResizeObserver(s.resize).observe(cv);
+  REDRAW.push(() => { if (s.w) draw(); });
+  return s;
+}
+function boxes(el, list) {
+  el.innerHTML = list.map(b => `<div class="statbox ${b[2] || ''}"><div class="k">${b[0]}</div><div class="v">${b[1]}</div></div>`).join('');
+}
+function segbind(id, cb) {
+  const w = $(id);
+  w.querySelectorAll('.seg').forEach(b => {
+    b.setAttribute('aria-pressed', b.classList.contains('on'));
+    b.addEventListener('click', () => {
+      w.querySelectorAll('.seg').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+      cb(b.dataset.v);
+    });
+  });
+}
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+/* 等高線：在格點上找變號，線性內插連線 */
+function gridVals(f, x0, y0, x1, y1, nx, ny) {
+  const v = new Float64Array((nx + 1) * (ny + 1)), dx = (x1 - x0) / nx, dy = (y1 - y0) / ny;
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) v[j * (nx + 1) + i] = f(x0 + i * dx, y0 + j * dy);
+  return { v, x0, y0, dx, dy, nx, ny };
+}
+function contourGrid(c, g, level, X, Y, keep) {
+  const { v, x0, y0, dx, dy, nx, ny } = g;
+  c.beginPath();
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const a = v[j * (nx + 1) + i] - level, b = v[j * (nx + 1) + i + 1] - level,
+      d = v[(j + 1) * (nx + 1) + i] - level, e = v[(j + 1) * (nx + 1) + i + 1] - level;
+    if (![a, b, d, e].every(isFinite)) continue;
+    const pts = [];
+    const ed = (p, q, ax, ay, bx, by) => { if ((p < 0) !== (q < 0)) { const t = p / (p - q); pts.push([ax + (bx - ax) * t, ay + (by - ay) * t]); } };
+    const xa = x0 + i * dx, ya = y0 + j * dy, xb = xa + dx, yb = ya + dy;
+    ed(a, b, xa, ya, xb, ya); ed(b, e, xb, ya, xb, yb); ed(d, e, xa, yb, xb, yb); ed(a, d, xa, ya, xa, yb);
+    if (pts.length >= 2) {
+      if (keep && !keep((pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2)) continue;
+      c.moveTo(X(pts[0][0]), Y(pts[0][1])); c.lineTo(X(pts[1][0]), Y(pts[1][1]));
+      if (pts.length === 4) { c.moveTo(X(pts[2][0]), Y(pts[2][1])); c.lineTo(X(pts[3][0]), Y(pts[3][1])); }
+    }
+  }
+  c.stroke();
+}
+function label(c, txt, x, y, opt) {
+  opt = opt || {};
+  c.font = (opt.weight || '500') + ' ' + (opt.size || 13) + 'px ' + (opt.font || sans());
+  c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'alphabetic';
+  if (opt.halo !== false) { c.lineWidth = 4; c.strokeStyle = opt.haloColor || PAL.card; c.lineJoin = 'round'; c.strokeText(txt, x, y); }
+  c.fillStyle = opt.color || PAL.ink; c.fillText(txt, x, y);
+  c.textBaseline = 'alphabetic';
+}
+
+/* ================================================================
+   LAB 7　⑥ 時間地圖
+================================================================ */
+function lab7() {
+  const HOME = { lat: 24.433, lon: 118.317 };
+  const PLACES = [
+    { name: '烈嶼東林', lat: 24.432, lon: 118.243, mode: 'car', t: 21 },
+    { name: '廈門五通碼頭', lat: 24.519, lon: 118.182, mode: 'ferry', t: 30 },
+    { name: '泉州石井碼頭', lat: 24.633, lon: 118.428, mode: 'ferry', t: 70 },
+    { name: '澎湖馬公', lat: 23.568, lon: 119.628, mode: 'fly', t: 40 },
+    { name: '台中', lat: 24.264, lon: 120.621, mode: 'fly', t: 50 },
+    { name: '台北松山', lat: 25.069, lon: 121.552, mode: 'fly', t: 55 },
+    { name: '高雄', lat: 22.577, lon: 120.350, mode: 'fly', t: 55 }
+  ];
+  const MODE_NAME = { car: '開車經大橋', ferry: '小三通', fly: '飛機' };
+  const R_EARTH = 6371, rad = Math.PI / 180;
+  PLACES.forEach(p => {
+    const dl = (p.lat - HOME.lat) * rad, dn = (p.lon - HOME.lon) * rad;
+    const a = Math.sin(dl / 2) ** 2 + Math.cos(HOME.lat * rad) * Math.cos(p.lat * rad) * Math.sin(dn / 2) ** 2;
+    p.km = 2 * R_EARTH * Math.asin(Math.sqrt(a));
+    const dx = dn * Math.cos((p.lat + HOME.lat) / 2 * rad), dy = dl;
+    p.ang = Math.atan2(dy, dx);
+  });
+  const maxKm = Math.max(...PLACES.map(p => p.km));
+  let sel = 5;
+  const st = stage('m7cv', 100, 72, draw);
+  const cx = 50, cy = 36, R = 31;
+  const COLS = () => ({ car: PAL.gold, ferry: PAL.teal, fly: PAL.violet });
+
+  function minutes(p) {
+    const wait = $('m7wait').checked, ty = $('m7typhoon').checked, br = $('m7bridge').checked;
+    if (p.mode === 'car') {
+      if (!br) return p.t;
+      return ty ? Infinity : 41;
+    }
+    if (ty) return Infinity;
+    if (!wait) return p.t;
+    return p.t + (p.mode === 'ferry' ? 90 : +$('m7fly').value);
+  }
+  const ringStep = mx => mx <= 80 ? 10 : mx <= 160 ? 20 : 30;
+  function geo() {
+    const s = +$('m7s').value / 100;
+    const ts = PLACES.map(minutes), fin = ts.filter(isFinite);
+    const step = ringStep(Math.max(...fin, 10));
+    const maxMin = Math.ceil(Math.max(...fin, 10) / step) * step;
+    const pos = PLACES.map((p, i) => {
+      const rr = p.km / maxKm * R, rt = isFinite(ts[i]) ? ts[i] / maxMin * R : R * 1.12;
+      const r = (1 - s) * rr + s * rt;
+      return { x: cx + r * Math.cos(p.ang), y: cy - r * Math.sin(p.ang), t: ts[i] };
+    });
+    return { s, ts, maxMin, step, pos };
+  }
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, g = geo(), Cm = COLS(), fs = clamp(k * 1.5, 10, 13.5);
+    const X = x => x * k, Y = y => y * k;
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    const dirs = ['東', '東北', '北', '西北', '西', '西南', '南', '東南'];
+    dirs.forEach((nm, i) => {
+      const a = i * Math.PI / 4;
+      c.setLineDash([3, 5]); c.strokeStyle = PAL['edge-soft']; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(X(cx), Y(cy)); c.lineTo(X(cx + R * Math.cos(a)), Y(cy - R * Math.sin(a))); c.stroke(); c.setLineDash([]);
+      label(c, nm, X(cx + (R + 2.6) * Math.cos(a)), Y(cy - (R + 2.6) * Math.sin(a)) + 4, { size: fs - 1, color: PAL['ink-3'], weight: 700 });
+    });
+    const rings = (alpha, step, max, txt) => {
+      if (alpha <= 0.02) return;
+      c.strokeStyle = rgba(PAL['ink-3'], 0.45 * alpha); c.lineWidth = 1;
+      for (let v = step; v <= max + 1e-9; v += step) {
+        const r = v / max * R; c.beginPath(); c.arc(X(cx), Y(cy), r * k, 0, Math.PI * 2); c.stroke();
+        c.globalAlpha = alpha; label(c, v + ' ' + txt, X(cx) + 3, Y(cy - r) - 3, { size: fs - 2.5, align: 'left', color: PAL['ink-3'], halo: false }); c.globalAlpha = 1;
+      }
+    };
+    rings(1 - 2 * g.s, 50, maxKm, '公里');
+    rings(2 * g.s - 1, g.step, g.maxMin, '分');
+    // 到不了的圈
+    if (g.ts.some(t => !isFinite(t)) && g.s > 0.02) {
+      c.setLineDash([6, 5]); c.strokeStyle = rgba(PAL.crimson, 0.6 * g.s); c.lineWidth = 1.5;
+      c.beginPath(); c.arc(X(cx), Y(cy), R * 1.12 * k, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
+    }
+    // 選中的地方
+    const ps = g.pos[sel];
+    c.strokeStyle = PAL.ink; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(X(cx), Y(cy)); c.lineTo(X(ps.x), Y(ps.y)); c.stroke();
+    // 地點
+    const boxesUsed = [[X(cx) - 4, Y(cy) - 4, 60, 22]];
+    const order = PLACES.map((p, i) => i).sort((a, b) => (a === sel ? -1 : b === sel ? 1 : 0));
+    const hidden = [];
+    for (const i of order) {
+      const p = PLACES[i], q = g.pos[i], x = X(q.x), y = Y(q.y), off = !isFinite(q.t);
+      c.beginPath(); c.arc(x, y, i === sel ? 7 : 5.5, 0, Math.PI * 2);
+      c.fillStyle = off ? PAL.card : Cm[p.mode]; c.fill();
+      c.strokeStyle = off ? PAL.crimson : PAL.card; c.lineWidth = 2; c.stroke();
+      if (i === sel) { c.strokeStyle = PAL.ink; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 11, 0, Math.PI * 2); c.stroke(); }
+      const txt = p.name + (off ? '（停駛）' : '');
+      c.font = '600 ' + fs + 'px ' + sans();
+      const tw = c.measureText(txt).width, left = q.x < cx - 2;
+      const bx = left ? x - 10 - tw : x + 10, by = y - fs + 2, bb = [bx - 2, by - 2, tw + 4, fs + 6];
+      const clash = boxesUsed.some(u => bb[0] < u[0] + u[2] && bb[0] + bb[2] > u[0] && bb[1] < u[1] + u[3] && bb[1] + bb[3] > u[1]);
+      if (clash && i !== sel) { hidden.push(p.name); continue; }
+      boxesUsed.push(bb);
+      label(c, txt, left ? x - 10 : x + 10, y + fs / 3, { size: fs, weight: 600, align: left ? 'right' : 'left', color: off ? PAL.crimson : PAL.ink });
+    }
+    c.fillStyle = PAL.ink; c.fillRect(X(cx) - 6, Y(cy) - 6, 12, 12);
+    label(c, '金城', X(cx) + 9, Y(cy) + 16, { size: fs, weight: 700, align: 'left' });
+    if (hidden.length) label(c, '有 ' + hidden.length + ' 個地方擠在一起，用下面的按鈕看', 8, st.h - 10, { size: fs - 2, align: 'left', color: PAL['ink-3'] });
+  }
+
+  function panel() {
+    $('m7flyrow').hidden = !$('m7wait').checked;
+    $('m7flyv').textContent = $('m7fly').value + ' 分';
+    const notes = ['只算坐在交通工具上的時間，取自旅遊網站整理（2026 年）；烈嶼東林的時間是示意。方向和真的地圖一樣。'];
+    if ($('m7wait').checked) notes.push('小三通以提早 90 分鐘到碼頭計，飛機的提早時間可以自己調。');
+    if ($('m7typhoon').checked) notes.push('颱風天船和飛機都停了。');
+    if ($('m7bridge').checked) notes.push('大橋封閉時，到烈嶼改搭船，約 41 分（含等船，見 ⑤）。');
+    $('m7note').textContent = notes.join('');
+    const Cm = COLS();
+    $('m7legend').innerHTML = Object.keys(MODE_NAME).map(m => `<span><i style="background:${Cm[m]}"></i>${MODE_NAME[m]}</span>`).join('');
+    $('m7pick').innerHTML = PLACES.map((p, i) => `<button class="btn${i === sel ? ' on' : ''}" data-i="${i}" aria-pressed="${i === sel}">${p.name}</button>`).join('');
+    const p = PLACES[sel], t = minutes(p);
+    const how = p.mode === 'car' && $('m7bridge').checked ? '搭船（大橋封閉）' : MODE_NAME[p.mode];
+    boxes($('m7probe'), [
+      ['地點', p.name], ['交通方式', how], ['離金城（直線）', fmt(p.km, 0) + ' 公里', 'blue'],
+      ['要幾分鐘', isFinite(t) ? fmt(t, 0) + ' 分' : '停駛', 'hot'], ['每公里幾分鐘', isFinite(t) ? fmt(t / p.km, 2) : '—']
+    ]);
+    const rows = PLACES.map(q => ({ q, t: minutes(q) })).sort((a, b) => (b.t / b.q.km) - (a.t / a.q.km));
+    $('m7tbl').innerHTML = '<thead><tr><th>地點</th><th>公里</th><th>分鐘</th><th>每公里幾分鐘</th></tr></thead><tbody>' +
+      rows.map(r => `<tr><td>${r.q.name}</td><td>${fmt(r.q.km, 0)}</td><td>${isFinite(r.t) ? fmt(r.t, 0) : '停駛'}</td><td>${isFinite(r.t) ? fmt(r.t / r.q.km, 2) : '—'}</td></tr>`).join('') + '</tbody>';
+  }
+  function refresh() { panel(); draw(); }
+  ['m7s', 'm7fly'].forEach(id => $(id).addEventListener('input', refresh));
+  ['m7wait', 'm7typhoon', 'm7bridge'].forEach(id => $(id).addEventListener('change', refresh));
+  $('m7pick').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b) { sel = +b.dataset.i; refresh(); } });
+  st.cv.addEventListener('pointerdown', e => {
+    const p = st.pos(e), g = geo();
+    let b = -1, bd = 4;
+    g.pos.forEach((q, i) => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; b = i; } });
+    if (b >= 0) { sel = b; refresh(); }
+  });
+  REDRAW.push(panel);
+  panel();
+}
+
+
+readPal();
+lab7(); 
+const recolor = () => { readPal(); REDRAW.forEach(f => f()); };
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(recolor);
+
+</script>
+<a class="bk-fab" href="tp-kinmen-isochrone.html" aria-label="專題">← 專題</a>
+</body>
+</html>
