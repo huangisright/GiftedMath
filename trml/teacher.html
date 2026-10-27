@@ -445,8 +445,8 @@ function renderNotes(){
     var i=+b.getAttribute('data-sh'), n=withText[i];
     b.onclick=function(){
       b.disabled=true; $('shs-'+i).textContent='處理中…';
-      fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'share',key:lget('trml-key'),year:n.year,sid:n.sid,qid:n.qid,on:!n.shared})})
-        .then(function(r){return r.json();}).then(function(d){
+      postJ(API,{action:'share',key:lget('trml-key'),year:n.year,sid:n.sid,qid:n.qid,on:!n.shared})
+        .then(function(d){
           b.disabled=false;
           if(!d.ok){ $('shs-'+i).innerHTML='<span class="err">'+esc(d.error||'失敗')+'</span>'; return; }
           n.shared=d.shared; b.textContent=n.shared?'取消分享':'分享給同學'; b.className=n.shared?'ghost':'';
@@ -490,8 +490,8 @@ function renderGrade(){
       var v=$('pt-'+i).value.trim(), pts=Number(v);
       if(v===''||!(pts>=0&&pts<=8)){ $('gs-'+i).innerHTML='<span class="err">請填 0～8</span>'; return; }
       b.disabled=true; $('gs-'+i).textContent='存檔中…';
-      fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'grade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,points:pts,note:$('nt-'+i).value.trim()})})
-        .then(function(x){return x.json();}).then(function(d){
+      postJ(API,{action:'grade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,points:pts,note:$('nt-'+i).value.trim()})
+        .then(function(d){
           b.disabled=false;
           if(!d.ok){ $('gs-'+i).innerHTML='<span class="err">'+esc(d.error||'存檔失敗')+'</span>'; return; }
           r.points=pts; r.graded='已批改';

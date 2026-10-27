@@ -19,6 +19,12 @@ var CSS='.nt{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;
 '.nt-sh{background:var(--moss-soft);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;margin-top:10px}'+
 '.nt-sh b{color:var(--moss)}.nt-sh .one{white-space:pre-wrap;overflow-wrap:anywhere}.nt-sh img{max-width:100%;border-radius:4px;background:#fff}';
 function css(){ if(document.getElementById('nt-css')) return; var s=document.createElement('style'); s.id='nt-css'; s.textContent=CSS; document.head.appendChild(s); }
+function postJ(url,body,n){ n=n||0;
+  // Apps Script 偶爾把 POST 的回覆換成首頁資料（有 teams、sets，沒有這次要的結果）；同一份再送一次是安全的（後端會認出重複）
+  return fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.teams&&d.sets&&n<3) return new Promise(function(res){setTimeout(res,800*(n+1));}).then(function(){return postJ(url,body,n+1);});
+    if(d&&d.teams&&d.sets) throw new Error('伺服器回覆不完整，請再按一次');
+    return d; }); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function shrink(file){
   return new Promise(function(res,rej){
@@ -74,7 +80,7 @@ function mount(el,o){
     var btn=this; btn.disabled=true; msg.className='st msg'; msg.textContent='存檔中…';
     var body={action:'note',qid:o.qid,setId:o.setId||'',diff:st.diff,stuck:st.stuck,text:ta.value.trim(),photos:st.photos,clearPhotos:st.clear};
     for(var k in o.auth) body[k]=o.auth[k];
-    fetch(o.api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){
+    postJ(o.api,body).then(function(d){
       btn.disabled=false;
       if(!d.ok){ msg.className='st msg err'; msg.textContent=d.error||'存檔失敗'; return; }
       st.photos=[]; st.clear=false; st.nphotos=d.note.nphotos; paint();
@@ -84,4 +90,5 @@ function mount(el,o){
   paint();
 }
 root.TRMLNote={mount:mount, readonlyHtml:readonlyHtml};
+root.postJ=root.postJ||postJ;
 })(window);

@@ -32,7 +32,13 @@ var cfg=null, run=null, timer=null, lastTick=0, lastInput=null;
 function fmt(sec){ sec=Math.max(0,Math.round(sec)); var m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
 function show(v){ ['v-login','v-run','v-result'].forEach(function(id){ $(id).hidden = id!==v; }); window.scrollTo(0,0); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-function post(body){ return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();}); }
+function postJ(url,body,n){ n=n||0;
+  // Apps Script 偶爾把 POST 的回覆換成首頁資料（有 teams、sets，沒有這次要的結果）；同一份再送一次是安全的（後端會認出重複）
+  return fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.teams&&d.sets&&n<3) return new Promise(function(res){setTimeout(res,800*(n+1));}).then(function(){return postJ(url,body,n+1);});
+    if(d&&d.teams&&d.sets) throw new Error('伺服器回覆不完整，請再按一次');
+    return d; }); }
+function post(body){ return postJ(API,body); }
 function each(sel,root,fn){ Array.prototype.forEach.call((root||document).querySelectorAll(sel),fn); }
 function nRounds(set){ return Math.ceil(set.questions.length/2); }
 
