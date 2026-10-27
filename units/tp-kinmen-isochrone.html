@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>金門有多大？</title>
+<meta name="description" content="等時線專題：從金城國中出發，用走路、公車、灘地、救護車、金門大橋與時間地圖七個探索站，重新量一次金門。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Crimson+Text:ital,wght@0,600;1,400;1,600&display=swap">
+<style>
+
+:root{
+  --paper:#F5F2E8;
+  --grid:rgba(46,90,136,.075);
+  --card:#FFFDF8;
+  --edge:#DFD6C4;
+  --edge-soft:#EBE3D4;
+  --ink:#23282D;
+  --ink-2:#5C554A;
+  --ink-3:#847B6C;
+  --indigo:#2E5A88;
+  --indigo-soft:#E7EEF6;
+  --orange:#C1652F;
+  --orange-soft:#FBEEE1;
+  --green:#4A7C59;
+  --green-soft:#E7F0E9;
+  --crimson:#B23A3A;
+  --black-card:#2B2F35;
+  --shadow:0 1px 2px rgba(72,60,40,.06), 0 6px 18px rgba(72,60,40,.07);
+  --shadow-lift:0 2px 4px rgba(72,60,40,.08), 0 14px 34px rgba(72,60,40,.12);
+  --serif:"Noto Serif TC",'Songti TC','Times New Roman',serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --math:"Crimson Text","Times New Roman",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#161A1E;
+    --grid:rgba(127,169,214,.07);
+    --card:#1F252B;
+    --edge:#333C45;
+    --edge-soft:#2A323A;
+    --ink:#E7E2D6;
+    --ink-2:#B3AC9E;
+    --ink-3:#8B857A;
+    --indigo:#82ADDC;
+    --indigo-soft:#1E2C3B;
+    --orange:#E28B52;
+    --orange-soft:#3A2718;
+    --green:#82B893;
+    --green-soft:#1D2C22;
+    --crimson:#D66B6B;
+    --black-card:#0E1114;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#161A1E;
+  --grid:rgba(127,169,214,.07);
+  --card:#1F252B;
+  --edge:#333C45;
+  --edge-soft:#2A323A;
+  --ink:#E7E2D6;
+  --ink-2:#B3AC9E;
+  --ink-3:#8B857A;
+  --indigo:#82ADDC;
+  --indigo-soft:#1E2C3B;
+  --orange:#E28B52;
+  --orange-soft:#3A2718;
+  --green:#82B893;
+  --green-soft:#1D2C22;
+  --crimson:#D66B6B;
+  --black-card:#0E1114;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.28);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 14px 34px rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 26px);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px;margin:0 auto;padding:0 22px 100px}
+em,.v{font-family:var(--math);font-style:italic;font-size:1.08em;letter-spacing:.01em}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---- header ---- */
+header{padding:58px 0 34px}
+.eyebrow{
+  font-size:12.5px;letter-spacing:.22em;color:var(--orange);
+  font-weight:700;margin-bottom:16px;
+}
+h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(38px,7vw,62px);line-height:1.12;margin:0 0 14px;
+  letter-spacing:.02em;text-wrap:balance;
+}
+.sub{font-size:clamp(16px,2.4vw,19px);color:var(--ink-2);margin:0 0 26px}
+.thesis{
+  border-left:3px solid var(--orange);
+  padding:4px 0 4px 20px;margin:0;
+  font-family:var(--serif);font-size:clamp(16px,2.4vw,19px);
+  line-height:1.85;color:var(--ink);max-width:64ch;
+}
+
+/* ---- nav ---- */
+nav{
+  position:sticky;top:0;z-index:30;
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:11px 0;margin-bottom:8px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--edge-soft);
+}
+nav a{
+  font-size:13.5px;text-decoration:none;color:var(--ink-2);
+  padding:5px 12px;border-radius:999px;border:1px solid transparent;
+  transition:.16s;
+}
+nav a:hover,nav a:focus-visible{color:var(--indigo);border-color:var(--edge);background:var(--card)}
+
+/* ---- sections ---- */
+section{padding:44px 0 8px;scroll-margin-top:64px}
+.pillar-tag{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:12.5px;letter-spacing:.16em;font-weight:700;
+  margin-bottom:12px;
+}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+h2{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(25px,4.2vw,34px);line-height:1.3;margin:0 0 12px;
+  text-wrap:balance;
+}
+h3{font-family:var(--serif);font-size:19px;margin:30px 0 8px;font-weight:500}
+p{margin:0 0 15px;max-width:66ch}
+.lede{font-size:17.5px;color:var(--ink-2);max-width:64ch}
+
+/* ---- lab ---- */
+.lab{
+  background:var(--card);border:1px solid var(--edge);
+  border-radius:5px;box-shadow:var(--shadow);
+  margin:26px 0 30px;overflow:hidden;
+}
+.lab-head{
+  display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding:17px 22px 13px;border-bottom:1px solid var(--edge-soft);
+}
+.lab-no{
+  font-family:var(--math);font-size:13px;font-weight:600;font-style:normal;
+  color:var(--card);background:var(--indigo);
+  width:23px;height:23px;border-radius:50%;
+  display:grid;place-items:center;flex:none;align-self:center;
+}
+.lab-title{font-family:var(--serif);font-weight:700;font-size:18px;margin:0}
+.lab-why{font-size:13.5px;color:var(--ink-3);margin:0}
+.lab-body{padding:22px}
+.lab-foot{
+  padding:14px 22px;background:var(--green-soft);
+  border-top:1px solid var(--edge-soft);
+  font-size:14.5px;color:var(--ink);
+}
+.lab-foot b{color:var(--green)}
+
+/* ---- controls ---- */
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{
+  font-family:var(--sans);font-size:14px;
+  padding:7px 14px;border-radius:4px;
+  border:1px solid var(--edge);background:var(--paper);color:var(--ink);
+  cursor:pointer;transition:.14s;line-height:1.5;
+}
+button:hover:not(:disabled){border-color:var(--indigo);color:var(--indigo)}
+button:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--indigo);border-color:var(--indigo);color:#fff}
+button.primary:hover{filter:brightness(1.12);color:#fff}
+button.warn{border-color:var(--orange);color:var(--orange)}
+button.ghost{background:transparent}
+input[type=number],input[type=text]{
+  font-family:var(--math);font-size:16px;
+  width:66px;padding:6px 9px;border-radius:4px;
+  border:1px solid var(--edge);background:var(--paper);color:var(--ink);
+}
+input[type=text].wide{width:190px;letter-spacing:.09em;font-family:var(--sans);font-size:15px}
+input:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+label{font-size:13.5px;color:var(--ink-2)}
+input[type=range]{accent-color:var(--indigo);width:160px}
+
+.msg{
+  margin-top:12px;padding:10px 14px;border-radius:4px;font-size:14.5px;
+  border:1px solid var(--edge);background:var(--paper);
+}
+.msg.bad{border-color:var(--orange);background:var(--orange-soft);color:var(--orange)}
+.msg.good{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+
+/* ---- 按鈕與切換 ---- */
+.btn{
+  font-family:var(--sans);font-size:13.5px;padding:5px 11px;border-radius:5px;
+  border:1px solid var(--edge);background:var(--card);color:var(--ink-2);cursor:pointer;
+}
+.btn:hover{border-color:var(--orange);color:var(--orange)}
+.segwrap{display:inline-flex;flex-wrap:wrap;gap:0;border-radius:6px;overflow:hidden;border:1px solid var(--edge)}
+.seg{
+  font-family:var(--sans);font-size:13px;padding:6px 12px;border:none;
+  background:var(--card);color:var(--ink-3);cursor:pointer;border-right:1px solid var(--edge-soft);
+}
+.seg:last-child{border-right:none}
+.seg.on{background:var(--indigo);color:#fff}
+
+.row label{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--ink-2)}
+.row input[type=range]{width:min(230px,58vw);max-width:100%}
+.row input[type=number]{
+  font-family:var(--math);font-size:16px;width:92px;padding:3px 7px;
+  border:1px solid var(--edge);border-radius:5px;background:var(--card);color:var(--ink);
+}
+
+.statrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 2px}
+.statbox{
+  border:1px solid var(--edge-soft);background:var(--card);border-radius:6px;
+  padding:6px 14px;text-align:center;min-width:104px;
+}
+.statbox .k{font-size:11.5px;color:var(--ink-3)}
+.statbox .v{font-family:var(--math);font-size:19px;font-variant-numeric:tabular-nums}
+.statbox.hot{border-color:var(--orange)}
+.statbox.hot .v{color:var(--orange)}
+.statbox.cool{border-color:var(--green)}
+.statbox.cool .v{color:var(--green)}
+.statbox.blue{border-color:var(--indigo)}
+.statbox.blue .v{color:var(--indigo)}
+
+/* ---- 九上2 專用 ---- */
+.hint{font-size:12.5px;color:var(--ink-3);text-align:center;margin:2px 0 0}
+.row .btn{margin-right:6px}
+.statbox.grn{border-color:var(--green)}
+.statbox.grn .v{color:var(--green)}
+
+
+/* ---- 等時線單元：探索站用的畫布與收合區 ---- */
+:root{--violet:#7A5AA6;--teal:#2F7A72;--gold:#9A7414}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--violet:#B497DB;--teal:#6FC2B8;--gold:#D9B34E}}
+:root[data-theme="dark"]{--violet:#B497DB;--teal:#6FC2B8;--gold:#D9B34E}
+.lab canvas{display:block;width:100%;max-width:100%;border:1px solid var(--edge);border-radius:8px;background:var(--card);touch-action:none;margin:12px 0 4px;cursor:pointer}
+.note-s{font-size:12.5px;color:var(--ink-3);margin:2px 0 10px;max-width:none}
+.ask{font-family:var(--serif);font-size:17px;line-height:1.6;margin:10px 0 0;color:var(--ink);max-width:none}
+details.more{margin-top:14px;border-top:1px dashed var(--edge);padding-top:10px}
+details.more summary{cursor:pointer;font-size:13.5px;color:var(--ink-3)}
+details.more summary:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.more-body{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.more-body .hint{font-size:12.5px;color:var(--ink-3);margin:0}
+.ticks{display:flex;flex-wrap:wrap;gap:6px 16px}
+.ticks label{display:inline-flex;gap:6px;align-items:center;font-size:14px;color:var(--ink-2);cursor:pointer}
+.tbl{overflow-x:auto}
+table.mini{border-collapse:collapse;font-size:13.5px;width:100%;max-width:560px}
+table.mini th,table.mini td{padding:4px 8px;border-bottom:1px solid var(--edge-soft);text-align:right;font-variant-numeric:tabular-nums}
+table.mini th:first-child,table.mini td:first-child{text-align:left}
+table.mini th{color:var(--ink-3);font-weight:500}
+ol.order{margin:0;padding-left:1.5em;font-size:14px;columns:2;column-gap:28px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-3)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid var(--edge)}
+select{font-family:var(--sans);font-size:14px;padding:5px 8px;border:1px solid var(--edge);border-radius:6px;background:var(--card);color:var(--ink)}
+.route{font-size:14px;color:var(--ink-2);margin:6px 0 0;max-width:none}
+.warnline{font-size:13.5px;color:var(--orange);min-height:1.4em;margin:4px 0 0}
+section.mod h2{margin-bottom:6px}
+.statbox .v{font-style:normal}
+.more-body .hint{text-align:left}
+.btn.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.row .btn{margin:0}
+#m7pick{gap:6px}
+</style>
+</head>
+<body>
+
+
+<style id="backnav">
+.bk-top{
+  max-width:1080px; margin:0 auto; padding:14px 20px 0;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:14px;
+}
+.bk-top a{color:#2E5A88; text-decoration:none; font-weight:600}
+.bk-top a:hover{text-decoration:underline}
+.bk-top .bk-sep{color:#B8AE9C; margin:0 10px}
+.bk-fab{
+  position:fixed; right:16px; bottom:16px; z-index:9999;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 15px; border-radius:24px;
+  background:#FFFDF8; border:1px solid #DFD6C4; color:#2E5A88;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:14px; font-weight:600; text-decoration:none;
+  box-shadow:0 2px 4px rgba(72,60,40,.10), 0 10px 26px rgba(72,60,40,.16);
+}
+.bk-fab:hover{border-color:#2E5A88}
+.bk-fab:focus-visible{outline:2px solid #2E5A88; outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bk-top a{color:#82ADDC}
+  :root:not([data-theme="light"]) .bk-fab{
+    background:#1F252B; border-color:#333C45; color:#82ADDC;
+    box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+  }
+  :root:not([data-theme="light"]) .bk-fab:hover{border-color:#82ADDC}
+}
+:root[data-theme="dark"] .bk-top a{color:#82ADDC}
+:root[data-theme="dark"] .bk-fab{
+  background:#1F252B; border-color:#333C45; color:#82ADDC;
+  box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+}
+@media print{ .bk-top, .bk-fab{display:none !important} }
+@media (max-width:520px){ .bk-fab{right:12px; bottom:12px; padding:8px 13px; font-size:13px} }
+</style>
+<div class="bk-top"><a href="../index.html">← 回目錄</a></div>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">專題　金門在地　數理資優班　·　互動探索站</div>
+  <h1>金門有多大？</h1>
+  <p class="sub">等時線　·　從金城國中出發，用「幾分鐘到得了」重新量一次家鄉</p>
+  <p class="thesis">用尺量，金門大約一百五十平方公里。換一把尺，用「從這裡出發，幾分鐘到得了」去量，金門的大小、形狀，甚至誰離誰比較近，都會跟著走路、公車、大橋和船班改變。下面七個探索站，每一站都從一個在地的問題開始。</p>
+</header>
+
+<nav>
+  <a href="#p1">① 上學</a>
+  <a href="#p2">② 搭上公車</a>
+  <a href="#p3">③ 建功嶼</a>
+  <a href="#p4">④ 誰先到</a>
+  <a href="#p5">⑤ 烈嶼有多遠</a>
+  <a href="#p6">⑥ 時間地圖</a>
+  <a href="#end">統整</a>
+</nav>
+
+<!-- ================= ① 上學 ================= -->
+<section id="p1" class="mod">
+  <div class="pillar-tag" style="color:var(--indigo)"><span class="dot" style="background:var(--indigo)"></span>①　上學</div>
+  <h2>走 10 分鐘，到得了哪裡？</h2>
+  <p class="lede">從金城國中出發走路，每分鐘 80 公尺。如果只能沿著一格一格的街道走，10 分鐘內到得了的地方會圍成什麼樣子？</p>
+</section>
+
+<div class="lab" id="lab1">
+  <div class="lab-head">
+    <span class="lab-no">1</span>
+    <div>
+      <p class="lab-title">沿著街道走</p>
+      <p class="lab-why">拖滑桿改變時間。點一個路口，看看直線距離和沿街走的距離差多少。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <label>走幾分鐘 <input type="range" id="m1t" min="0" max="25" step="0.5" value="10"><b class="num" id="m1tv"></b></label>
+    </div>
+    <div class="ticks">
+      <label><input type="checkbox" id="m1circle"> 畫出直線走得到的範圍</label>
+      <label><input type="checkbox" id="m1stream"> 有一條溪，只有一座橋</label>
+    </div>
+    <canvas id="m1cv" aria-label="金城街道方格，學校在中間，可以點路口"></canvas>
+    <p class="note-s">1 格 ＝ 200 公尺，走 1 格要 2.5 分鐘。點任何一個路口，會畫出沿街走過去的一條最快的路。</p>
+    <div class="statrow" id="m1probe"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="m1run">在街上隨機取 1000 個點</button>
+      <button id="m1clear">清除</button>
+    </div>
+    <div class="statrow" id="m1stats"></div>
+    <p class="ask" id="m1ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家說出自己的理由之後再打開。</p>
+        <div class="ticks">
+          <label><input type="checkbox" id="m1labels"> 標出每個路口要走幾分鐘</label>
+          <label><input type="checkbox" id="m1area"> 比較兩塊範圍的面積</label>
+        </div>
+        <div class="statrow" id="m1areas" hidden></div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　電腦取了很多點，剛好走 10 分鐘的點都排在同一個形狀上。這樣算不算已經知道，沿街走 10 分鐘的範圍<b>一定</b>是這個形狀？</div>
+</div>
+
+<!-- ================= ② 搭上公車 ================= -->
+<section id="p2" class="mod">
+  <div class="pillar-tag" style="color:var(--orange)"><span class="dot" style="background:var(--orange)"></span>②　搭上公車</div>
+  <h2>坐一段公車，範圍會變成什麼形狀？</h2>
+  <p class="lede">公車從金城車站出發往山外，每 3 分鐘到下一站，站和站相距 1 公里。可以在任何一站下車再走路。坐車比較快，但只能在站牌上下車，還要等車。</p>
+</section>
+
+<div class="lab" id="lab2">
+  <div class="lab-head">
+    <span class="lab-no">2</span>
+    <div>
+      <p class="lab-title">坐一段，再走一段</p>
+      <p class="lab-why">改變總共的時間和等車的時間。點地圖上任何一個地方，看看怎麼去最快。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <label>總共幾分鐘 <input type="range" id="m2t" min="0" max="30" step="1" value="12"><b class="num" id="m2tv"></b></label>
+    </div>
+    <div class="row">
+      <label>先等車幾分鐘 <input type="range" id="m2w" min="0" max="30" step="1" value="0"><b class="num" id="m2wv"></b></label>
+    </div>
+    <canvas id="m2cv" aria-label="公車路線與走得到的範圍，可以點地圖"></canvas>
+    <p class="note-s">走路每分鐘 80 公尺。在金城車站也可以不搭車，直接走。</p>
+    <div class="statrow" id="m2probe"></div>
+    <div class="statrow" id="m2area"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="m2run">隨機丟 1000 個點</button>
+      <button id="m2clear">清除</button>
+    </div>
+    <div class="statrow" id="m2stats"></div>
+    <p class="ask" id="m2ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家畫出自己的範圍之後再打開。</p>
+        <div class="ticks">
+          <label><input type="checkbox" id="m2circles"> 畫出每一站各自走得到的範圍</label>
+          <label><input type="checkbox" id="m2color"> 依「在哪一站下車最快」塗色</label>
+        </div>
+        <div class="legend" id="m2legend" hidden></div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　剛好錯過一班車、要多等 30 分鐘，範圍是整個縮小，還是只有某些地方縮？哪些地方完全不受影響？</div>
+</div>
+
+<div class="lab" id="lab3">
+  <div class="lab-head">
+    <span class="lab-no">3</span>
+    <div>
+      <p class="lab-title">隨機到站，要等多久？</p>
+      <p class="lab-why">金城車站往山外的兩條路線（車船處時刻表，2026 年 10 月 1 日起）。點時間軸，看那個時候到站要等幾分鐘。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <div class="segwrap" id="m3seg">
+        <button class="seg on" data-v="only3">只搭 3 路</button>
+        <button class="seg" data-v="both">3 路＋藍1</button>
+        <button class="seg" data-v="same">藍1 改成整點</button>
+      </div>
+    </div>
+    <p class="note-s" id="m3sched"></p>
+    <canvas id="m3cv" aria-label="一天的班車時間軸，下方是每個人等了多久"></canvas>
+    <p class="note-s">上面兩排是發車時間；下面每一點是一個人：橫的位置是他幾點到站，高度是他等了幾分鐘。</p>
+    <div class="statrow" id="m3probe"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="m3run">模擬 1000 個人隨機到站</button>
+      <button id="m3clear">清除</button>
+    </div>
+    <div class="statrow" id="m3stats"></div>
+    <p class="ask" id="m3ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家猜過「錯開多少最好」之後再打開。</p>
+        <div class="row">
+          <label>藍1 比整點晚幾分鐘發車 <input type="range" id="m3off" min="0" max="59" step="1" value="30"><b class="num" id="m3offv"></b></label>
+        </div>
+        <canvas id="m3cv2" aria-label="藍1 錯開分鐘數和平均等待的關係"></canvas>
+        <p class="hint">橫軸是藍1 錯開幾分鐘，縱軸是兩條路線都能搭時的平均等待。17:40 那一班固定不動。</p>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　只搭 3 路時，電腦模擬出來平均大約等 30 分鐘。這樣算不算已經知道「平均要等半小時」？為什麼剛好是 30？</div>
+</div>
+
+<!-- ================= ③ 建功嶼 ================= -->
+<section id="p3" class="mod">
+  <div class="pillar-tag" style="color:var(--green)"><span class="dot" style="background:var(--green)"></span>③　建功嶼</div>
+  <h2>退潮了，走哪條路最快？</h2>
+  <p class="lede">退潮時，你在堤岸上的 A，要到灘地上的 B。堤岸上每分鐘走 80 公尺；灘地很軟，每分鐘只走 40 公尺。先在堤岸上走到分界線上的某一點，再轉進灘地。要在哪裡轉？</p>
+</section>
+
+<div class="lab" id="lab4">
+  <div class="lab-head">
+    <span class="lab-no">4</span>
+    <div>
+      <p class="lab-title">找轉折點</p>
+      <p class="lab-why">拖動分界線上的轉折點 C，或改兩邊的速度。A 離分界線 200 公尺，B 離分界線 300 公尺，左右相距 600 公尺。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <label>轉折點 C 的位置 <input type="range" id="m4x" min="0" max="600" step="1" value="300"><b class="num" id="m4xv"></b></label>
+      <button class="btn" id="m4straight">直直走過去</button>
+    </div>
+    <div class="row">
+      <label>堤岸上每分鐘 <input type="range" id="m4v1" min="40" max="160" step="10" value="80"><b class="num" id="m4v1v"></b></label>
+    </div>
+    <div class="row">
+      <label>灘地上每分鐘 <input type="range" id="m4v2" min="10" max="80" step="5" value="40"><b class="num" id="m4v2v"></b></label>
+    </div>
+    <canvas id="m4cv" aria-label="堤岸與灘地，A 到 B 經過轉折點 C"></canvas>
+    <p class="note-s">C 可以直接拖。分界線上的數字是離 A 正下方多少公尺。</p>
+    <div class="statrow" id="m4now"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="m4run">每隔 1 公尺試一次</button>
+      <button id="m4clear">清除</button>
+    </div>
+    <canvas id="m4cv2" hidden aria-label="轉折點位置和總時間的關係"></canvas>
+    <div class="statrow" id="m4stats"></div>
+    <p class="ask" id="m4ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家量過、猜過規律之後再打開。</p>
+        <div class="ticks">
+          <label><input type="checkbox" id="m4tri"> 畫出兩個直角三角形，算「分界線上那一股 ÷ 斜邊」</label>
+          <label><input type="checkbox" id="m4iso"> 從 A 出發，每 2 分鐘畫一圈走得到的範圍</label>
+        </div>
+        <div class="statrow" id="m4ratio" hidden></div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　電腦把轉折點每隔 1 公尺試一次，找到最快的那一點。這樣算不算已經知道「最快的路有什麼規律」？</div>
+</div>
+
+<!-- ================= ④ 誰先到 ================= -->
+<section id="p4" class="mod">
+  <div class="pillar-tag" style="color:var(--crimson)"><span class="dot" style="background:var(--crimson)"></span>④　誰先到</div>
+  <h2>兩輛救護車，誰先到？</h2>
+  <p class="lede">兩個救護據點同時接到通報，各派一輛車。哪些地方是甲先到、哪些是乙先到？剛好同時到的地方排成什麼形狀？也可以換成風獅爺：每個地方由離它最近的那一尊守護。</p>
+</section>
+
+<div class="lab" id="lab5">
+  <div class="lab-head">
+    <span class="lab-no">5</span>
+    <div>
+      <p class="lab-title">誰先到？</p>
+      <p class="lab-why" id="m5lead"></p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <div class="segwrap" id="m5seg">
+        <button class="seg on" data-v="ems">兩個救護據點</button>
+        <button class="seg" data-v="lions">風獅爺守護範圍</button>
+      </div>
+    </div>
+    <div id="m5speed">
+      <div class="row">
+        <label><span class="dot" style="background:var(--indigo)"></span> 甲車速 <input type="range" id="m5va" min="10" max="90" step="5" value="40"><b class="num" id="m5vav"></b></label>
+      </div>
+      <div class="row">
+        <label><span class="dot" style="background:var(--orange)"></span> 乙車速 <input type="range" id="m5vb" min="10" max="90" step="5" value="40"><b class="num" id="m5vbv"></b></label>
+      </div>
+      <div class="row">
+        <label>乙先等多久 <input type="range" id="m5wait" min="0" max="10" step="1" value="0"><b class="num" id="m5waitv"></b></label>
+      </div>
+    </div>
+    <canvas id="m5cv" aria-label="金門示意平面，可拖曳據點與地點"></canvas>
+    <p class="note-s">示意平面，每格 1 公里，位置為示意。拖曳圖上的點就能移動；點空白的地方，十字標記會跳過去。</p>
+    <div class="statrow" id="m5probe"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="m5run">隨機跑 1000 個點</button>
+      <button id="m5clear">清除</button>
+    </div>
+    <div class="statrow" id="m5stats"></div>
+    <p class="ask" id="m5ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">分界與特別的點，留到大家說出理由之後再打開。</p>
+        <div class="ticks">
+          <label><input type="checkbox" id="m5fill"> 塗滿整片</label>
+          <label><input type="checkbox" id="m5edge"> 畫出分界</label>
+          <label id="m5specialwrap"><input type="checkbox" id="m5special"> 標出特別的點</label>
+        </div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　電腦隨機檢查了 1000 個地點，圈起來的那些點看起來都落在同一條曲線附近。這樣算不算已經知道分界長什麼樣子？</div>
+</div>
+
+<!-- ================= ⑤ 烈嶼有多遠 ================= -->
+<section id="p5" class="mod">
+  <div class="pillar-tag" style="color:var(--teal)"><span class="dot" style="background:var(--teal)"></span>⑤　烈嶼有多遠</div>
+  <h2>金門大橋通車以後，烈嶼變近了多少？</h2>
+  <p class="lede">從金城車站出發，開車走金門大橋到烈嶼各個村落。村落之間有很多條路，最快的是哪一條？通車以前要先到水頭碼頭搭船，拿來比一比。</p>
+</section>
+
+<div class="lab" id="lab6">
+  <div class="lab-head">
+    <span class="lab-no">6</span>
+    <div>
+      <p class="lab-title">烈嶼有多遠？</p>
+      <p class="lab-why" id="m6lead"></p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <div class="segwrap" id="m6seg">
+        <button class="seg on" data-v="after">通車後：走大橋</button>
+        <button class="seg" data-v="before">通車前：搭船（比較用）</button>
+      </div>
+    </div>
+    <div id="m6ferry" hidden>
+      <div class="row">
+        <label>船程 <input type="range" id="m6cross" min="15" max="20" step="1" value="15"><b class="num" id="m6crossv"></b></label>
+      </div>
+      <div class="row">
+        <label>幾分鐘一班 <input type="range" id="m6head" min="30" max="60" step="30" value="30"><b class="num" id="m6headv"></b></label>
+      </div>
+      <p class="note-s" id="m6ferrysum"></p>
+    </div>
+    <canvas id="m6cv" aria-label="大小金門簡化路網，點地點可以排出一條路線"></canvas>
+    <p class="note-s">從金城車站出發，依序點路上的地點就能排出一條路線；再點一次最後一站可以退一步。村落之間的分鐘數為示意，可在「更多」裡修改。</p>
+    <div class="statrow" id="m6routesum"></div>
+    <p class="route" id="m6route"></p>
+    <p class="warnline" id="m6msg" role="status"></p>
+    <div class="row"><button id="m6reset">路線重來</button></div>
+    <div class="row" style="margin-top:14px">
+      <label>目的地 <select id="m6target"></select></label>
+      <button class="primary" id="m6run">隨機試 1000 條路線</button>
+      <button id="m6clear">清除</button>
+    </div>
+    <div class="statrow" id="m6stats"></div>
+    <p class="route" id="m6best"></p>
+    <p class="ask" id="m6ask" hidden></p>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">下面這些，留到大家說出自己的方法之後再打開。</p>
+        <div>
+          <p class="lab-title" style="font-size:15.5px">一步一步往外確定</p>
+          <div class="row" style="margin:6px 0">
+            <button class="primary" id="m6step">下一步</button>
+            <button id="m6stepall">全部</button>
+            <button id="m6stepreset">重來</button>
+          </div>
+          <ol class="order" id="m6order"></ol>
+        </div>
+        <div class="ticks"><label><input type="checkbox" id="m6iso"> 塗出等時圈（每 10 分鐘一圈）</label></div>
+        <div class="legend" id="m6legend" hidden></div>
+        <div class="ticks"><label><input type="checkbox" id="m6compare"> 通車前後比較</label></div>
+        <div class="tbl" id="m6comparewrap" hidden><table class="mini" id="m6comparetbl"></table></div>
+        <div class="ticks"><label><input type="checkbox" id="m6edit"> 修改分鐘數與地點位置</label></div>
+        <div id="m6editbox" hidden>
+          <p class="hint">點一段路上的數字來改分鐘數；拖曳地點可以移動位置。修改只存在這台裝置的瀏覽器裡。</p>
+          <div class="row" style="margin-top:6px">
+            <span id="m6edgename" style="font-size:14px;color:var(--ink-2)">還沒選路段</span>
+            <input id="m6edgew" type="number" min="1" max="120" step="1" aria-label="這段路的分鐘數" disabled>
+            <span style="font-size:14px;color:var(--ink-2)">分</span>
+            <button id="m6resetall">全部還原</button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　電腦隨機試了 1000 次，找出好幾十條到湖井頭的路線，最短的那條是幾分鐘。這樣算不算已經知道，最短就是這麼多？</div>
+</div>
+
+<!-- ================= ⑥ 時間地圖 ================= -->
+<section id="p6" class="mod">
+  <div class="pillar-tag" style="color:var(--violet)"><span class="dot" style="background:var(--violet)"></span>⑥　時間地圖</div>
+  <h2>金門離哪裡比較近？</h2>
+  <p class="lede">在一般的地圖上，廈門就在對岸，台北遠在東北方。如果把每個地方放在「從金城出發要幾分鐘」的位置上，方向不變，地圖會變成什麼樣子？</p>
+</section>
+
+<div class="lab" id="lab7">
+  <div class="lab-head">
+    <span class="lab-no">7</span>
+    <div>
+      <p class="lab-title">把地圖換成時間</p>
+      <p class="lab-why">拖滑桿，從一般的地圖慢慢變成時間地圖。點一個地方，看它離金城幾公里、要幾分鐘。</p>
+    </div>
+  </div>
+  <div class="lab-body">
+    <div class="row">
+      <label>一般地圖 <input type="range" id="m7s" min="0" max="100" step="1" value="0"> 時間地圖</label>
+    </div>
+    <div class="ticks">
+      <label><input type="checkbox" id="m7wait"> 加上等候與報到</label>
+      <label><input type="checkbox" id="m7typhoon"> 颱風天</label>
+      <label><input type="checkbox" id="m7bridge"> 大橋封閉</label>
+    </div>
+    <div class="row" id="m7flyrow" hidden>
+      <label>搭飛機提早到機場 <input type="range" id="m7fly" min="0" max="120" step="10" value="60"><b class="num" id="m7flyv"></b></label>
+    </div>
+    <canvas id="m7cv" aria-label="以金城為中心的地圖，可以在一般距離與時間之間切換"></canvas>
+    <p class="note-s" id="m7note"></p>
+    <div class="legend" id="m7legend"></div>
+    <div class="row" id="m7pick" style="margin-top:10px"></div>
+    <div class="statrow" id="m7probe"></div>
+    <details class="more">
+      <summary>更多</summary>
+      <div class="more-body">
+        <p class="hint">留到大家自己定義「變形多大」之後再打開。</p>
+        <div class="tbl"><table class="mini" id="m7tbl"></table></div>
+      </div>
+    </details>
+  </div>
+  <div class="lab-foot"><b>關鍵的一問</b>　在一般地圖上，從甲地經過乙地再到丙地，不會比甲地直接到丙地近。在時間地圖上，這件事還一定成立嗎？</div>
+</div>
+
+<!-- ================= 統整 ================= -->
+<section id="end">
+  <div class="pillar-tag" style="color:var(--indigo)"><span class="dot" style="background:var(--indigo)"></span>統整</div>
+  <h2>金門有多大？要看你用什麼量</h2>
+  <p class="lede">用尺量，每個方向一公里就是一公里。用時間量，街道把圓壓成別的形狀，公車和大橋把某些方向拉長，軟軟的灘地讓路線轉彎，兩輛車的分界線跟著車速改變，時間地圖上的距離甚至不再滿足「繞路不會比較近」。</p>
+  <p class="lede">每一站都有兩種知道：電腦試了很多次，所以<b>看起來</b>是這樣；你說得出理由，所以<b>一定</b>是這樣。把每一站你自己找到的招式記在招式簿裡。</p>
+  <p>資料來源：金門縣車船管理處公車時刻表（2026 年 10 月 1 日起）、旅遊網站整理的船班與航班時間（2026 年）。村落之間的分鐘數、救護據點與風獅爺的位置為示意。</p>
+</section>
+
+</div>
+
+<script>
+/* ================================================================
+   專題　金門有多大？　等時線互動探索站
+   每一站各自包在一個函式裡；共用的只有畫布、配色與小工具。
+================================================================ */
+const $ = id => document.getElementById(id);
+const PAL = {};
+const PAL_KEYS = ['paper', 'card', 'edge', 'edge-soft', 'ink', 'ink-2', 'ink-3', 'indigo', 'indigo-soft',
+  'orange', 'orange-soft', 'green', 'green-soft', 'crimson', 'violet', 'teal', 'gold'];
+function readPal() {
+  const cs = getComputedStyle(document.documentElement);
+  PAL_KEYS.forEach(k => { PAL[k] = cs.getPropertyValue('--' + k).trim(); });
+}
+function rgba(c, a) {
+  const h = (c || '#000000').replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(x => x + x).join('') : h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+const sans = () => getComputedStyle(document.body).fontFamily;
+const MATHF = '"Crimson Text","Times New Roman",Georgia,serif';
+function fmt(v, d) {
+  if (v === null || v === undefined || !isFinite(v)) return '—';
+  return v.toFixed(d || 0).replace('-', '−');
+}
+const fmtMin = v => (Math.round(v * 10) / 10).toString().replace('-', '−');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const hhmm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(Math.round(m % 60)).padStart(2, '0');
+
+const REDRAW = [];
+function stage(id, W, H, draw) {
+  const cv = $(id), ctx = cv.getContext('2d');
+  cv.style.aspectRatio = W + ' / ' + H;
+  const s = { cv, ctx, W, H, w: 0, h: 0, k: 1 };
+  s.resize = () => {
+    const r = cv.getBoundingClientRect();
+    if (!r.width) return;
+    const dpr = window.devicePixelRatio || 1;
+    s.w = r.width; s.h = r.width * H / W;
+    cv.width = Math.round(s.w * dpr); cv.height = Math.round(s.h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    s.k = s.w / W;
+    draw();
+  };
+  s.pos = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / s.k, y: (e.clientY - r.top) / s.k }; };
+  new ResizeObserver(s.resize).observe(cv);
+  REDRAW.push(() => { if (s.w) draw(); });
+  return s;
+}
+function boxes(el, list) {
+  el.innerHTML = list.map(b => `<div class="statbox ${b[2] || ''}"><div class="k">${b[0]}</div><div class="v">${b[1]}</div></div>`).join('');
+}
+function segbind(id, cb) {
+  const w = $(id);
+  w.querySelectorAll('.seg').forEach(b => {
+    b.setAttribute('aria-pressed', b.classList.contains('on'));
+    b.addEventListener('click', () => {
+      w.querySelectorAll('.seg').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+      cb(b.dataset.v);
+    });
+  });
+}
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+/* 等高線：在格點上找變號，線性內插連線 */
+function gridVals(f, x0, y0, x1, y1, nx, ny) {
+  const v = new Float64Array((nx + 1) * (ny + 1)), dx = (x1 - x0) / nx, dy = (y1 - y0) / ny;
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) v[j * (nx + 1) + i] = f(x0 + i * dx, y0 + j * dy);
+  return { v, x0, y0, dx, dy, nx, ny };
+}
+function contourGrid(c, g, level, X, Y, keep) {
+  const { v, x0, y0, dx, dy, nx, ny } = g;
+  c.beginPath();
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const a = v[j * (nx + 1) + i] - level, b = v[j * (nx + 1) + i + 1] - level,
+      d = v[(j + 1) * (nx + 1) + i] - level, e = v[(j + 1) * (nx + 1) + i + 1] - level;
+    if (![a, b, d, e].every(isFinite)) continue;
+    const pts = [];
+    const ed = (p, q, ax, ay, bx, by) => { if ((p < 0) !== (q < 0)) { const t = p / (p - q); pts.push([ax + (bx - ax) * t, ay + (by - ay) * t]); } };
+    const xa = x0 + i * dx, ya = y0 + j * dy, xb = xa + dx, yb = ya + dy;
+    ed(a, b, xa, ya, xb, ya); ed(b, e, xb, ya, xb, yb); ed(d, e, xa, yb, xb, yb); ed(a, d, xa, ya, xa, yb);
+    if (pts.length >= 2) {
+      if (keep && !keep((pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2)) continue;
+      c.moveTo(X(pts[0][0]), Y(pts[0][1])); c.lineTo(X(pts[1][0]), Y(pts[1][1]));
+      if (pts.length === 4) { c.moveTo(X(pts[2][0]), Y(pts[2][1])); c.lineTo(X(pts[3][0]), Y(pts[3][1])); }
+    }
+  }
+  c.stroke();
+}
+function label(c, txt, x, y, opt) {
+  opt = opt || {};
+  c.font = (opt.weight || '500') + ' ' + (opt.size || 13) + 'px ' + (opt.font || sans());
+  c.textAlign = opt.align || 'center'; c.textBaseline = opt.base || 'alphabetic';
+  if (opt.halo !== false) { c.lineWidth = 4; c.strokeStyle = opt.haloColor || PAL.card; c.lineJoin = 'round'; c.strokeText(txt, x, y); }
+  c.fillStyle = opt.color || PAL.ink; c.fillText(txt, x, y);
+  c.textBaseline = 'alphabetic';
+}
+
+/* ================================================================
+   LAB 1　① 上學：沿著街道走
+================================================================ */
+function lab1() {
+  const NX = 14, NY = 10, M = 0.5, BL = 200, WALK = 80, MPB = BL / WALK;   // 走 1 格 2.5 分鐘
+  const SCH = { x: 7, y: 5 }, MARKS = [['A', 4, 5], ['B', 13, 5]];
+  const st = stage('m1cv', NX + 2 * M, NY + 2 * M, draw);
+  const X = x => (x + M) * st.k, Y = y => (y + M) * st.k;
+  const T = () => +$('m1t').value, stream = () => $('m1stream').checked;
+  const key = (i, j) => j * (NX + 1) + i;
+  let E = [], dist = [], par = [], probe = { x: 4, y: 5 }, samples = [];
+
+  const blocked = (i, j) => stream() && i === 4 && j !== 2;   // 溪在 x = 4.5，橋在 y = 2
+  function bfs() {
+    E = [];
+    for (let j = 0; j <= NY; j++) for (let i = 0; i < NX; i++) if (!blocked(i, j)) E.push([i, j, i + 1, j]);
+    for (let j = 0; j < NY; j++) for (let i = 0; i <= NX; i++) E.push([i, j, i, j + 1]);
+    const adj = Array.from({ length: (NX + 1) * (NY + 1) }, () => []);
+    for (const [a, b, c, d] of E) { adj[key(a, b)].push(key(c, d)); adj[key(c, d)].push(key(a, b)); }
+    dist = new Array(adj.length).fill(Infinity); par = new Array(adj.length).fill(-1);
+    const q = [key(SCH.x, SCH.y)]; dist[q[0]] = 0;
+    for (let h = 0; h < q.length; h++) { const u = q[h]; for (const v of adj[u]) if (dist[v] === Infinity) { dist[v] = dist[u] + 1; par[v] = u; q.push(v); } }
+  }
+  const ptime = s => { const [a, b, c, d] = s.e; return Math.min(dist[key(a, b)] + s.s, dist[key(c, d)] + 1 - s.s) * MPB; };
+  const ppos = s => { const [a, b, c, d] = s.e; return { x: a + (c - a) * s.s, y: b + (d - b) * s.s }; };
+  const cont = (x, y) => (!stream() || x > 4.5) ? Math.abs(x - SCH.x) + Math.abs(y - SCH.y)
+    : Math.abs(SCH.x - 4.5) + Math.abs(SCH.y - 2) + Math.abs(4.5 - x) + Math.abs(2 - y);
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, t = T(), f = sans();
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    c.lineCap = 'round';
+    if (stream()) {
+      c.fillStyle = rgba(PAL.indigo, 0.16); c.fillRect(X(4.5 - 0.2), 0, 0.4 * k, st.h);
+      c.strokeStyle = rgba(PAL.indigo, 0.55); c.lineWidth = 1;
+      [4.3, 4.7].forEach(x => { c.beginPath(); c.moveTo(X(x), 0); c.lineTo(X(x), st.h); c.stroke(); });
+    }
+    c.strokeStyle = PAL.edge; c.lineWidth = Math.max(2, k * 0.09);
+    for (const [a, b, cc, d] of E) { c.beginPath(); c.moveTo(X(a), Y(b)); c.lineTo(X(cc), Y(d)); c.stroke(); }
+    if (stream()) {
+      c.fillStyle = PAL.card; c.strokeStyle = PAL.ink; c.lineWidth = 1.5;
+      c.fillRect(X(4.22), Y(2) - 0.12 * k, 0.56 * k, 0.24 * k); c.strokeRect(X(4.22), Y(2) - 0.12 * k, 0.56 * k, 0.24 * k);
+      label(c, '橋', X(4.5), Y(2) - 0.22 * k, { size: 12, weight: 700 });
+      label(c, '溪', X(4.5), Y(NY) + 0.4 * k, { size: 12, weight: 700, color: PAL.indigo });
+    }
+    // 走得到的街道
+    c.strokeStyle = PAL.orange; c.lineWidth = Math.max(3, k * 0.15);
+    for (const [a, b, cc, d] of E) {
+      const du = dist[key(a, b)] * MPB, dv = dist[key(cc, d)] * MPB;
+      const p = clamp((t - du) / MPB, 0, 1), q = clamp((t - dv) / MPB, 0, 1);
+      c.beginPath();
+      if (p + q >= 1) { c.moveTo(X(a), Y(b)); c.lineTo(X(cc), Y(d)); }
+      else {
+        if (p > 0) { c.moveTo(X(a), Y(b)); c.lineTo(X(a + (cc - a) * p), Y(b + (d - b) * p)); }
+        if (q > 0) { c.moveTo(X(cc), Y(d)); c.lineTo(X(cc + (a - cc) * q), Y(d + (b - d) * q)); }
+      }
+      c.stroke();
+    }
+    if ($('m1circle').checked && t > 0) {
+      c.setLineDash([7, 5]); c.strokeStyle = PAL.indigo; c.lineWidth = 2;
+      c.beginPath(); c.arc(X(SCH.x), Y(SCH.y), t * WALK / BL * k, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
+    }
+    // 隨機點
+    for (const s of samples) {
+      const p = ppos(s), tt = ptime(s), tie = t > 0 && Math.abs(tt - t) < 0.03 * t;
+      c.fillStyle = tt <= t ? rgba(PAL.orange, 0.85) : rgba(PAL['ink-3'], 0.45);
+      c.beginPath(); c.arc(X(p.x), Y(p.y), tie ? 3 : 2, 0, Math.PI * 2); c.fill();
+      if (tie) { c.strokeStyle = PAL.ink; c.lineWidth = 1.4; c.beginPath(); c.arc(X(p.x), Y(p.y), 5.5, 0, Math.PI * 2); c.stroke(); }
+    }
+    // 路口分鐘數
+    if ($('m1labels').checked) {
+      const fs = clamp(k * 0.22, 8, 12);
+      for (let j = 0; j <= NY; j++) for (let i = 0; i <= NX; i++) {
+        const d = dist[key(i, j)]; if (!isFinite(d)) continue;
+        label(c, fmtMin(d * MPB), X(i) + 0.08 * k, Y(j) - 0.1 * k, { size: fs, align: 'left', color: d * MPB <= t ? PAL.orange : PAL['ink-3'], font: MATHF, weight: 600 });
+      }
+    }
+    // 探測路口：直線與一條最快的街道路線
+    const pk = key(probe.x, probe.y);
+    if (pk !== key(SCH.x, SCH.y) && isFinite(dist[pk])) {
+      c.strokeStyle = PAL.indigo; c.lineWidth = 3; c.lineJoin = 'round'; c.beginPath();
+      let u = pk; c.moveTo(X(probe.x), Y(probe.y));
+      while (par[u] >= 0) { u = par[u]; c.lineTo(X(u % (NX + 1)), Y(Math.floor(u / (NX + 1)))); }
+      c.stroke();
+      c.setLineDash([4, 5]); c.strokeStyle = PAL['ink-3']; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(X(SCH.x), Y(SCH.y)); c.lineTo(X(probe.x), Y(probe.y)); c.stroke(); c.setLineDash([]);
+    }
+    for (const [nm, i, j] of MARKS) {
+      c.fillStyle = PAL.card; c.strokeStyle = PAL.ink; c.lineWidth = 2;
+      c.beginPath(); c.arc(X(i), Y(j), 6, 0, Math.PI * 2); c.fill(); c.stroke();
+      label(c, nm, X(i), Y(j) - 10, { size: 13, weight: 700 });
+    }
+    c.fillStyle = PAL.ink; c.fillRect(X(SCH.x) - 7, Y(SCH.y) - 7, 14, 14);
+    label(c, '金城國中', X(SCH.x) + 10, Y(SCH.y) - 10, { size: 13, weight: 700, align: 'left' });
+    const px = X(probe.x), py = Y(probe.y);
+    c.strokeStyle = PAL.ink; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(px - 8, py); c.lineTo(px + 8, py); c.moveTo(px, py - 8); c.lineTo(px, py + 8); c.stroke();
+    c.beginPath(); c.arc(px, py, 11, 0, Math.PI * 2); c.stroke();
+  }
+
+  function panel() {
+    $('m1tv').textContent = fmtMin(T()) + ' 分';
+    const d = dist[key(probe.x, probe.y)], e = Math.hypot(probe.x - SCH.x, probe.y - SCH.y);
+    boxes($('m1probe'), [
+      ['直線距離', fmt(e * BL) + ' 公尺'],
+      ['沿街走', fmt(d * BL) + ' 公尺', 'blue'],
+      ['走路要', fmtMin(d * MPB) + ' 分', 'hot'],
+      ['沿街 ÷ 直線', e ? fmt(d / e, 2) : '—']
+    ]);
+    const n = samples.length;
+    if (!n) { $('m1stats').innerHTML = ''; $('m1ask').hidden = true; }
+    else {
+      const t = T(), ok = samples.filter(s => ptime(s) <= t).length;
+      const ties = samples.filter(s => t > 0 && Math.abs(ptime(s) - t) < 0.03 * t);
+      const eu = ties.map(s => { const p = ppos(s); return Math.hypot(p.x - SCH.x, p.y - SCH.y); });
+      const rt = ties.map((s, i) => ptime(s) / MPB / eu[i]);
+      const list = [['已經檢查', n + ' 個點'], ['走得到', ok + ' 個', 'hot'], ['剛好走到（圈起來）', ties.length + ' 個']];
+      if (ties.length) {
+        list.push(['圈起來的點離學校（直線）', fmt(Math.min(...eu) * BL) + '～' + fmt(Math.max(...eu) * BL) + ' 公尺']);
+        list.push(['圈起來的點：沿街 ÷ 直線', fmt(Math.min(...rt), 2) + '～' + fmt(Math.max(...rt), 2)]);
+      }
+      boxes($('m1stats'), list);
+      $('m1ask').textContent = `電腦檢查了 ${n} 個點，剛好走 ${fmtMin(t)} 分鐘的點都排在同一個形狀上。你還需要什麼？`;
+      $('m1ask').hidden = false;
+    }
+    const on = $('m1area').checked; $('m1areas').hidden = !on;
+    if (on) {
+      const r = T() * WALK / BL, h = 0.05; let a = 0, b = 0;
+      for (let x = h / 2; x < NX; x += h) for (let y = h / 2; y < NY; y += h) {
+        if (cont(x, y) <= r) a++;
+        if (Math.hypot(x - SCH.x, y - SCH.y) <= r) b++;
+      }
+      const u = (h * BL / 1000) ** 2;
+      boxes($('m1areas'), [
+        ['沿街走得到（圍起來，只算畫面裡）', fmt(a * u, 2) + ' 平方公里', 'hot'],
+        ['直線走得到（只算畫面裡）', fmt(b * u, 2) + ' 平方公里', 'blue'],
+        ['前者 ÷ 後者', b ? fmt(a / b, 3) : '—']
+      ]);
+    }
+  }
+  function refresh() { panel(); draw(); }
+
+  $('m1t').addEventListener('input', refresh);
+  $('m1circle').addEventListener('change', draw);
+  $('m1labels').addEventListener('change', draw);
+  $('m1area').addEventListener('change', panel);
+  $('m1stream').addEventListener('change', () => { bfs(); samples = []; $('m1run').textContent = '在街上隨機取 1000 個點'; refresh(); });
+  $('m1run').addEventListener('click', () => {
+    for (let n = 0; n < 1000; n++) samples.push({ e: E[Math.floor(Math.random() * E.length)], s: Math.random() });
+    $('m1run').textContent = '再取 1000 個點'; refresh();
+  });
+  $('m1clear').addEventListener('click', () => { samples = []; $('m1run').textContent = '在街上隨機取 1000 個點'; refresh(); });
+  st.cv.addEventListener('pointerdown', e => {
+    const p = st.pos(e);
+    probe = { x: clamp(Math.round(p.x - M), 0, NX), y: clamp(Math.round(p.y - M), 0, NY) };
+    refresh();
+  });
+  bfs(); panel();
+}
+
+/* ================================================================
+   LAB 2　② 搭上公車：坐一段，再走一段
+================================================================ */
+function lab2() {
+  const WK = 0.08, GAP = 3, NST = 5, W = 8.4, H = 4.8;     // 公里、分鐘
+  const stops = Array.from({ length: NST + 1 }, (_, k) => ({ x: 1.2 + k, y: 2.4 }));
+  const st = stage('m2cv', W, H, draw);
+  const X = x => x * st.k, Y = y => y * st.k;
+  const T = () => +$('m2t').value, Wt = () => +$('m2w').value;
+  const NAMES = ['直接走', '第 1 站', '第 2 站', '第 3 站', '第 4 站', '第 5 站'];
+  let probe = { x: 3.2, y: 1.4 }, samples = [];
+  const COL = () => [PAL.gold, PAL.indigo, PAL.orange, PAL.green, PAL.violet, PAL.teal];
+
+  function best(x, y) {
+    let b = 0, bt = Math.hypot(x - stops[0].x, y - stops[0].y) / WK;
+    for (let k = 1; k <= NST; k++) {
+      const t = Wt() + GAP * k + Math.hypot(x - stops[k].x, y - stops[k].y) / WK;
+      if (t < bt) { bt = t; b = k; }
+    }
+    return { k: b, t: bt };
+  }
+  const startOf = k => k === 0 ? 0 : Wt() + GAP * k;
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, t = T(), col = COL(), byStop = $('m2color').checked;
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    const step = Math.max(3, Math.round(st.w / 200));
+    for (let px = 0; px < st.w; px += step) for (let py = 0; py < st.h; py += step) {
+      const b = best((px + step / 2) / k, (py + step / 2) / k);
+      if (b.t <= t) { c.fillStyle = byStop ? rgba(col[b.k], 0.28) : rgba(PAL.indigo, 0.18); c.fillRect(px, py, step, step); }
+    }
+    if (t > 0) {
+      c.strokeStyle = PAL.indigo; c.lineWidth = 2;
+      contourGrid(c, gridVals((x, y) => best(x, y).t, 0, 0, W, H, 210, 120), t, X, Y);
+    }
+    if ($('m2circles').checked) {
+      c.setLineDash([5, 4]); c.lineWidth = 1.5;
+      for (let i = 0; i <= NST; i++) {
+        const r = (t - startOf(i)) * WK; if (r <= 0) continue;
+        c.strokeStyle = col[i]; c.beginPath(); c.arc(X(stops[i].x), Y(stops[i].y), r * k, 0, Math.PI * 2); c.stroke();
+      }
+      c.setLineDash([]);
+    }
+    for (const s of samples) {
+      const b = best(s.x, s.y), tie = t > 0 && Math.abs(b.t - t) < 0.03 * t;
+      c.fillStyle = b.t <= t ? rgba(PAL.indigo, 0.8) : rgba(PAL['ink-3'], 0.4);
+      c.beginPath(); c.arc(X(s.x), Y(s.y), tie ? 3 : 2, 0, Math.PI * 2); c.fill();
+      if (tie) { c.strokeStyle = PAL.ink; c.lineWidth = 1.4; c.beginPath(); c.arc(X(s.x), Y(s.y), 5.5, 0, Math.PI * 2); c.stroke(); }
+    }
+    // 公車路線
+    c.strokeStyle = PAL['ink-2']; c.lineWidth = 5; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(X(stops[0].x), Y(stops[0].y)); c.lineTo(X(stops[NST].x), Y(stops[NST].y)); c.stroke();
+    const fs = clamp(k * 0.15, 10, 13);
+    for (let i = 0; i < NST; i++) label(c, '3 分', X(stops[i].x + 0.5), Y(stops[i].y) - 9, { size: fs - 1, color: PAL['ink-3'] });
+    stops.forEach((s, i) => {
+      if (i === 0) { c.fillStyle = PAL.ink; c.fillRect(X(s.x) - 7, Y(s.y) - 7, 14, 14); }
+      else { c.fillStyle = PAL.card; c.strokeStyle = PAL.ink; c.lineWidth = 2.5; c.beginPath(); c.arc(X(s.x), Y(s.y), 6, 0, Math.PI * 2); c.fill(); c.stroke(); }
+      label(c, i === 0 ? '金城車站' : '第 ' + i + ' 站', X(s.x), Y(s.y) + 22, { size: fs, weight: i === 0 ? 700 : 500 });
+    });
+    label(c, '往山外 →', X(stops[NST].x + 0.45), Y(stops[NST].y) + 4, { size: fs, color: PAL['ink-3'], align: 'left' });
+    // 比例尺
+    c.strokeStyle = PAL['ink-3']; c.lineWidth = 2;
+    const x0 = X(W - 1.25), y0 = st.h - 12;
+    c.beginPath(); c.moveTo(x0, y0 - 5); c.lineTo(x0, y0); c.lineTo(x0 + k, y0); c.lineTo(x0 + k, y0 - 5); c.stroke();
+    label(c, '1 公里', x0 + k / 2, y0 - 8, { size: 11, color: PAL['ink-3'] });
+    // 探測點
+    const b = best(probe.x, probe.y), px = X(probe.x), py = Y(probe.y);
+    c.setLineDash([4, 4]); c.strokeStyle = PAL.ink; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(X(stops[b.k].x), Y(stops[b.k].y)); c.lineTo(px, py); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = PAL.ink; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(px - 8, py); c.lineTo(px + 8, py); c.moveTo(px, py - 8); c.lineTo(px, py + 8); c.stroke();
+    c.beginPath(); c.arc(px, py, 11, 0, Math.PI * 2); c.stroke();
+  }
+
+  function panel() {
+    $('m2tv').textContent = T() + ' 分';
+    $('m2wv').textContent = Wt() + ' 分';
+    const b = best(probe.x, probe.y), walk = Math.hypot(probe.x - stops[0].x, probe.y - stops[0].y) / WK;
+    const off = Math.hypot(probe.x - stops[b.k].x, probe.y - stops[b.k].y) * 1000;
+    boxes($('m2probe'), [
+      ['到這裡最快', fmtMin(b.t) + ' 分', 'hot'],
+      ['怎麼去', b.k === 0 ? '直接走' : '坐到第 ' + b.k + ' 站', 'blue'],
+      [b.k === 0 ? '走' : '下車後走', fmt(off) + ' 公尺'],
+      ['只走路要', fmtMin(walk) + ' 分']
+    ]);
+    // 面積（包含畫面外）
+    const t = T(), R = t * WK;
+    let area = 0;
+    if (R > 0) {
+      const h = Math.max(0.01, R / 120), xa = stops[0].x - R, xb = stops[NST].x + R;
+      let n = 0;
+      for (let x = xa + h / 2; x < xb; x += h) for (let y = stops[0].y - R + h / 2; y < stops[0].y + R; y += h) if (best(x, y).t <= t) n++;
+      area = n * h * h;
+    }
+    const walkA = Math.PI * R * R;
+    boxes($('m2area'), [
+      ['到得了的面積', fmt(area, 2) + ' 平方公里', 'cool'],
+      ['只走路的面積', fmt(walkA, 2) + ' 平方公里'],
+      ['前者 ÷ 後者', walkA ? fmt(area / walkA, 2) : '—']
+    ]);
+    const n = samples.length;
+    if (!n) { $('m2stats').innerHTML = ''; $('m2ask').hidden = true; }
+    else {
+      const res = samples.map(s => best(s.x, s.y));
+      const ok = res.filter(r => r.t <= t).length, ties = res.filter(r => t > 0 && Math.abs(r.t - t) < 0.03 * t);
+      const cnt = NAMES.map(() => 0); ties.forEach(r => cnt[r.k]++);
+      const list = [['已經丟了', n + ' 個點'], ['到得了', ok + ' 個', 'blue'], ['剛好在邊界上（圈起來）', ties.length + ' 個']];
+      cnt.forEach((v, i) => { if (v) list.push(['邊界上：' + NAMES[i], v + ' 個']); });
+      boxes($('m2stats'), list);
+      $('m2ask').textContent = `電腦丟了 ${n} 個點，邊界上的點分別是從不同的站走過去的。你還需要什麼？`;
+      $('m2ask').hidden = false;
+    }
+    const lg = $('m2legend'); lg.hidden = !$('m2color').checked;
+    if (!lg.hidden) { const col = COL(); lg.innerHTML = NAMES.map((nm, i) => `<span><i style="background:${rgba(col[i], 0.5)}"></i>${nm}</span>`).join(''); }
+  }
+  function refresh() { panel(); draw(); }
+  ['m2t', 'm2w'].forEach(id => $(id).addEventListener('input', refresh));
+  ['m2circles', 'm2color'].forEach(id => $(id).addEventListener('change', refresh));
+  $('m2run').addEventListener('click', () => {
+    for (let n = 0; n < 1000; n++) samples.push({ x: Math.random() * W, y: Math.random() * H });
+    $('m2run').textContent = '再丟 1000 個點'; refresh();
+  });
+  $('m2clear').addEventListener('click', () => { samples = []; $('m2run').textContent = '隨機丟 1000 個點'; refresh(); });
+  st.cv.addEventListener('pointerdown', e => { const p = st.pos(e); probe = { x: clamp(p.x, 0, W), y: clamp(p.y, 0, H) }; refresh(); });
+  panel();
+}
+
+/* ================================================================
+   LAB 3　② 搭上公車：隨機到站要等多久
+================================================================ */
+function lab3() {
+  const T0 = 6 * 60, T1 = 20 * 60;
+  const R3 = []; for (let h = 6; h <= 20; h++) R3.push(h * 60);
+  const blue = off => { const a = []; for (let h = 7; h <= 16; h++) a.push(h * 60 + off); a.push(17 * 60 + 40); return a.sort((x, y) => x - y); };
+  let mode = 'only3', arr = [], me = 7 * 60 + 10;
+  const off = () => mode === 'same' ? 0 : +$('m3off').value;
+  const B1 = () => blue(off());
+  function deps() {
+    const all = mode === 'only3' ? R3.map(m => [m, '3 路']) : R3.map(m => [m, '3 路']).concat(B1().map(m => [m, '藍1']));
+    return all.sort((a, b) => a[0] - b[0]);
+  }
+  const next = (m, d) => { for (const x of d) if (x[0] >= m) return x; return null; };
+  function avgExact(times) {
+    const d = [...new Set(times)].sort((a, b) => a - b);
+    let prev = T0, s = 0;
+    for (const x of d) { if (x < T0 || x > T1) continue; const g = x - prev; s += g * g / 2; prev = x; }
+    return s / (T1 - T0);
+  }
+
+  const st = stage('m3cv', 900, 400, draw);
+  const X = m => (60 + (m - T0) / (T1 - T0) * 820) * st.k, Yw = w => (380 - w / 60 * 250) * st.k;
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, d = deps(), fs = clamp(13 * k * 1.1, 10, 13);
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    for (let h = 6; h <= 20; h += 2) {
+      c.strokeStyle = PAL['edge-soft']; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(X(h * 60), 26 * k); c.lineTo(X(h * 60), 380 * k); c.stroke();
+      label(c, hhmm(h * 60), X(h * 60), 18 * k, { size: fs - 1, color: PAL['ink-3'], halo: false });
+    }
+    const row = (y, list, colr, name, on) => {
+      label(c, name, 8 * k, y * k + 5, { size: fs, align: 'left', weight: 700, color: on ? colr : PAL['ink-3'], halo: false });
+      c.strokeStyle = on ? colr : rgba(PAL['ink-3'], 0.35); c.lineWidth = 2.5;
+      for (const m of list) { c.beginPath(); c.moveTo(X(m), (y - 10) * k); c.lineTo(X(m), (y + 10) * k); c.stroke(); }
+    };
+    row(48, R3, PAL.indigo, '3 路', true);
+    row(80, B1(), PAL.orange, '藍1', mode !== 'only3');
+    // 等待座標
+    c.strokeStyle = PAL.edge; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(X(T0), Yw(0)); c.lineTo(X(T1), Yw(0)); c.stroke();
+    c.setLineDash([3, 5]);
+    [30, 60].forEach(w => { c.beginPath(); c.moveTo(X(T0), Yw(w)); c.lineTo(X(T1), Yw(w)); c.stroke(); });
+    c.setLineDash([]);
+    [0, 30, 60].forEach(w => label(c, w + ' 分', 54 * k, Yw(w) + 4, { size: fs - 1, align: 'right', color: PAL['ink-3'], halo: false }));
+    label(c, '↓ 每個人等了幾分鐘', 62 * k, 108 * k, { size: fs - 1, align: 'left', color: PAL['ink-3'], halo: false });
+    // 每一個人
+    let sum = 0;
+    c.fillStyle = rgba(PAL.ink, 0.45);
+    for (const a of arr) { const n = next(a, d); const w = n[0] - a; sum += w; c.beginPath(); c.arc(X(a), Yw(w), 1.8, 0, Math.PI * 2); c.fill(); }
+    if (arr.length) {
+      const avg = sum / arr.length;
+      c.strokeStyle = PAL.green; c.lineWidth = 2; c.setLineDash([8, 5]);
+      c.beginPath(); c.moveTo(X(T0), Yw(avg)); c.lineTo(X(T1), Yw(avg)); c.stroke(); c.setLineDash([]);
+      label(c, '平均 ' + fmt(avg, 1) + ' 分', X(T1), Yw(avg) - 6, { size: fs, align: 'right', color: PAL.green, weight: 700 });
+    }
+    // 我
+    const n = next(me, d);
+    c.strokeStyle = PAL.crimson; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(X(me), 30 * k); c.lineTo(X(me), Yw(0)); c.stroke();
+    if (n) {
+      c.beginPath(); c.moveTo(X(me), Yw(n[0] - me)); c.lineTo(X(n[0]), Yw(0)); c.stroke();
+      c.fillStyle = PAL.crimson; c.beginPath(); c.arc(X(me), Yw(n[0] - me), 5, 0, Math.PI * 2); c.fill();
+    }
+  }
+  const st2 = stage('m3cv2', 900, 300, draw2);
+  function draw2() {
+    if (!st2.w) return;
+    const c = st2.ctx, k = st2.k, fs = clamp(13 * k * 1.1, 10, 13);
+    const XO = o => (60 + o / 59 * 810) * k, YA = a => (270 - a / 35 * 240) * k;
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st2.w, st2.h);
+    c.strokeStyle = PAL.edge; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(XO(0), YA(0)); c.lineTo(XO(59), YA(0)); c.moveTo(XO(0), YA(0)); c.lineTo(XO(0), YA(35)); c.stroke();
+    [0, 10, 20, 30].forEach(a => label(c, a + ' 分', XO(0) - 6, YA(a) + 4, { size: fs - 1, align: 'right', color: PAL['ink-3'], halo: false }));
+    [0, 15, 30, 45, 59].forEach(o => label(c, o + '', XO(o), YA(0) + 16, { size: fs - 1, color: PAL['ink-3'], halo: false }));
+    c.setLineDash([5, 4]); c.strokeStyle = PAL['ink-3'];
+    c.beginPath(); c.moveTo(XO(0), YA(30)); c.lineTo(XO(59), YA(30)); c.stroke(); c.setLineDash([]);
+    label(c, '只搭 3 路', XO(59), YA(30) - 6, { size: fs - 1, align: 'right', color: PAL['ink-3'] });
+    c.strokeStyle = PAL.orange; c.lineWidth = 2.5; c.beginPath();
+    for (let o = 0; o <= 59; o++) { const a = avgExact(R3.concat(blue(o))); o ? c.lineTo(XO(o), YA(a)) : c.moveTo(XO(o), YA(a)); }
+    c.stroke();
+    const o = +$('m3off').value, a = avgExact(R3.concat(blue(o)));
+    c.fillStyle = PAL.orange; c.beginPath(); c.arc(XO(o), YA(a), 6, 0, Math.PI * 2); c.fill();
+    label(c, '晚 ' + o + ' 分：平均 ' + fmt(a, 1) + ' 分', XO(o), YA(a) - 12, { size: fs, weight: 700, align: o > 40 ? 'right' : 'left' });
+  }
+
+  function panel() {
+    const b = B1().filter(m => m < 17 * 60).map(hhmm);
+    $('m3sched').textContent = mode === 'only3' ? '3 路：06:00 到 20:00，每個整點一班。'
+      : mode === 'same' ? '3 路：每個整點一班。藍1 改成 07:00 到 16:00 整點發車，17:40 那班不變。'
+        : `3 路：每個整點一班。藍1：${b[0]} 到 ${b[b.length - 1]}，每小時一班，另外 17:40 一班。`;
+    $('m3offv').textContent = off() + ' 分';
+    const d = deps(), n = next(me, d);
+    boxes($('m3probe'), [['我幾點到站', hhmm(me)], ['下一班', n ? hhmm(n[0]) + '　' + n[1] : '—', 'blue'], ['要等', n ? (n[0] - me) + ' 分' : '—', 'hot']]);
+    if (!arr.length) { $('m3stats').innerHTML = ''; $('m3ask').hidden = true; return; }
+    const ws = arr.map(a => next(a, d)[0] - a), avg = ws.reduce((s, v) => s + v, 0) / ws.length;
+    boxes($('m3stats'), [
+      ['模擬了', arr.length + ' 人'], ['平均等', fmt(avg, 1) + ' 分', 'cool'], ['最久等', fmt(Math.max(...ws), 0) + ' 分', 'hot'],
+      ['等超過 30 分的人', fmt(ws.filter(w => w > 30).length / ws.length * 100, 0) + '%']
+    ]);
+    $('m3ask').textContent = `電腦模擬了 ${arr.length} 個人，平均等了 ${fmt(avg, 1)} 分鐘。為什麼會是這個數？你還需要什麼？`;
+    $('m3ask').hidden = false;
+  }
+  function refresh() { panel(); draw(); draw2(); }
+  segbind('m3seg', v => { mode = v; refresh(); });
+  $('m3off').addEventListener('input', refresh);
+  $('m3run').addEventListener('click', () => {
+    for (let n = 0; n < 1000; n++) arr.push(T0 + Math.random() * (T1 - T0));
+    $('m3run').textContent = '再模擬 1000 個人'; refresh();
+  });
+  $('m3clear').addEventListener('click', () => { arr = []; $('m3run').textContent = '模擬 1000 個人隨機到站'; refresh(); });
+  st.cv.addEventListener('pointerdown', e => { const p = st.pos(e); me = clamp(Math.round(T0 + (p.x - 60) / 820 * (T1 - T0)), T0, T1); refresh(); });
+  panel();
+}
+
+/* ================================================================
+   LAB 4　③ 建功嶼：找轉折點
+================================================================ */
+function lab4() {
+  const XL = -100, XR = 800, YT = -300, YB = 400;           // 公尺；y 往下是灘地
+  const A = { x: 0, y: -200 }, B = { x: 600, y: 300 };
+  const st = stage('m4cv', XR - XL, YB - YT, draw);
+  const X = x => (x - XL) * st.k, Y = y => (y - YT) * st.k;
+  const v1 = () => +$('m4v1').value, v2 = () => +$('m4v2').value, cx = () => +$('m4x').value;
+  const T = x => Math.hypot(x - A.x, A.y) / v1() + Math.hypot(B.x - x, B.y) / v2();
+  let run = null, iso = null, drag = false;
+
+  function isoGrid() {
+    const xs = []; for (let x = XL; x <= XR + 100; x += 5) xs.push(x);
+    return gridVals((x, y) => {
+      if (y <= 0) return Math.hypot(x - A.x, y - A.y) / v1();
+      let m = Infinity;
+      for (const s of xs) { const t = Math.hypot(s - A.x, A.y) / v1() + Math.hypot(x - s, y) / v2(); if (t < m) m = t; }
+      return m;
+    }, XL, YT, XR, YB, 90, 70);
+  }
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, fs = clamp(k * 15, 10, 13), x = cx();
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    c.fillStyle = rgba(PAL.gold, 0.2); c.fillRect(0, Y(0), st.w, st.h - Y(0));
+    for (let i = 0; i < 40; i++) {            // 灘地的小點
+      const px = ((i * 137) % 900) - 100, py = 20 + ((i * 251) % 370);
+      c.fillStyle = rgba(PAL.gold, 0.35); c.beginPath(); c.arc(X(px), Y(py), 1.6, 0, Math.PI * 2); c.fill();
+    }
+    label(c, `堤岸（每分鐘 ${v1()} 公尺）`, st.w - 10, Y(0) - 10, { size: fs, align: 'right', weight: 700 });
+    label(c, `灘地（每分鐘 ${v2()} 公尺）`, st.w - 10, st.h - 12, { size: fs, align: 'right', weight: 700 });
+    if (iso) {
+      c.strokeStyle = rgba(PAL.teal, 0.75); c.lineWidth = 1.3;
+      const mx = Math.max(...iso.v);
+      for (let L = 2; L < mx; L += 2) contourGrid(c, iso, L, X, Y);
+    }
+    c.strokeStyle = PAL.ink; c.lineWidth = 2.5;
+    c.beginPath(); c.moveTo(0, Y(0)); c.lineTo(st.w, Y(0)); c.stroke();
+    for (let t = 0; t <= 600; t += 100) {
+      c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(t), Y(0) - 5); c.lineTo(X(t), Y(0) + 5); c.stroke();
+      label(c, String(t), X(t), Y(0) + 18, { size: fs - 1, color: PAL['ink-3'] });
+    }
+    c.setLineDash([3, 4]); c.strokeStyle = PAL['ink-3']; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(X(A.x), Y(A.y)); c.lineTo(X(A.x), Y(0)); c.moveTo(X(B.x), Y(0)); c.lineTo(X(B.x), Y(B.y)); c.stroke();
+    c.setLineDash([]);
+    if ($('m4tri').checked) {
+      c.strokeStyle = PAL.violet; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(X(A.x), Y(0)); c.lineTo(X(x), Y(0)); c.moveTo(X(x), Y(0)); c.lineTo(X(B.x), Y(0)); c.stroke();
+      const sq = 12;
+      c.lineWidth = 1.2; c.beginPath();
+      c.moveTo(X(A.x) + (x >= 0 ? sq : -sq), Y(0)); c.lineTo(X(A.x) + (x >= 0 ? sq : -sq), Y(0) - sq); c.lineTo(X(A.x), Y(0) - sq);
+      c.moveTo(X(B.x) + (x <= 600 ? -sq : sq), Y(0)); c.lineTo(X(B.x) + (x <= 600 ? -sq : sq), Y(0) + sq); c.lineTo(X(B.x), Y(0) + sq);
+      c.stroke();
+    }
+    if (run) {
+      c.setLineDash([7, 5]); c.strokeStyle = PAL.green; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(X(A.x), Y(A.y)); c.lineTo(X(run.x), Y(0)); c.lineTo(X(B.x), Y(B.y)); c.stroke(); c.setLineDash([]);
+    }
+    c.lineCap = 'round';
+    c.strokeStyle = PAL.indigo; c.lineWidth = 4; c.beginPath(); c.moveTo(X(A.x), Y(A.y)); c.lineTo(X(x), Y(0)); c.stroke();
+    c.strokeStyle = PAL.orange; c.beginPath(); c.moveTo(X(x), Y(0)); c.lineTo(X(B.x), Y(B.y)); c.stroke();
+    [[A, 'A'], [B, 'B']].forEach(([p, n]) => {
+      c.fillStyle = PAL.ink; c.beginPath(); c.arc(X(p.x), Y(p.y), 6, 0, Math.PI * 2); c.fill();
+      label(c, n, X(p.x) + 12, Y(p.y) + 5, { size: fs + 2, weight: 700, align: 'left', font: MATHF });
+    });
+    c.fillStyle = PAL.card; c.strokeStyle = PAL.ink; c.lineWidth = 2.5;
+    c.beginPath(); c.arc(X(x), Y(0), 8, 0, Math.PI * 2); c.fill(); c.stroke();
+    label(c, 'C', X(x) + 10, Y(0) - 10, { size: fs + 2, weight: 700, align: 'left', font: MATHF });
+  }
+
+  const st2 = stage('m4cv2', 900, 300, draw2);
+  function draw2() {
+    if (!st2.w || !run) return;
+    const c = st2.ctx, k = st2.k, fs = clamp(13 * k * 1.1, 10, 13);
+    const lo = Math.floor(run.min - 0.5), hi = Math.ceil(run.max + 0.5);
+    const XO = x => (70 + x / 600 * 800) * k, YT2 = t => (260 - (t - lo) / (hi - lo) * 230) * k;
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st2.w, st2.h);
+    c.strokeStyle = PAL.edge; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(XO(0), YT2(lo)); c.lineTo(XO(600), YT2(lo)); c.moveTo(XO(0), YT2(lo)); c.lineTo(XO(0), YT2(hi)); c.stroke();
+    for (let t = lo; t <= hi; t += Math.max(1, Math.round((hi - lo) / 5))) label(c, t + ' 分', XO(0) - 8, YT2(t) + 4, { size: fs - 1, align: 'right', color: PAL['ink-3'], halo: false });
+    for (let x = 0; x <= 600; x += 100) label(c, x + '', XO(x), YT2(lo) + 16, { size: fs - 1, color: PAL['ink-3'], halo: false });
+    label(c, '轉折點 C 在幾公尺 →', XO(600), YT2(hi) + 4, { size: fs - 1, align: 'right', color: PAL['ink-3'] });
+    c.strokeStyle = PAL.ink; c.lineWidth = 2; c.beginPath();
+    run.ts.forEach((t, x) => x ? c.lineTo(XO(x), YT2(t)) : c.moveTo(XO(x), YT2(t))); c.stroke();
+    c.fillStyle = PAL.green; c.beginPath(); c.arc(XO(run.x), YT2(run.t), 6, 0, Math.PI * 2); c.fill();
+    label(c, `最快：${run.x} 公尺，${fmt(run.t, 2)} 分`, XO(run.x), YT2(run.t) - 14, { size: fs, weight: 700, color: PAL.green });
+    const x = cx();
+    c.fillStyle = PAL.crimson; c.beginPath(); c.arc(XO(x), YT2(T(x)), 4.5, 0, Math.PI * 2); c.fill();
+  }
+
+  function compute() {
+    const ts = []; let bx = 0;
+    for (let x = 0; x <= 600; x++) { ts.push(T(x)); if (ts[x] < ts[bx]) bx = x; }
+    run = { ts, x: bx, t: ts[bx], min: Math.min(...ts), max: Math.max(...ts) };
+  }
+  function panel() {
+    const x = cx(), a = Math.hypot(x - A.x, A.y), b = Math.hypot(B.x - x, B.y);
+    $('m4xv').textContent = x + ' 公尺'; $('m4v1v').textContent = v1() + ' 公尺'; $('m4v2v').textContent = v2() + ' 公尺';
+    boxes($('m4now'), [
+      ['堤岸那段', fmt(a) + ' 公尺', 'blue'], ['走堤岸', fmt(a / v1(), 2) + ' 分', 'blue'],
+      ['灘地那段', fmt(b) + ' 公尺', 'hot'], ['走灘地', fmt(b / v2(), 2) + ' 分', 'hot'],
+      ['總共', fmt(T(x), 2) + ' 分']
+    ]);
+    if (run) {
+      boxes($('m4stats'), [['試了', '601 個位置'], ['最快的轉折點', run.x + ' 公尺', 'cool'], ['最快要', fmt(run.t, 2) + ' 分', 'cool']]);
+      $('m4ask').textContent = `電腦試了 601 個位置，最快的在 ${run.x} 公尺，要 ${fmt(run.t, 2)} 分。你還需要什麼？`;
+      $('m4ask').hidden = false;
+    } else { $('m4stats').innerHTML = ''; $('m4ask').hidden = true; }
+    const on = $('m4tri').checked; $('m4ratio').hidden = !on;
+    if (on) {
+      const s1 = Math.abs(x - A.x) / a, s2 = Math.abs(B.x - x) / b;
+      boxes($('m4ratio'), [
+        ['堤岸：一股 ÷ 斜邊', fmt(s1, 3), 'blue'], ['灘地：一股 ÷ 斜邊', fmt(s2, 3), 'hot'],
+        ['兩個相除', s2 ? fmt(s1 / s2, 3) : '—'], ['兩邊速度相除', fmt(v1() / v2(), 3)]
+      ]);
+    }
+  }
+  function refresh() { panel(); draw(); draw2(); }
+  $('m4x').addEventListener('input', refresh);
+  ['m4v1', 'm4v2'].forEach(id => $(id).addEventListener('input', () => {
+    if (run) compute(); if (iso) iso = isoGrid(); refresh();
+  }));
+  $('m4straight').addEventListener('click', () => { $('m4x').value = Math.round(B.x * (-A.y) / (B.y - A.y)); refresh(); });
+  $('m4run').addEventListener('click', () => { compute(); $('m4cv2').hidden = false; st2.resize(); refresh(); });
+  $('m4clear').addEventListener('click', () => { run = null; $('m4cv2').hidden = true; refresh(); });
+  $('m4tri').addEventListener('change', refresh);
+  $('m4iso').addEventListener('change', () => { iso = $('m4iso').checked ? isoGrid() : null; draw(); });
+  const setX = e => { const p = st.pos(e); $('m4x').value = clamp(Math.round(p.x + XL), 0, 600); refresh(); };
+  st.cv.addEventListener('pointerdown', e => { drag = true; st.cv.setPointerCapture(e.pointerId); setX(e); });
+  st.cv.addEventListener('pointermove', e => { if (drag) setX(e); });
+  st.cv.addEventListener('pointerup', () => { drag = false; });
+  st.cv.addEventListener('pointercancel', () => { drag = false; });
+  panel();
+}
+
+/* ================================================================
+   LAB 5　④ 誰先到
+================================================================ */
+function lab5() {
+  const W = 8, H = 16 / 3, WALK = 4, TIE = 0.03;
+  const tieEms = (a, b) => Math.abs(a - b) < TIE * Math.max(a, b);
+  const tieLion = nt => nt.d2 - nt.d1 < TIE * nt.d2;
+  const st = stage('m5cv', W, H, draw);
+  const sx = x => x * st.k, sy = y => y * st.k;
+  const C = () => ({ a: PAL.indigo, b: PAL.orange, tie: PAL.ink, panel: PAL.card, grid: PAL['edge-soft'], muted: PAL['ink-3'],
+    c: [PAL.indigo, PAL.orange, PAL.green, PAL.violet, PAL.gold, PAL.teal] });
+  const CV = ['--indigo', '--orange', '--green', '--violet', '--gold', '--teal'];
+  const S = {
+    mode: 'ems',
+    ems: { A: { x: 1.0, y: 2.6 }, B: { x: 4.0, y: 2.6 }, P: { x: 3.4, y: 1.1 } },
+    lions: [{ x: 1.2, y: 1.3 }, { x: 3.5, y: 1.1 }, { x: 6.1, y: 1.6 }, { x: 1.9, y: 3.9 }, { x: 4.4, y: 3.5 }, { x: 6.8, y: 4.1 }],
+    probe: { x: 2.9, y: 2.5 }, samples: [], drag: null
+  };
+  const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+  const va = () => +$('m5va').value, vb = () => +$('m5vb').value, wait = () => +$('m5wait').value;
+  const tA = p => dist(p, S.ems.A) / va() * 60, tB = p => dist(p, S.ems.B) / vb() * 60 + wait();
+  const gap = p => tA(p) - tB(p);
+  function nearestTwo(p) {
+    let best = -1, second = -1, d1 = Infinity, d2 = Infinity;
+    S.lions.forEach((L, i) => { const d = dist(p, L); if (d < d1) { d2 = d1; second = best; d1 = d; best = i; } else if (d < d2) { d2 = d; second = i; } });
+    return { best, second, d1, d2 };
+  }
+  function special() {
+    if (S.mode !== 'ems' || wait() !== 0) return null;
+    const A = S.ems.A, B = S.ems.B, k = va() / vb();
+    if (k === 1) return { kind: 'mid', x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+    const k2 = k * k;
+    return { kind: 'center', x: (A.x - k2 * B.x) / (1 - k2), y: (A.y - k2 * B.y) / (1 - k2), r: k * dist(A, B) / Math.abs(1 - k2) };
+  }
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, col = C(), k = st.k;
+    c.fillStyle = col.panel; c.fillRect(0, 0, st.w, st.h);
+    c.strokeStyle = col.grid; c.lineWidth = 1;
+    for (let x = 1; x < W; x++) { c.beginPath(); c.moveTo(sx(x) + 0.5, 0); c.lineTo(sx(x) + 0.5, st.h); c.stroke(); }
+    for (let y = 1; y < H; y++) { c.beginPath(); c.moveTo(0, sy(y) + 0.5); c.lineTo(st.w, sy(y) + 0.5); c.stroke(); }
+    c.strokeStyle = col.muted; c.lineWidth = 2;
+    const x0 = st.w - k - 14, y0 = st.h - 14;
+    c.beginPath(); c.moveTo(x0, y0 - 5); c.lineTo(x0, y0); c.lineTo(x0 + k, y0); c.lineTo(x0 + k, y0 - 5); c.stroke();
+    label(c, '1 公里', x0 + k / 2, y0 - 8, { size: 12, color: col.muted });
+    if ($('m5fill').checked) {
+      const step = Math.max(3, Math.round(st.w / 160));
+      for (let px = 0; px < st.w; px += step) for (let py = 0; py < st.h; py += step) {
+        const p = { x: (px + step / 2) / k, y: (py + step / 2) / k };
+        const cc = S.mode === 'ems' ? (gap(p) < 0 ? col.a : col.b) : col.c[nearestTwo(p).best];
+        c.fillStyle = rgba(cc, 0.16); c.fillRect(px, py, step, step);
+      }
+    }
+    for (const s of S.samples) {
+      const cc = S.mode === 'ems' ? (s.win === 'A' ? col.a : col.b) : col.c[s.win];
+      c.fillStyle = cc; c.beginPath(); c.arc(sx(s.x), sy(s.y), s.tie ? 3.2 : 2.2, 0, Math.PI * 2); c.fill();
+      if (s.tie) { c.strokeStyle = col.tie; c.lineWidth = 1.5; c.beginPath(); c.arc(sx(s.x), sy(s.y), 6, 0, Math.PI * 2); c.stroke(); }
+    }
+    if ($('m5edge').checked) {
+      c.strokeStyle = col.tie; c.lineWidth = 2.5;
+      if (S.mode === 'ems') contourGrid(c, gridVals((x, y) => gap({ x, y }), 0, 0, W, H, 180, 120), 0, sx, sy);
+      else {
+        const n = S.lions.length;
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+          const Li = S.lions[i], Lj = S.lions[j];
+          contourGrid(c, gridVals((x, y) => dist({ x, y }, Li) - dist({ x, y }, Lj), 0, 0, W, H, 180, 120), 0, sx, sy, (x, y) => {
+            const nt = nearestTwo({ x, y }); return (nt.best === i && nt.second === j) || (nt.best === j && nt.second === i);
+          });
+        }
+      }
+    }
+    if ($('m5special').checked) {
+      const s = special();
+      if (s) {
+        c.fillStyle = col.tie; c.strokeStyle = col.tie; c.lineWidth = 1.5; c.setLineDash([5, 5]);
+        if (s.kind === 'center') {
+          c.beginPath(); c.moveTo(sx(s.x), sy(s.y)); c.lineTo(sx(s.x + s.r), sy(s.y)); c.stroke();
+          c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(s.x), sy(s.y)); c.stroke();
+        } else { c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(S.ems.B.x), sy(S.ems.B.y)); c.stroke(); }
+        c.setLineDash([]); c.beginPath(); c.arc(sx(s.x), sy(s.y), 5, 0, Math.PI * 2); c.fill();
+      }
+    }
+    const r = clamp(st.w / 45, 12, 18);
+    const stn = (p, cc, txt) => {
+      c.fillStyle = cc; c.strokeStyle = col.panel; c.lineWidth = 3;
+      c.beginPath(); c.arc(sx(p.x), sy(p.y), r, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = col.panel; c.font = '700 ' + Math.round(r * 1.05) + 'px ' + sans(); c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(txt, sx(p.x), sy(p.y) + 1); c.textBaseline = 'alphabetic';
+    };
+    const links = (p, list) => { c.setLineDash([4, 5]); c.lineWidth = 1.5; for (const [q, cc] of list) { c.strokeStyle = cc; c.beginPath(); c.moveTo(sx(p.x), sy(p.y)); c.lineTo(sx(q.x), sy(q.y)); c.stroke(); } c.setLineDash([]); };
+    const cross = p => {
+      const x = sx(p.x), y = sy(p.y); c.strokeStyle = PAL.ink; c.lineWidth = 2.5;
+      c.beginPath(); c.moveTo(x - 9, y); c.lineTo(x + 9, y); c.moveTo(x, y - 9); c.lineTo(x, y + 9); c.stroke();
+      c.beginPath(); c.arc(x, y, 12, 0, Math.PI * 2); c.stroke();
+    };
+    if (S.mode === 'ems') {
+      const { A, B, P } = S.ems;
+      links(P, [[A, col.a], [B, col.b]]); stn(A, col.a, '甲'); stn(B, col.b, '乙'); cross(P);
+    } else {
+      const nt = nearestTwo(S.probe);
+      links(S.probe, [[S.lions[nt.best], col.c[nt.best]], [S.lions[nt.second], col.c[nt.second]]]);
+      S.lions.forEach((L, i) => stn(L, col.c[i], String(i + 1))); cross(S.probe);
+    }
+  }
+
+  const dot = v => `<span class="dot" style="background:var(${v})"></span> `;
+  function panel() {
+    $('m5vav').textContent = va() + ' km/h'; $('m5vbv').textContent = vb() + ' km/h'; $('m5waitv').textContent = wait() + ' 分';
+    if (S.mode === 'ems') {
+      const P = S.ems.P, a = tA(P), b = tB(P), dA = dist(P, S.ems.A), dB = dist(P, S.ems.B);
+      boxes($('m5probe'), [
+        ['事故地點', tieEms(a, b) ? '幾乎同時到' : (a < b ? dot('--indigo') + '甲先到' : dot('--orange') + '乙先到'), 'hot'],
+        ['甲到這裡', fmt(a, 1) + ' 分', 'blue'], ['乙到這裡', fmt(b, 1) + ' 分', 'hot'],
+        ['到甲的距離', fmt(dA, 2) + ' 公里'], ['到乙的距離', fmt(dB, 2) + ' 公里'],
+        ['到甲 ÷ 到乙', fmt(dA / dB, 2)], ['到甲 − 到乙', fmt(dA - dB, 2) + ' 公里']
+      ]);
+    } else {
+      const nt = nearestTwo(S.probe);
+      boxes($('m5probe'), [
+        ['這個地點', tieLion(nt) ? '兩尊幾乎一樣近' : dot(CV[nt.best]) + '第 ' + (nt.best + 1) + ' 尊守護', 'hot'],
+        ['最近：第 ' + (nt.best + 1) + ' 尊', fmt(nt.d1, 2) + ' 公里'], ['次近：第 ' + (nt.second + 1) + ' 尊', fmt(nt.d2, 2) + ' 公里'],
+        ['走路到最近那尊', fmt(nt.d1 / WALK * 60, 1) + ' 分']
+      ]);
+    }
+    const n = S.samples.length;
+    if (!n) { $('m5stats').innerHTML = ''; $('m5ask').hidden = true; return; }
+    const ties = S.samples.filter(s => s.tie), list = [['已經檢查', n + ' 個點']];
+    if (S.mode === 'ems') {
+      const nA = S.samples.filter(s => !s.tie && s.win === 'A').length;
+      list.push(['甲先到', nA + '', 'blue'], ['乙先到', (n - nA - ties.length) + '', 'hot'], ['幾乎同時（圈起來）', ties.length + '']);
+      if (ties.length) {
+        const R = ties.map(s => s.ratio), D = ties.map(s => s.diff);
+        list.push(['圈起來的點：到甲 ÷ 到乙', fmt(Math.min(...R), 2) + '～' + fmt(Math.max(...R), 2)]);
+        list.push(['圈起來的點：到甲 − 到乙', fmt(Math.min(...D), 2) + '～' + fmt(Math.max(...D), 2)]);
+      }
+    } else {
+      const cnt = S.lions.map(() => 0); S.samples.forEach(s => { if (!s.tie) cnt[s.win]++; });
+      cnt.forEach((v, i) => list.push([dot(CV[i]) + '第 ' + (i + 1) + ' 尊', v + '']));
+      list.push(['兩尊幾乎一樣近（圈起來）', ties.length + '']);
+    }
+    boxes($('m5stats'), list);
+    $('m5ask').textContent = `電腦確認了 ${n} 個點，你還需要什麼？`; $('m5ask').hidden = false;
+  }
+  function run() {
+    for (let i = 0; i < 1000; i++) {
+      const p = { x: Math.random() * W, y: Math.random() * H };
+      if (S.mode === 'ems') {
+        const g = gap(p), dA = dist(p, S.ems.A), dB = dist(p, S.ems.B);
+        S.samples.push({ ...p, tie: tieEms(tA(p), tB(p)), win: g < 0 ? 'A' : 'B', ratio: dA / dB, diff: dA - dB });
+      } else { const nt = nearestTwo(p); S.samples.push({ ...p, tie: tieLion(nt), win: nt.best }); }
+    }
+    $('m5run').textContent = '再跑 1000 個點'; panel(); draw();
+  }
+  function clearS() { S.samples = []; $('m5run').textContent = '隨機跑 1000 個點'; }
+  const LEADS = {
+    ems: '拖曳十字標記換個事故地點，看看是哪一輛先到；也可以拖曳甲、乙兩個據點，改改兩邊的車速。',
+    lions: '每一處都由離它最近的那尊風獅爺守護。拖曳十字標記看看誰在守護它；也可以搬動風獅爺。'
+  };
+  function setMode(m) {
+    S.mode = m; $('m5lead').textContent = LEADS[m];
+    $('m5speed').hidden = m !== 'ems'; $('m5specialwrap').hidden = m !== 'ems';
+    clearS(); panel(); draw();
+  }
+  function hit(p) {
+    const tol = 22 / st.k;
+    const cand = S.mode === 'ems' ? [['P', S.ems.P], ['A', S.ems.A], ['B', S.ems.B]] : [['P', S.probe], ...S.lions.map((L, i) => [i, L])];
+    let best = null, bd = tol;
+    for (const [k, q] of cand) { const d = dist(p, q); if (d < bd) { bd = d; best = k; } }
+    return best;
+  }
+  const target = k => S.mode === 'ems' ? S.ems[k] : (k === 'P' ? S.probe : S.lions[k]);
+  st.cv.addEventListener('pointerdown', e => {
+    const p = st.pos(e), k = hit(p);
+    if (k === null) { const t = target('P'); t.x = p.x; t.y = p.y; S.drag = 'P'; } else S.drag = k;
+    st.cv.setPointerCapture(e.pointerId); panel(); draw();
+  });
+  st.cv.addEventListener('pointermove', e => {
+    if (S.drag === null) return;
+    const p = st.pos(e), t = target(S.drag);
+    t.x = clamp(p.x, 0.05, W - 0.05); t.y = clamp(p.y, 0.05, H - 0.05);
+    if (S.drag !== 'P' && S.samples.length) clearS();
+    panel(); draw();
+  });
+  const end = () => { S.drag = null; };
+  st.cv.addEventListener('pointerup', end); st.cv.addEventListener('pointercancel', end);
+  ['m5va', 'm5vb', 'm5wait'].forEach(id => $(id).addEventListener('input', () => { clearS(); panel(); draw(); }));
+  ['m5fill', 'm5edge', 'm5special'].forEach(id => $(id).addEventListener('change', draw));
+  $('m5run').addEventListener('click', run);
+  $('m5clear').addEventListener('click', () => { clearS(); panel(); draw(); });
+  segbind('m5seg', setMode);
+  setMode('ems');
+}
+
+/* ================================================================
+   LAB 6　⑤ 烈嶼有多遠
+================================================================ */
+function lab6() {
+  const W = 12, H = 8, START = 'K', STORE = 'gm-kinmen-isochrone-m5-v1';
+  const NODES0 = {
+    K: { name: '金城車站', x: 10.8, y: 3.7, lab: 'below' }, S: { name: '水頭碼頭', x: 9.2, y: 5.4, lab: 'below' },
+    H: { name: '湖下', x: 9.1, y: 1.9, lab: 'above' }, B: { name: '大橋烈嶼端', x: 6.3, y: 1.5, lab: 'above' },
+    HT: { name: '后頭', x: 5.0, y: 2.2, lab: 'above' }, DL: { name: '東林', x: 4.1, y: 3.7, lab: 'right' },
+    HJ: { name: '湖井頭', x: 1.7, y: 2.5, lab: 'above' }, XK: { name: '西口', x: 1.5, y: 4.6, lab: 'left' },
+    SL: { name: '上林', x: 3.3, y: 5.3, lab: 'below' }, QQ: { name: '青岐', x: 2.3, y: 6.5, lab: 'below' },
+    HC: { name: '黃厝', x: 4.9, y: 6.4, lab: 'below' }, J: { name: '九宮碼頭', x: 6.1, y: 4.8, lab: 'below' }
+  };
+  const EDGES0 = [
+    ['K', 'S', 8], ['K', 'H', 10], ['S', 'H', 12], ['H', 'B', 5, 'bridge'], ['S', 'J', 0, 'ferry'],
+    ['B', 'HT', 2], ['HT', 'DL', 4], ['J', 'DL', 3], ['HT', 'HJ', 7], ['DL', 'HJ', 6], ['DL', 'XK', 5], ['HJ', 'XK', 3],
+    ['DL', 'SL', 3], ['J', 'SL', 5], ['XK', 'SL', 4], ['SL', 'QQ', 3], ['XK', 'QQ', 4], ['J', 'HC', 3], ['SL', 'HC', 3], ['HC', 'QQ', 5]
+  ];
+  const TARGETS = ['J', 'HT', 'DL', 'HJ', 'XK', 'SL', 'QQ', 'HC'];
+  const BAND_A = [0.95, 0.75, 0.55, 0.38, 0.24, 0.12];
+  let nodes = JSON.parse(JSON.stringify(NODES0));
+  let edges = EDGES0.map(e => ({ a: e[0], b: e[1], w: e[2], kind: e[3] || 'road' }));
+  try {
+    const sv = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (sv && sv.nodes && sv.w) {
+      for (const k in sv.nodes) if (nodes[k]) { nodes[k].x = sv.nodes[k].x; nodes[k].y = sv.nodes[k].y; }
+      sv.w.forEach((w, i) => { if (edges[i] && edges[i].kind !== 'ferry' && w > 0) edges[i].w = w; });
+    }
+  } catch (e) { }
+  function persist() {
+    try { const n = {}; for (const k in nodes) n[k] = { x: nodes[k].x, y: nodes[k].y }; localStorage.setItem(STORE, JSON.stringify({ nodes: n, w: edges.map(e => e.w) })); } catch (e) { }
+  }
+  const S = { mode: 'after', route: [START], samples: null, best: null, steps: null, sel: null, drag: null, moved: false };
+  const ferryW = () => +$('m6cross').value + (+$('m6head').value) / 2;
+  const weight = e => e.kind === 'ferry' ? ferryW() : e.w;
+  const on = (e, m) => e.kind === 'road' || (e.kind === 'bridge' && m === 'after') || (e.kind === 'ferry' && m === 'before');
+  const active = e => on(e, S.mode);
+  function nbrs(u, m) {
+    const out = [];
+    for (const e of edges) { if (!on(e, m || S.mode)) continue; if (e.a === u) out.push([e.b, weight(e)]); else if (e.b === u) out.push([e.a, weight(e)]); }
+    return out;
+  }
+  const edgeBetween = (u, v) => edges.find(e => active(e) && ((e.a === u && e.b === v) || (e.a === v && e.b === u)));
+  function shortest(m) {
+    const d = {}; for (const k in nodes) d[k] = Infinity; d[START] = 0;
+    const left = new Set(Object.keys(nodes));
+    while (left.size) {
+      let u = null; for (const k of left) if (u === null || d[k] < d[u]) u = k;
+      if (d[u] === Infinity) break; left.delete(u);
+      for (const [v, w] of nbrs(u, m)) if (d[u] + w < d[v]) d[v] = d[u] + w;
+    }
+    return d;
+  }
+  function stepInit() { const d = {}; for (const k in nodes) d[k] = Infinity; d[START] = 0; S.steps = { d, done: [], left: new Set(Object.keys(nodes)) }; }
+  function stepOnce() {
+    if (!S.steps) stepInit();
+    const t = S.steps; let u = null;
+    for (const k of t.left) if (u === null || t.d[k] < t.d[u]) u = k;
+    if (u === null || t.d[u] === Infinity) return false;
+    t.left.delete(u); t.done.push(u);
+    for (const [v, w] of nbrs(u)) if (t.left.has(v) && t.d[u] + w < t.d[v]) t.d[v] = t.d[u] + w;
+    return true;
+  }
+
+  const st = stage('m6cv', W, H, draw);
+  const X = x => x * st.k, Y = y => y * st.k;
+  const col = () => ({ sea: PAL['indigo-soft'], land: PAL.paper, landline: PAL.edge, road: PAL['ink-3'], accent: PAL.indigo, bridge: PAL.orange, ferry: PAL.teal, ink: PAL.ink, panel: PAL.card, line: PAL.edge, muted: PAL['ink-3'] });
+  function blob(keys, pad, C) {
+    const pts = keys.map(k => [nodes[k].x, nodes[k].y]).sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], hi = [];
+    for (const p of pts) { while (lo.length >= 2 && cr(lo.at(-2), lo.at(-1), p) <= 0) lo.pop(); lo.push(p); }
+    for (const p of pts.slice().reverse()) { while (hi.length >= 2 && cr(hi.at(-2), hi.at(-1), p) <= 0) hi.pop(); hi.push(p); }
+    const hull = lo.slice(0, -1).concat(hi.slice(0, -1));
+    const cx = hull.reduce((s, p) => s + p[0], 0) / hull.length, cy = hull.reduce((s, p) => s + p[1], 0) / hull.length;
+    const out = hull.map(([x, y]) => { const dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1; return [x + dx / L * pad, y + dy / L * pad]; });
+    const c = st.ctx; c.beginPath();
+    for (let i = 0; i < out.length; i++) {
+      const p = out[i], q = out[(i + 1) % out.length], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+      if (i === 0) { const pm = out.at(-1); c.moveTo(X((pm[0] + p[0]) / 2), Y((pm[1] + p[1]) / 2)); }
+      c.quadraticCurveTo(X(p[0]), Y(p[1]), X(m[0]), Y(m[1]));
+    }
+    c.closePath(); c.fillStyle = C.land; c.fill(); c.strokeStyle = C.landline; c.lineWidth = 1.5; c.stroke();
+  }
+  const edgeMid = e => { const p = nodes[e.a], q = nodes[e.b], t = e.kind === 'ferry' ? 0.45 : 0.5; return { x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t }; };
+  const band = t => Math.min(5, Math.floor(t / 10));
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, C = col(), f = sans(), k = st.k;
+    c.fillStyle = C.sea; c.fillRect(0, 0, st.w, st.h);
+    blob(['B', 'HT', 'DL', 'HJ', 'XK', 'SL', 'QQ', 'HC', 'J'], 0.75, C);
+    blob(['K', 'S', 'H'], 0.9, C);
+    label(c, '烈嶼', X(3.4), Y(7.6), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
+    label(c, '大金門', X(10.2), Y(7.0), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
+    const iso = $('m6iso').checked ? shortest(S.mode) : null;
+    const rE = new Set(); for (let i = 1; i < S.route.length; i++) rE.add(edgeBetween(S.route[i - 1], S.route[i]));
+    const bE = new Set(); if (S.best) for (let i = 1; i < S.best.path.length; i++) bE.add(edgeBetween(S.best.path[i - 1], S.best.path[i]));
+    for (const e of edges) {
+      const p = nodes[e.a], q = nodes[e.b], a = active(e);
+      c.save(); c.lineCap = 'round';
+      if (!a) { c.strokeStyle = rgba(C.road, 0.35); c.lineWidth = 2; c.setLineDash([3, 6]); }
+      else if (e.kind === 'bridge') { c.strokeStyle = C.bridge; c.lineWidth = 6; }
+      else if (e.kind === 'ferry') { c.strokeStyle = C.ferry; c.lineWidth = 3; c.setLineDash([9, 7]); }
+      else { c.strokeStyle = C.road; c.lineWidth = 2.5; }
+      c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke();
+      if (a && (bE.has(e) || rE.has(e))) {
+        c.setLineDash([]); c.strokeStyle = rE.has(e) ? C.accent : rgba(C.accent, 0.5);
+        c.lineWidth = rE.has(e) ? 7 : 5; c.globalAlpha = 0.75;
+        c.beginPath(); c.moveTo(X(p.x), Y(p.y)); c.lineTo(X(q.x), Y(q.y)); c.stroke();
+      }
+      c.restore();
+    }
+    const fs = Math.round(clamp(k * 0.2, 10.5, 14));
+    for (const e of edges) {
+      if (!active(e)) continue;
+      const m = edgeMid(e), txt = e.kind === 'bridge' ? '橋 ' + e.w : e.kind === 'ferry' ? '船 ' + weight(e) : String(e.w);
+      c.font = '600 ' + fs + 'px ' + f;
+      const tw = c.measureText(txt).width + 10, th = fs + 6, sel = S.sel === e;
+      c.fillStyle = sel ? C.ink : C.panel; c.strokeStyle = e.kind === 'bridge' ? C.bridge : e.kind === 'ferry' ? C.ferry : C.line; c.lineWidth = 1.2;
+      roundRect(c, X(m.x) - tw / 2, Y(m.y) - th / 2, tw, th, th / 2); c.fill(); c.stroke();
+      c.fillStyle = sel ? C.panel : C.ink; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(txt, X(m.x), Y(m.y) + 1); c.textBaseline = 'alphabetic';
+    }
+    const r = clamp(k * 0.17, 7, 11), t = S.steps;
+    for (const key in nodes) {
+      const n = nodes[key], x = X(n.x), y = Y(n.y);
+      let fill = C.panel, stroke = C.ink;
+      if (iso && iso[key] < Infinity) { fill = rgba(C.accent, BAND_A[band(iso[key])]); stroke = C.accent; }
+      const fin = t && t.done.includes(key);
+      c.beginPath(); c.arc(x, y, key === START ? r * 1.3 : r, 0, Math.PI * 2);
+      c.fillStyle = C.panel; c.fill(); c.fillStyle = fill; c.fill(); c.lineWidth = fin ? 3 : 2; c.strokeStyle = stroke; c.stroke();
+      if (S.route.at(-1) === key) { c.beginPath(); c.arc(x, y, r + 6, 0, Math.PI * 2); c.strokeStyle = C.accent; c.lineWidth = 2; c.stroke(); }
+      let lx = x, ly = y, al = 'center';
+      if (n.lab === 'above') ly = y - r - 7;
+      if (n.lab === 'below') ly = y + r + fs + 3;
+      if (n.lab === 'left') { lx = x - r - 6; ly = y + fs / 3; al = 'right'; }
+      if (n.lab === 'right') { lx = x + r + 6; ly = y + fs / 3; al = 'left'; }
+      label(c, n.name, lx, ly, { size: fs, align: al, haloColor: C.land });
+      if (t && t.d[key] < Infinity) {
+        const txt = fin ? String(t.d[key]) : t.d[key] + '?';
+        c.font = (fin ? '700 ' : '500 ') + fs + 'px ' + MATHF;
+        const tw = c.measureText(txt).width + 10, th = fs + 6, bx = x - tw / 2, by = y - r - th - 4 - (n.lab === 'above' ? fs + 6 : 0);
+        c.fillStyle = fin ? C.ink : C.panel; c.strokeStyle = C.ink; c.lineWidth = 1.2;
+        roundRect(c, bx, by, tw, th, 4); c.fill(); c.stroke();
+        c.fillStyle = fin ? C.panel : C.muted; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(txt, bx + tw / 2, by + th / 2 + 1); c.textBaseline = 'alphabetic';
+      }
+    }
+  }
+
+  function routeTotal(p) { let s = 0; for (let i = 1; i < p.length; i++) { const e = edgeBetween(p[i - 1], p[i]); if (!e) return null; s += weight(e); } return s; }
+  function updateRoute() {
+    S.route = S.route.filter((k, i) => i === 0 || edgeBetween(S.route[i - 1], k));
+    const p = S.route;
+    boxes($('m6routesum'), [['我排的路線', p.length > 1 ? '共 ' + routeTotal(p) + ' 分' : '從金城車站出發', 'blue']]);
+    const parts = [nodes[p[0]].name];
+    for (let i = 1; i < p.length; i++) parts.push(`（${weight(edgeBetween(p[i - 1], p[i]))}）→ ${nodes[p[i]].name}`);
+    $('m6route').textContent = p.length > 1 ? parts.join(' ') : '點地圖上和金城車站相連的地點，開始排路線。';
+  }
+  function randomPath(tg) {
+    for (let tries = 0; tries < 50; tries++) {
+      const p = [START], seen = new Set([START]);
+      while (p.at(-1) !== tg) {
+        const o = nbrs(p.at(-1)).map(n => n[0]).filter(v => !seen.has(v)); if (!o.length) break;
+        const v = o[Math.floor(Math.random() * o.length)]; p.push(v); seen.add(v);
+      }
+      if (p.at(-1) === tg) return p;
+    }
+    return null;
+  }
+  function run() {
+    const tg = $('m6target').value;
+    if (!S.samples || S.samples.tg !== tg || S.samples.mode !== S.mode) S.samples = { tg, mode: S.mode, n: 0, seen: new Map() };
+    const s = S.samples;
+    for (let i = 0; i < 1000; i++) { const p = randomPath(tg); if (!p) continue; s.n++; const key = p.join('-'); if (!s.seen.has(key)) s.seen.set(key, routeTotal(p)); }
+    let best = null; for (const [key, t] of s.seen) if (!best || t < best.t) best = { t, path: key.split('-') };
+    S.best = best; $('m6run').textContent = '再試 1000 條'; stats(); draw();
+  }
+  function stats() {
+    const s = S.samples;
+    if (!s) { $('m6stats').innerHTML = ''; $('m6best').textContent = ''; $('m6ask').hidden = true; return; }
+    const ts = [...s.seen.values()];
+    boxes($('m6stats'), [['已經試了', s.n + ' 次'], ['不同的路線', s.seen.size + ' 條'], ['最短', Math.min(...ts) + ' 分', 'cool'], ['最長', Math.max(...ts) + ' 分', 'hot']]);
+    $('m6best').textContent = '最短那條：' + S.best.path.map(k => nodes[k].name).join(' → ');
+    $('m6ask').textContent = `電腦試了 ${s.n} 次，找到 ${s.seen.size} 條到${nodes[s.tg].name}的路線。你能確定沒有更短的嗎？`;
+    $('m6ask').hidden = false;
+  }
+  function clearS() { S.samples = null; S.best = null; $('m6run').textContent = '隨機試 1000 條路線'; stats(); }
+  function updateOrder() {
+    const t = S.steps;
+    $('m6order').innerHTML = !t || !t.done.length ? '' : t.done.map(k => `<li>${nodes[k].name}　<span class="num">${t.d[k]}</span> 分</li>`).join('');
+  }
+  function updateLegend() {
+    const lg = $('m6legend'); lg.hidden = !$('m6iso').checked; if (lg.hidden) return;
+    lg.innerHTML = BAND_A.slice(0, 5).map((a, i) => `<span><i style="background:${rgba(PAL.indigo, a)}"></i>${i * 10}–${i * 10 + 10} 分</span>`).join('') +
+      `<span><i style="background:${rgba(PAL.indigo, BAND_A[5])}"></i>50 分以上</span>`;
+  }
+  function updateCompare() {
+    const w = $('m6comparewrap'); w.hidden = !$('m6compare').checked; if (w.hidden) return;
+    const a = shortest('after'), b = shortest('before');
+    const rows = TARGETS.map(k => ({ k, a: a[k], b: b[k], s: b[k] - a[k] })).sort((p, q) => q.s - p.s);
+    $('m6comparetbl').innerHTML = '<thead><tr><th>地點</th><th>通車前</th><th>通車後</th><th>省下</th></tr></thead><tbody>' +
+      rows.map(r => `<tr><td>${nodes[r.k].name}</td><td>${r.b}</td><td>${r.a}</td><td>${r.s}</td></tr>`).join('') + '</tbody>';
+  }
+  function updateFerry() {
+    $('m6crossv').textContent = $('m6cross').value + ' 分'; $('m6headv').textContent = $('m6head').value + ' 分';
+    $('m6ferrysum').textContent = `船程 ${$('m6cross').value} 分，加上平均等船 ${+$('m6head').value / 2} 分，這段算 ${ferryW()} 分。`;
+  }
+  function refreshAll() { updateRoute(); updateFerry(); updateOrder(); updateLegend(); updateCompare(); draw(); }
+  const LEADS = {
+    after: '從金城車站出發，開車走金門大橋到烈嶼。排一條路線看看要幾分鐘，再讓電腦試很多條。',
+    before: '大橋還沒通車的時候，要先到水頭碼頭搭船到九宮。船的那一段要算船程，也要算等船的時間。這一頁只拿來和通車後比較。'
+  };
+  function setMode(m) {
+    S.mode = m; $('m6lead').textContent = LEADS[m]; $('m6ferry').hidden = m !== 'before';
+    S.route = [START]; S.steps = null; S.sel = null; $('m6msg').textContent = ''; $('m6step').disabled = false;
+    clearS(); refreshAll();
+  }
+  function hitNode(p) { let b = null, bd = 24 / st.k; for (const k in nodes) { const d = Math.hypot(nodes[k].x - p.x, nodes[k].y - p.y); if (d < bd) { bd = d; b = k; } } return b; }
+  function hitEdge(p) { let b = null, bd = 14 / st.k; for (const e of edges) { if (!active(e) || e.kind === 'ferry') continue; const m = edgeMid(e), d = Math.hypot(m.x - p.x, m.y - p.y); if (d < bd) { bd = d; b = e; } } return b; }
+  function selectEdge(e) {
+    S.sel = e; $('m6edgename').textContent = `${nodes[e.a].name}－${nodes[e.b].name}`;
+    $('m6edgew').disabled = false; $('m6edgew').value = e.w; $('m6edgew').focus(); draw();
+  }
+  st.cv.addEventListener('pointerdown', e => {
+    const p = st.pos(e);
+    if ($('m6edit').checked) {
+      const ed = hitEdge(p); if (ed) { selectEdge(ed); return; }
+      const k = hitNode(p); if (k) { S.drag = k; S.moved = false; st.cv.setPointerCapture(e.pointerId); }
+      return;
+    }
+    const k = hitNode(p); if (!k) return;
+    const last = S.route.at(-1); $('m6msg').textContent = '';
+    if (k === last && S.route.length > 1) S.route.pop();
+    else if (k === last) { }
+    else if (S.route.includes(k)) $('m6msg').textContent = `${nodes[k].name}已經走過了。`;
+    else if (edgeBetween(last, k)) S.route.push(k);
+    else $('m6msg').textContent = `${nodes[last].name}和${nodes[k].name}之間沒有直接相連的路。`;
+    updateRoute(); draw();
+  });
+  st.cv.addEventListener('pointermove', e => {
+    if (!S.drag) return;
+    const p = st.pos(e), n = nodes[S.drag];
+    n.x = clamp(p.x, 0.3, W - 0.3); n.y = clamp(p.y, 0.3, H - 0.3); S.moved = true; draw();
+  });
+  const endDrag = () => { if (S.drag && S.moved) persist(); S.drag = null; };
+  st.cv.addEventListener('pointerup', endDrag); st.cv.addEventListener('pointercancel', endDrag);
+  $('m6edgew').addEventListener('input', () => {
+    const v = Math.round(+$('m6edgew').value);
+    if (!S.sel || !(v >= 1 && v <= 120)) return;
+    S.sel.w = v; persist(); clearS(); S.steps = null; refreshAll();
+  });
+  $('m6edit').addEventListener('change', () => {
+    $('m6editbox').hidden = !$('m6edit').checked; st.cv.style.cursor = $('m6edit').checked ? 'move' : 'pointer';
+    if (!$('m6edit').checked) { S.sel = null; $('m6edgew').disabled = true; $('m6edgename').textContent = '還沒選路段'; draw(); }
+  });
+  $('m6resetall').addEventListener('click', () => {
+    nodes = JSON.parse(JSON.stringify(NODES0)); edges = EDGES0.map(e => ({ a: e[0], b: e[1], w: e[2], kind: e[3] || 'road' }));
+    try { localStorage.removeItem(STORE); } catch (e) { }
+    S.sel = null; $('m6edgew').disabled = true; $('m6edgename').textContent = '還沒選路段'; clearS(); S.steps = null; refreshAll();
+  });
+  $('m6reset').addEventListener('click', () => { S.route = [START]; $('m6msg').textContent = ''; updateRoute(); draw(); });
+  $('m6run').addEventListener('click', run);
+  $('m6clear').addEventListener('click', () => { clearS(); draw(); });
+  $('m6target').addEventListener('change', () => { clearS(); draw(); });
+  $('m6step').addEventListener('click', () => { if (!stepOnce()) $('m6step').disabled = true; updateOrder(); draw(); });
+  $('m6stepall').addEventListener('click', () => { while (stepOnce()); $('m6step').disabled = true; updateOrder(); draw(); });
+  $('m6stepreset').addEventListener('click', () => { S.steps = null; $('m6step').disabled = false; updateOrder(); draw(); });
+  $('m6iso').addEventListener('change', () => { updateLegend(); draw(); });
+  $('m6compare').addEventListener('change', updateCompare);
+  ['m6cross', 'm6head'].forEach(id => $(id).addEventListener('input', () => { clearS(); S.steps = null; $('m6step').disabled = false; refreshAll(); }));
+  $('m6target').innerHTML = TARGETS.map(k => `<option value="${k}"${k === 'HJ' ? ' selected' : ''}>${nodes[k].name}</option>`).join('');
+  segbind('m6seg', setMode);
+  REDRAW.push(updateLegend);
+  setMode('after');
+}
+
+/* ================================================================
+   LAB 7　⑥ 時間地圖
+================================================================ */
+function lab7() {
+  const HOME = { lat: 24.433, lon: 118.317 };
+  const PLACES = [
+    { name: '烈嶼東林', lat: 24.432, lon: 118.243, mode: 'car', t: 21 },
+    { name: '廈門五通碼頭', lat: 24.519, lon: 118.182, mode: 'ferry', t: 30 },
+    { name: '泉州石井碼頭', lat: 24.633, lon: 118.428, mode: 'ferry', t: 70 },
+    { name: '澎湖馬公', lat: 23.568, lon: 119.628, mode: 'fly', t: 40 },
+    { name: '台中', lat: 24.264, lon: 120.621, mode: 'fly', t: 50 },
+    { name: '台北松山', lat: 25.069, lon: 121.552, mode: 'fly', t: 55 },
+    { name: '高雄', lat: 22.577, lon: 120.350, mode: 'fly', t: 55 }
+  ];
+  const MODE_NAME = { car: '開車經大橋', ferry: '小三通', fly: '飛機' };
+  const R_EARTH = 6371, rad = Math.PI / 180;
+  PLACES.forEach(p => {
+    const dl = (p.lat - HOME.lat) * rad, dn = (p.lon - HOME.lon) * rad;
+    const a = Math.sin(dl / 2) ** 2 + Math.cos(HOME.lat * rad) * Math.cos(p.lat * rad) * Math.sin(dn / 2) ** 2;
+    p.km = 2 * R_EARTH * Math.asin(Math.sqrt(a));
+    const dx = dn * Math.cos((p.lat + HOME.lat) / 2 * rad), dy = dl;
+    p.ang = Math.atan2(dy, dx);
+  });
+  const maxKm = Math.max(...PLACES.map(p => p.km));
+  let sel = 5;
+  const st = stage('m7cv', 100, 72, draw);
+  const cx = 50, cy = 36, R = 31;
+  const COLS = () => ({ car: PAL.gold, ferry: PAL.teal, fly: PAL.violet });
+
+  function minutes(p) {
+    const wait = $('m7wait').checked, ty = $('m7typhoon').checked, br = $('m7bridge').checked;
+    if (p.mode === 'car') {
+      if (!br) return p.t;
+      return ty ? Infinity : 41;
+    }
+    if (ty) return Infinity;
+    if (!wait) return p.t;
+    return p.t + (p.mode === 'ferry' ? 90 : +$('m7fly').value);
+  }
+  const ringStep = mx => mx <= 80 ? 10 : mx <= 160 ? 20 : 30;
+  function geo() {
+    const s = +$('m7s').value / 100;
+    const ts = PLACES.map(minutes), fin = ts.filter(isFinite);
+    const step = ringStep(Math.max(...fin, 10));
+    const maxMin = Math.ceil(Math.max(...fin, 10) / step) * step;
+    const pos = PLACES.map((p, i) => {
+      const rr = p.km / maxKm * R, rt = isFinite(ts[i]) ? ts[i] / maxMin * R : R * 1.12;
+      const r = (1 - s) * rr + s * rt;
+      return { x: cx + r * Math.cos(p.ang), y: cy - r * Math.sin(p.ang), t: ts[i] };
+    });
+    return { s, ts, maxMin, step, pos };
+  }
+
+  function draw() {
+    if (!st.w) return;
+    const c = st.ctx, k = st.k, g = geo(), Cm = COLS(), fs = clamp(k * 1.5, 10, 13.5);
+    const X = x => x * k, Y = y => y * k;
+    c.fillStyle = PAL.card; c.fillRect(0, 0, st.w, st.h);
+    const dirs = ['東', '東北', '北', '西北', '西', '西南', '南', '東南'];
+    dirs.forEach((nm, i) => {
+      const a = i * Math.PI / 4;
+      c.setLineDash([3, 5]); c.strokeStyle = PAL['edge-soft']; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(X(cx), Y(cy)); c.lineTo(X(cx + R * Math.cos(a)), Y(cy - R * Math.sin(a))); c.stroke(); c.setLineDash([]);
+      label(c, nm, X(cx + (R + 2.6) * Math.cos(a)), Y(cy - (R + 2.6) * Math.sin(a)) + 4, { size: fs - 1, color: PAL['ink-3'], weight: 700 });
+    });
+    const rings = (alpha, step, max, txt) => {
+      if (alpha <= 0.02) return;
+      c.strokeStyle = rgba(PAL['ink-3'], 0.45 * alpha); c.lineWidth = 1;
+      for (let v = step; v <= max + 1e-9; v += step) {
+        const r = v / max * R; c.beginPath(); c.arc(X(cx), Y(cy), r * k, 0, Math.PI * 2); c.stroke();
+        c.globalAlpha = alpha; label(c, v + ' ' + txt, X(cx) + 3, Y(cy - r) - 3, { size: fs - 2.5, align: 'left', color: PAL['ink-3'], halo: false }); c.globalAlpha = 1;
+      }
+    };
+    rings(1 - 2 * g.s, 50, maxKm, '公里');
+    rings(2 * g.s - 1, g.step, g.maxMin, '分');
+    // 到不了的圈
+    if (g.ts.some(t => !isFinite(t)) && g.s > 0.02) {
+      c.setLineDash([6, 5]); c.strokeStyle = rgba(PAL.crimson, 0.6 * g.s); c.lineWidth = 1.5;
+      c.beginPath(); c.arc(X(cx), Y(cy), R * 1.12 * k, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
+    }
+    // 選中的地方
+    const ps = g.pos[sel];
+    c.strokeStyle = PAL.ink; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(X(cx), Y(cy)); c.lineTo(X(ps.x), Y(ps.y)); c.stroke();
+    // 地點
+    const boxesUsed = [[X(cx) - 4, Y(cy) - 4, 60, 22]];
+    const order = PLACES.map((p, i) => i).sort((a, b) => (a === sel ? -1 : b === sel ? 1 : 0));
+    const hidden = [];
+    for (const i of order) {
+      const p = PLACES[i], q = g.pos[i], x = X(q.x), y = Y(q.y), off = !isFinite(q.t);
+      c.beginPath(); c.arc(x, y, i === sel ? 7 : 5.5, 0, Math.PI * 2);
+      c.fillStyle = off ? PAL.card : Cm[p.mode]; c.fill();
+      c.strokeStyle = off ? PAL.crimson : PAL.card; c.lineWidth = 2; c.stroke();
+      if (i === sel) { c.strokeStyle = PAL.ink; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 11, 0, Math.PI * 2); c.stroke(); }
+      const txt = p.name + (off ? '（停駛）' : '');
+      c.font = '600 ' + fs + 'px ' + sans();
+      const tw = c.measureText(txt).width, left = q.x < cx - 2;
+      const bx = left ? x - 10 - tw : x + 10, by = y - fs + 2, bb = [bx - 2, by - 2, tw + 4, fs + 6];
+      const clash = boxesUsed.some(u => bb[0] < u[0] + u[2] && bb[0] + bb[2] > u[0] && bb[1] < u[1] + u[3] && bb[1] + bb[3] > u[1]);
+      if (clash && i !== sel) { hidden.push(p.name); continue; }
+      boxesUsed.push(bb);
+      label(c, txt, left ? x - 10 : x + 10, y + fs / 3, { size: fs, weight: 600, align: left ? 'right' : 'left', color: off ? PAL.crimson : PAL.ink });
+    }
+    c.fillStyle = PAL.ink; c.fillRect(X(cx) - 6, Y(cy) - 6, 12, 12);
+    label(c, '金城', X(cx) + 9, Y(cy) + 16, { size: fs, weight: 700, align: 'left' });
+    if (hidden.length) label(c, '有 ' + hidden.length + ' 個地方擠在一起，用下面的按鈕看', 8, st.h - 10, { size: fs - 2, align: 'left', color: PAL['ink-3'] });
+  }
+
+  function panel() {
+    $('m7flyrow').hidden = !$('m7wait').checked;
+    $('m7flyv').textContent = $('m7fly').value + ' 分';
+    const notes = ['只算坐在交通工具上的時間，取自旅遊網站整理（2026 年）；烈嶼東林的時間是示意。方向和真的地圖一樣。'];
+    if ($('m7wait').checked) notes.push('小三通以提早 90 分鐘到碼頭計，飛機的提早時間可以自己調。');
+    if ($('m7typhoon').checked) notes.push('颱風天船和飛機都停了。');
+    if ($('m7bridge').checked) notes.push('大橋封閉時，到烈嶼改搭船，約 41 分（含等船，見 ⑤）。');
+    $('m7note').textContent = notes.join('');
+    const Cm = COLS();
+    $('m7legend').innerHTML = Object.keys(MODE_NAME).map(m => `<span><i style="background:${Cm[m]}"></i>${MODE_NAME[m]}</span>`).join('');
+    $('m7pick').innerHTML = PLACES.map((p, i) => `<button class="btn${i === sel ? ' on' : ''}" data-i="${i}" aria-pressed="${i === sel}">${p.name}</button>`).join('');
+    const p = PLACES[sel], t = minutes(p);
+    const how = p.mode === 'car' && $('m7bridge').checked ? '搭船（大橋封閉）' : MODE_NAME[p.mode];
+    boxes($('m7probe'), [
+      ['地點', p.name], ['交通方式', how], ['離金城（直線）', fmt(p.km, 0) + ' 公里', 'blue'],
+      ['要幾分鐘', isFinite(t) ? fmt(t, 0) + ' 分' : '停駛', 'hot'], ['每公里幾分鐘', isFinite(t) ? fmt(t / p.km, 2) : '—']
+    ]);
+    const rows = PLACES.map(q => ({ q, t: minutes(q) })).sort((a, b) => (b.t / b.q.km) - (a.t / a.q.km));
+    $('m7tbl').innerHTML = '<thead><tr><th>地點</th><th>公里</th><th>分鐘</th><th>每公里幾分鐘</th></tr></thead><tbody>' +
+      rows.map(r => `<tr><td>${r.q.name}</td><td>${fmt(r.q.km, 0)}</td><td>${isFinite(r.t) ? fmt(r.t, 0) : '停駛'}</td><td>${isFinite(r.t) ? fmt(r.t / r.q.km, 2) : '—'}</td></tr>`).join('') + '</tbody>';
+  }
+  function refresh() { panel(); draw(); }
+  ['m7s', 'm7fly'].forEach(id => $(id).addEventListener('input', refresh));
+  ['m7wait', 'm7typhoon', 'm7bridge'].forEach(id => $(id).addEventListener('change', refresh));
+  $('m7pick').addEventListener('click', e => { const b = e.target.closest('button[data-i]'); if (b) { sel = +b.dataset.i; refresh(); } });
+  st.cv.addEventListener('pointerdown', e => {
+    const p = st.pos(e), g = geo();
+    let b = -1, bd = 4;
+    g.pos.forEach((q, i) => { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < bd) { bd = d; b = i; } });
+    if (b >= 0) { sel = b; refresh(); }
+  });
+  REDRAW.push(panel);
+  panel();
+}
+
+/* ================================================================ */
+readPal();
+lab1(); lab2(); lab3(); lab4(); lab5(); lab6(); lab7();
+const recolor = () => { readPal(); REDRAW.forEach(f => f()); };
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(recolor);
+
+</script>
+<a class="bk-fab" href="../index.html" aria-label="回到目錄頁">← 目錄</a>
+</body>
+</html>
