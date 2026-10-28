@@ -521,14 +521,14 @@ function label(c, txt, x, y, opt) {
    LAB 6　⑤ 烈嶼有多遠
 ================================================================ */
 function lab6() {
-  const W = 12, H = 8, START = 'K', STORE = 'gm-kinmen-isochrone-m5-v1';
+  const W = 12, H = 8, START = 'K', STORE = 'gm-kinmen-isochrone-m5-v2';
   const NODES0 = {
-    K: { name: '金城車站', x: 10.8, y: 3.7, lab: 'below' }, S: { name: '水頭碼頭', x: 9.2, y: 5.4, lab: 'below' },
-    H: { name: '湖下', x: 9.1, y: 1.9, lab: 'above' }, B: { name: '大橋烈嶼端', x: 6.3, y: 1.5, lab: 'above' },
-    HT: { name: '后頭', x: 5.0, y: 2.2, lab: 'above' }, DL: { name: '東林', x: 4.1, y: 3.7, lab: 'right' },
-    HJ: { name: '湖井頭', x: 1.7, y: 2.5, lab: 'above' }, XK: { name: '西口', x: 1.5, y: 4.6, lab: 'left' },
-    SL: { name: '上林', x: 3.3, y: 5.3, lab: 'below' }, QQ: { name: '青岐', x: 2.3, y: 6.5, lab: 'below' },
-    HC: { name: '黃厝', x: 4.9, y: 6.4, lab: 'below' }, J: { name: '九宮碼頭', x: 6.1, y: 4.8, lab: 'below' }
+    K: { name: '金城車站', x: 9.4, y: 4.6, lab: 'below' }, S: { name: '水頭碼頭', x: 7.3, y: 5.6, lab: 'below' },
+    H: { name: '湖下', x: 7.0, y: 1.6, lab: 'above' }, B: { name: '大橋烈嶼端', x: 5.19, y: 1.3, lab: 'above' },
+    HT: { name: '后頭', x: 4.18, y: 1.94, lab: 'above' }, DL: { name: '東林', x: 3.48, y: 3.32, lab: 'right' },
+    HJ: { name: '湖井頭', x: 1.61, y: 2.22, lab: 'above' }, XK: { name: '西口', x: 1.45, y: 4.24, lab: 'left' },
+    SL: { name: '上林', x: 2.85, y: 4.98, lab: 'below' }, QQ: { name: '青岐', x: 2.07, y: 6.08, lab: 'below' },
+    HC: { name: '黃厝', x: 4.1, y: 5.99, lab: 'below' }, J: { name: '九宮碼頭', x: 5.04, y: 4.42, lab: 'below' }
   };
   const EDGES0 = [
     ['K', 'S', 8], ['K', 'H', 10], ['S', 'H', 12], ['H', 'B', 5, 'bridge'], ['S', 'J', 0, 'ferry'],
@@ -540,7 +540,7 @@ function lab6() {
   let nodes = JSON.parse(JSON.stringify(NODES0));
   let edges = EDGES0.map(e => ({ a: e[0], b: e[1], w: e[2], kind: e[3] || 'road' }));
   try {
-    const sv = JSON.parse(localStorage.getItem(STORE) || 'null');
+    const sv = JSON.parse(localStorage.getItem(STORE) || 'null') || (() => { const o = JSON.parse(localStorage.getItem('gm-kinmen-isochrone-m5-v1') || 'null'); return o && o.w ? { nodes: {}, w: o.w } : null; })();
     if (sv && sv.nodes && sv.w) {
       for (const k in sv.nodes) if (nodes[k]) { nodes[k].x = sv.nodes[k].x; nodes[k].y = sv.nodes[k].y; }
       sv.w.forEach((w, i) => { if (edges[i] && edges[i].kind !== 'ferry' && w > 0) edges[i].w = w; });
@@ -592,7 +592,11 @@ function lab6() {
     for (const p of pts.slice().reverse()) { while (hi.length >= 2 && cr(hi.at(-2), hi.at(-1), p) <= 0) hi.pop(); hi.push(p); }
     const hull = lo.slice(0, -1).concat(hi.slice(0, -1));
     const cx = hull.reduce((s, p) => s + p[0], 0) / hull.length, cy = hull.reduce((s, p) => s + p[1], 0) / hull.length;
-    const out = hull.map(([x, y]) => { const dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1; return [x + dx / L * pad, y + dy / L * pad]; });
+    shore(hull.map(([x, y]) => { const dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1; return [x + dx / L * pad, y + dy / L * pad]; }), C);
+  }
+  // 大金門只畫西邊一角：海岸線固定，往右、上、下延伸出畫面
+  const GREAT = [[6.7, -2], [6.5, 0.6], [6.35, 1.6], [6.6, 2.7], [6.5, 3.8], [6.75, 4.9], [6.65, 5.9], [7.3, 6.55], [8.4, 6.75], [9.6, 6.5], [10.8, 6.9], [11.7, 7.5], [12.4, 9.5], [14, 9.5], [14, -2]];
+  function shore(out, C) {
     const c = st.ctx; c.beginPath();
     for (let i = 0; i < out.length; i++) {
       const p = out[i], q = out[(i + 1) % out.length], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
@@ -608,10 +612,11 @@ function lab6() {
     if (!st.w) return;
     const c = st.ctx, C = col(), f = sans(), k = st.k;
     c.fillStyle = C.sea; c.fillRect(0, 0, st.w, st.h);
-    blob(['B', 'HT', 'DL', 'HJ', 'XK', 'SL', 'QQ', 'HC', 'J'], 0.75, C);
-    blob(['K', 'S', 'H'], 0.9, C);
-    label(c, '烈嶼', X(3.4), Y(7.6), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
-    label(c, '大金門', X(10.2), Y(7.0), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
+    blob(['B', 'HT', 'DL', 'HJ', 'XK', 'SL', 'QQ', 'HC', 'J'], 0.6, C);
+    shore(GREAT, C);
+    label(c, '烈嶼', X(3.25), Y(7.25), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
+    label(c, '大金門', X(10.3), Y(2.3), { size: Math.round(Math.max(11, k * 0.24)), color: C.muted, halo: false });
+    label(c, '只畫出西邊一角', X(10.3), Y(2.85), { size: Math.round(clamp(k * 0.15, 10, 12)), color: C.muted, halo: false });
     const iso = $('m6iso').checked ? shortest(S.mode) : null;
     const rE = new Set(); for (let i = 1; i < S.route.length; i++) rE.add(edgeBetween(S.route[i - 1], S.route[i]));
     const bE = new Set(); if (S.best) for (let i = 1; i < S.best.path.length; i++) bE.add(edgeBetween(S.best.path[i - 1], S.best.path[i]));
