@@ -356,6 +356,7 @@ header.sub-h .sub{margin-bottom:6px;max-width:64ch}
       <div class="segwrap" id="m5seg">
         <button class="seg on" data-v="ems">兩個救護據點</button>
         <button class="seg" data-v="lions">風獅爺守護範圍</button>
+        <button class="seg" data-v="coast">一個據點和一條海岸線</button>
       </div>
     </div>
     <div id="m5speed">
@@ -363,10 +364,10 @@ header.sub-h .sub{margin-bottom:6px;max-width:64ch}
         <label><span class="dot" style="background:var(--indigo)"></span> 甲車速 <input type="range" id="m5va" min="10" max="90" step="5" value="40"><b class="num" id="m5vav"></b></label>
       </div>
       <div class="row">
-        <label><span class="dot" style="background:var(--orange)"></span> 乙車速 <input type="range" id="m5vb" min="10" max="90" step="5" value="40"><b class="num" id="m5vbv"></b></label>
+        <label><span class="dot" style="background:var(--orange)"></span> <span id="m5vblab">乙車速</span> <input type="range" id="m5vb" min="10" max="90" step="5" value="40"><b class="num" id="m5vbv"></b></label>
       </div>
       <div class="row">
-        <label>乙先等多久 <input type="range" id="m5wait" min="0" max="10" step="1" value="0"><b class="num" id="m5waitv"></b></label>
+        <label><span id="m5waitlab">乙先等多久</span> <input type="range" id="m5wait" min="0" max="10" step="1" value="0"><b class="num" id="m5waitv"></b></label>
       </div>
     </div>
     <canvas id="m5cv" aria-label="金門示意平面，可拖曳據點與地點"></canvas>
@@ -512,11 +513,13 @@ function lab5() {
     mode: 'ems',
     ems: { A: { x: 1.0, y: 2.6 }, B: { x: 4.0, y: 2.6 }, P: { x: 3.4, y: 1.1 } },
     lions: [{ x: 1.2, y: 1.3 }, { x: 3.5, y: 1.1 }, { x: 6.1, y: 1.6 }, { x: 1.9, y: 3.9 }, { x: 4.4, y: 3.5 }, { x: 6.8, y: 4.1 }],
-    probe: { x: 2.9, y: 2.5 }, samples: [], drag: null
+    probe: { x: 2.9, y: 2.5 }, coast: { y: 4.4 }, samples: [], drag: null
   };
+  const pair = () => S.mode === 'ems' || S.mode === 'coast';
   const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
   const va = () => +$('m5va').value, vb = () => +$('m5vb').value, wait = () => +$('m5wait').value;
-  const tA = p => dist(p, S.ems.A) / va() * 60, tB = p => dist(p, S.ems.B) / vb() * 60 + wait();
+  const dBof = p => S.mode === 'coast' ? Math.abs(p.y - S.coast.y) : dist(p, S.ems.B);
+  const tA = p => dist(p, S.ems.A) / va() * 60, tB = p => dBof(p) / vb() * 60 + wait();
   const gap = p => tA(p) - tB(p);
   function nearestTwo(p) {
     let best = -1, second = -1, d1 = Infinity, d2 = Infinity;
@@ -524,7 +527,11 @@ function lab5() {
     return { best, second, d1, d2 };
   }
   function special() {
-    if (S.mode !== 'ems' || wait() !== 0) return null;
+    if (!pair() || wait() !== 0) return null;
+    if (S.mode === 'coast') {
+      if (va() !== vb()) return null;
+      const A = S.ems.A; return { kind: 'vertex', x: A.x, y: (A.y + S.coast.y) / 2 };
+    }
     const A = S.ems.A, B = S.ems.B, k = va() / vb();
     if (k === 1) return { kind: 'mid', x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
     const k2 = k * k;
@@ -546,18 +553,18 @@ function lab5() {
       const step = Math.max(3, Math.round(st.w / 160));
       for (let px = 0; px < st.w; px += step) for (let py = 0; py < st.h; py += step) {
         const p = { x: (px + step / 2) / k, y: (py + step / 2) / k };
-        const cc = S.mode === 'ems' ? (gap(p) < 0 ? col.a : col.b) : col.c[nearestTwo(p).best];
+        const cc = pair() ? (gap(p) < 0 ? col.a : col.b) : col.c[nearestTwo(p).best];
         c.fillStyle = rgba(cc, 0.16); c.fillRect(px, py, step, step);
       }
     }
     for (const s of S.samples) {
-      const cc = S.mode === 'ems' ? (s.win === 'A' ? col.a : col.b) : col.c[s.win];
+      const cc = pair() ? (s.win === 'A' ? col.a : col.b) : col.c[s.win];
       c.fillStyle = cc; c.beginPath(); c.arc(sx(s.x), sy(s.y), s.tie ? 3.2 : 2.2, 0, Math.PI * 2); c.fill();
       if (s.tie) { c.strokeStyle = col.tie; c.lineWidth = 1.5; c.beginPath(); c.arc(sx(s.x), sy(s.y), 6, 0, Math.PI * 2); c.stroke(); }
     }
     if ($('m5edge').checked) {
       c.strokeStyle = col.tie; c.lineWidth = 2.5;
-      if (S.mode === 'ems') contourGrid(c, gridVals((x, y) => gap({ x, y }), 0, 0, W, H, 180, 120), 0, sx, sy);
+      if (pair()) contourGrid(c, gridVals((x, y) => gap({ x, y }), 0, 0, W, H, 180, 120), 0, sx, sy);
       else {
         const n = S.lions.length;
         for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
@@ -575,7 +582,8 @@ function lab5() {
         if (s.kind === 'center') {
           c.beginPath(); c.moveTo(sx(s.x), sy(s.y)); c.lineTo(sx(s.x + s.r), sy(s.y)); c.stroke();
           c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(s.x), sy(s.y)); c.stroke();
-        } else { c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(S.ems.B.x), sy(S.ems.B.y)); c.stroke(); }
+        } else if (s.kind === 'vertex') { c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(S.ems.A.x), sy(S.coast.y)); c.stroke(); }
+        else { c.beginPath(); c.moveTo(sx(S.ems.A.x), sy(S.ems.A.y)); c.lineTo(sx(S.ems.B.x), sy(S.ems.B.y)); c.stroke(); }
         c.setLineDash([]); c.beginPath(); c.arc(sx(s.x), sy(s.y), 5, 0, Math.PI * 2); c.fill();
       }
     }
@@ -595,6 +603,11 @@ function lab5() {
     if (S.mode === 'ems') {
       const { A, B, P } = S.ems;
       links(P, [[A, col.a], [B, col.b]]); stn(A, col.a, '甲'); stn(B, col.b, '乙'); cross(P);
+    } else if (S.mode === 'coast') {
+      const { A, P } = S.ems, ly = sy(S.coast.y);
+      c.strokeStyle = col.b; c.lineWidth = 5; c.beginPath(); c.moveTo(0, ly); c.lineTo(st.w, ly); c.stroke();
+      label(c, '海岸線（整條同時出發）', 10, ly - 10, { size: 13, weight: 700, align: 'left', color: col.b });
+      links(P, [[A, col.a], [{ x: P.x, y: S.coast.y }, col.b]]); stn(A, col.a, '甲'); cross(P);
     } else {
       const nt = nearestTwo(S.probe);
       links(S.probe, [[S.lions[nt.best], col.c[nt.best]], [S.lions[nt.second], col.c[nt.second]]]);
@@ -605,13 +618,13 @@ function lab5() {
   const dot = v => `<span class="dot" style="background:var(${v})"></span> `;
   function panel() {
     $('m5vav').textContent = va() + ' km/h'; $('m5vbv').textContent = vb() + ' km/h'; $('m5waitv').textContent = wait() + ' 分';
-    if (S.mode === 'ems') {
-      const P = S.ems.P, a = tA(P), b = tB(P), dA = dist(P, S.ems.A), dB = dist(P, S.ems.B);
+    if (pair()) {
+      const P = S.ems.P, a = tA(P), b = tB(P), dA = dist(P, S.ems.A), dB = dBof(P), nb = S.mode === 'coast' ? '海岸線' : '乙';
       boxes($('m5probe'), [
-        ['事故地點', tieEms(a, b) ? '幾乎同時到' : (a < b ? dot('--indigo') + '甲先到' : dot('--orange') + '乙先到'), 'hot'],
-        ['甲到這裡', fmt(a, 1) + ' 分', 'blue'], ['乙到這裡', fmt(b, 1) + ' 分', 'hot'],
-        ['到甲的距離', fmt(dA, 2) + ' 公里'], ['到乙的距離', fmt(dB, 2) + ' 公里'],
-        ['到甲 ÷ 到乙', fmt(dA / dB, 2)], ['到甲 − 到乙', fmt(dA - dB, 2) + ' 公里']
+        ['這個地點', tieEms(a, b) ? '幾乎同時到' : (a < b ? dot('--indigo') + '甲先到' : dot('--orange') + nb + '先到'), 'hot'],
+        ['甲到這裡', fmt(a, 1) + ' 分', 'blue'], [nb + '到這裡', fmt(b, 1) + ' 分', 'hot'],
+        ['到甲的距離', fmt(dA, 2) + ' 公里'], ['到' + nb + '的距離', fmt(dB, 2) + ' 公里'],
+        ['到甲 ÷ 到' + nb, fmt(dA / dB, 2)], ['到甲 − 到' + nb, fmt(dA - dB, 2) + ' 公里']
       ]);
     } else {
       const nt = nearestTwo(S.probe);
@@ -624,13 +637,14 @@ function lab5() {
     const n = S.samples.length;
     if (!n) { $('m5stats').innerHTML = ''; $('m5ask').hidden = true; return; }
     const ties = S.samples.filter(s => s.tie), list = [['已經檢查', n + ' 個點']];
-    if (S.mode === 'ems') {
+    if (pair()) {
+      const nb = S.mode === 'coast' ? '海岸線' : '乙';
       const nA = S.samples.filter(s => !s.tie && s.win === 'A').length;
-      list.push(['甲先到', nA + '', 'blue'], ['乙先到', (n - nA - ties.length) + '', 'hot'], ['幾乎同時（圈起來）', ties.length + '']);
+      list.push(['甲先到', nA + '', 'blue'], [nb + '先到', (n - nA - ties.length) + '', 'hot'], ['幾乎同時（圈起來）', ties.length + '']);
       if (ties.length) {
         const R = ties.map(s => s.ratio), D = ties.map(s => s.diff);
-        list.push(['圈起來的點：到甲 ÷ 到乙', fmt(Math.min(...R), 2) + '～' + fmt(Math.max(...R), 2)]);
-        list.push(['圈起來的點：到甲 − 到乙', fmt(Math.min(...D), 2) + '～' + fmt(Math.max(...D), 2)]);
+        list.push(['圈起來的點：到甲 ÷ 到' + nb, fmt(Math.min(...R), 2) + '～' + fmt(Math.max(...R), 2)]);
+        list.push(['圈起來的點：到甲 − 到' + nb, fmt(Math.min(...D), 2) + '～' + fmt(Math.max(...D), 2)]);
       }
     } else {
       const cnt = S.lions.map(() => 0); S.samples.forEach(s => { if (!s.tie) cnt[s.win]++; });
@@ -643,8 +657,8 @@ function lab5() {
   function run() {
     for (let i = 0; i < 1000; i++) {
       const p = { x: Math.random() * W, y: Math.random() * H };
-      if (S.mode === 'ems') {
-        const g = gap(p), dA = dist(p, S.ems.A), dB = dist(p, S.ems.B);
+      if (pair()) {
+        const g = gap(p), dA = dist(p, S.ems.A), dB = dBof(p);
         S.samples.push({ ...p, tie: tieEms(tA(p), tB(p)), win: g < 0 ? 'A' : 'B', ratio: dA / dB, diff: dA - dB });
       } else { const nt = nearestTwo(p); S.samples.push({ ...p, tie: tieLion(nt), win: nt.best }); }
     }
@@ -653,21 +667,26 @@ function lab5() {
   function clearS() { S.samples = []; $('m5run').textContent = '隨機跑 1000 個點'; }
   const LEADS = {
     ems: '拖曳十字標記換個事故地點，看看是哪一輛先到；也可以拖曳甲、乙兩個據點，改改兩邊的車速。',
-    lions: '每一處都由離它最近的那尊風獅爺守護。拖曳十字標記看看誰在守護它；也可以搬動風獅爺。'
+    lions: '每一處都由離它最近的那尊風獅爺守護。拖曳十字標記看看誰在守護它；也可以搬動風獅爺。',
+    coast: '甲從一個據點出發；另一邊沿著整條海岸線同時出發，往最近的方向直直過去。拖曳甲、海岸線或十字標記，改改兩邊的速度。'
   };
   function setMode(m) {
     S.mode = m; $('m5lead').textContent = LEADS[m];
-    $('m5speed').hidden = m !== 'ems'; $('m5specialwrap').hidden = m !== 'ems';
+    $('m5speed').hidden = !pair(); $('m5specialwrap').hidden = !pair();
+    $('m5vblab').textContent = m === 'coast' ? '海岸線出發的速度' : '乙車速';
+    $('m5waitlab').textContent = m === 'coast' ? '海岸線先等多久' : '乙先等多久';
     clearS(); panel(); draw();
   }
   function hit(p) {
     const tol = 22 / st.k;
-    const cand = S.mode === 'ems' ? [['P', S.ems.P], ['A', S.ems.A], ['B', S.ems.B]] : [['P', S.probe], ...S.lions.map((L, i) => [i, L])];
+    const cand = S.mode === 'ems' ? [['P', S.ems.P], ['A', S.ems.A], ['B', S.ems.B]]
+      : S.mode === 'coast' ? [['P', S.ems.P], ['A', S.ems.A]] : [['P', S.probe], ...S.lions.map((L, i) => [i, L])];
     let best = null, bd = tol;
     for (const [k, q] of cand) { const d = dist(p, q); if (d < bd) { bd = d; best = k; } }
+    if (best === null && S.mode === 'coast' && Math.abs(p.y - S.coast.y) < tol * 0.7) best = 'L';
     return best;
   }
-  const target = k => S.mode === 'ems' ? S.ems[k] : (k === 'P' ? S.probe : S.lions[k]);
+  const target = k => k === 'L' ? S.coast : pair() ? S.ems[k] : (k === 'P' ? S.probe : S.lions[k]);
   st.cv.addEventListener('pointerdown', e => {
     const p = st.pos(e), k = hit(p);
     if (k === null) { const t = target('P'); t.x = p.x; t.y = p.y; S.drag = 'P'; } else S.drag = k;
@@ -676,7 +695,7 @@ function lab5() {
   st.cv.addEventListener('pointermove', e => {
     if (S.drag === null) return;
     const p = st.pos(e), t = target(S.drag);
-    t.x = clamp(p.x, 0.05, W - 0.05); t.y = clamp(p.y, 0.05, H - 0.05);
+    if (S.drag !== 'L') t.x = clamp(p.x, 0.05, W - 0.05); t.y = clamp(p.y, 0.05, H - 0.05);
     if (S.drag !== 'P' && S.samples.length) clearS();
     panel(); draw();
   });
