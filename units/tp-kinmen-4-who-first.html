@@ -361,7 +361,7 @@ header.sub-h .sub{margin-bottom:6px;max-width:64ch}
     </div>
     <div id="m5speed">
       <div class="row">
-        <label><span class="dot" style="background:var(--indigo)"></span> 甲車速 <input type="range" id="m5va" min="10" max="90" step="5" value="40"><b class="num" id="m5vav"></b></label>
+        <label><span class="dot" style="background:var(--indigo)"></span> <span id="m5valab">甲車速</span> <input type="range" id="m5va" min="10" max="90" step="5" value="40"><b class="num" id="m5vav"></b></label>
       </div>
       <div class="row">
         <label><span class="dot" style="background:var(--orange)"></span> <span id="m5vblab">乙車速</span> <input type="range" id="m5vb" min="10" max="90" step="5" value="40"><b class="num" id="m5vbv"></b></label>
@@ -518,6 +518,8 @@ function lab5() {
   const pair = () => S.mode === 'ems' || S.mode === 'coast';
   const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
   const va = () => +$('m5va').value, vb = () => +$('m5vb').value, wait = () => +$('m5wait').value;
+  // 海岸線模式：海岸線上方是陸地，下方是海；只看陸地上的點
+  const onLand = p => S.mode !== 'coast' || p.y < S.coast.y;
   const dBof = p => S.mode === 'coast' ? Math.abs(p.y - S.coast.y) : dist(p, S.ems.B);
   const tA = p => dist(p, S.ems.A) / va() * 60, tB = p => dBof(p) / vb() * 60 + wait();
   const gap = p => tA(p) - tB(p);
@@ -542,6 +544,11 @@ function lab5() {
     if (!st.w) return;
     const c = st.ctx, col = C(), k = st.k;
     c.fillStyle = col.panel; c.fillRect(0, 0, st.w, st.h);
+    if (S.mode === 'coast') {
+      const ly = sy(S.coast.y);
+      c.fillStyle = PAL['indigo-soft']; c.fillRect(0, ly, st.w, st.h - ly);
+      if (st.h - ly > 30) label(c, '海', st.w / 2, ly + Math.min(40, (st.h - ly) / 2 + 8), { size: 16, weight: 700, color: col.muted });
+    }
     c.strokeStyle = col.grid; c.lineWidth = 1;
     for (let x = 1; x < W; x++) { c.beginPath(); c.moveTo(sx(x) + 0.5, 0); c.lineTo(sx(x) + 0.5, st.h); c.stroke(); }
     for (let y = 1; y < H; y++) { c.beginPath(); c.moveTo(0, sy(y) + 0.5); c.lineTo(st.w, sy(y) + 0.5); c.stroke(); }
@@ -553,6 +560,7 @@ function lab5() {
       const step = Math.max(3, Math.round(st.w / 160));
       for (let px = 0; px < st.w; px += step) for (let py = 0; py < st.h; py += step) {
         const p = { x: (px + step / 2) / k, y: (py + step / 2) / k };
+        if (!onLand(p)) continue;
         const cc = pair() ? (gap(p) < 0 ? col.a : col.b) : col.c[nearestTwo(p).best];
         c.fillStyle = rgba(cc, 0.16); c.fillRect(px, py, step, step);
       }
@@ -564,7 +572,7 @@ function lab5() {
     }
     if ($('m5edge').checked) {
       c.strokeStyle = col.tie; c.lineWidth = 2.5;
-      if (pair()) contourGrid(c, gridVals((x, y) => gap({ x, y }), 0, 0, W, H, 180, 120), 0, sx, sy);
+      if (pair()) contourGrid(c, gridVals((x, y) => gap({ x, y }), 0, 0, W, H, 180, 120), 0, sx, sy, (x, y) => onLand({ x, y }));
       else {
         const n = S.lions.length;
         for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
@@ -606,7 +614,7 @@ function lab5() {
     } else if (S.mode === 'coast') {
       const { A, P } = S.ems, ly = sy(S.coast.y);
       c.strokeStyle = col.b; c.lineWidth = 5; c.beginPath(); c.moveTo(0, ly); c.lineTo(st.w, ly); c.stroke();
-      label(c, '海岸線（整條同時出發）', 10, ly - 10, { size: 13, weight: 700, align: 'left', color: col.b });
+      label(c, '海岸線（走到海邊，算到最近的那一點）', 10, ly - 10, { size: 13, weight: 700, align: 'left', color: col.b });
       links(P, [[A, col.a], [{ x: P.x, y: S.coast.y }, col.b]]); stn(A, col.a, '甲'); cross(P);
     } else {
       const nt = nearestTwo(S.probe);
@@ -619,10 +627,13 @@ function lab5() {
   function panel() {
     $('m5vav').textContent = va() + ' km/h'; $('m5vbv').textContent = vb() + ' km/h'; $('m5waitv').textContent = wait() + ' 分';
     if (pair()) {
-      const P = S.ems.P, a = tA(P), b = tB(P), dA = dist(P, S.ems.A), dB = dBof(P), nb = S.mode === 'coast' ? '海岸線' : '乙';
+      const P = S.ems.P, a = tA(P), b = tB(P), dA = dist(P, S.ems.A), dB = dBof(P), cst = S.mode === 'coast', nb = cst ? '海邊' : '乙';
       boxes($('m5probe'), [
-        ['這個地點', tieEms(a, b) ? '幾乎同時到' : (a < b ? dot('--indigo') + '甲先到' : dot('--orange') + nb + '先到'), 'hot'],
-        ['甲到這裡', fmt(a, 1) + ' 分', 'blue'], [nb + '到這裡', fmt(b, 1) + ' 分', 'hot'],
+        ['這個地點', cst
+          ? (tieEms(a, b) ? '兩邊幾乎一樣快' : (a < b ? dot('--indigo') + '去甲比較快' : dot('--orange') + '去海邊比較快'))
+          : (tieEms(a, b) ? '幾乎同時到' : (a < b ? dot('--indigo') + '甲先到' : dot('--orange') + '乙先到')), 'hot'],
+        cst ? ['從這裡到甲', fmt(a, 1) + ' 分', 'blue'] : ['甲到這裡', fmt(a, 1) + ' 分', 'blue'],
+        cst ? ['從這裡到海邊', fmt(b, 1) + ' 分', 'hot'] : ['乙到這裡', fmt(b, 1) + ' 分', 'hot'],
         ['到甲的距離', fmt(dA, 2) + ' 公里'], ['到' + nb + '的距離', fmt(dB, 2) + ' 公里'],
         ['到甲 ÷ 到' + nb, fmt(dA / dB, 2)], ['到甲 − 到' + nb, fmt(dA - dB, 2) + ' 公里']
       ]);
@@ -638,9 +649,10 @@ function lab5() {
     if (!n) { $('m5stats').innerHTML = ''; $('m5ask').hidden = true; return; }
     const ties = S.samples.filter(s => s.tie), list = [['已經檢查', n + ' 個點']];
     if (pair()) {
-      const nb = S.mode === 'coast' ? '海岸線' : '乙';
+      const cst = S.mode === 'coast', nb = cst ? '海邊' : '乙';
       const nA = S.samples.filter(s => !s.tie && s.win === 'A').length;
-      list.push(['甲先到', nA + '', 'blue'], [nb + '先到', (n - nA - ties.length) + '', 'hot'], ['幾乎同時（圈起來）', ties.length + '']);
+      if (cst) list.push(['去甲比較快', nA + '', 'blue'], ['去海邊比較快', (n - nA - ties.length) + '', 'hot'], ['幾乎一樣快（圈起來）', ties.length + '']);
+      else list.push(['甲先到', nA + '', 'blue'], ['乙先到', (n - nA - ties.length) + '', 'hot'], ['幾乎同時（圈起來）', ties.length + '']);
       if (ties.length) {
         const R = ties.map(s => s.ratio), D = ties.map(s => s.diff);
         list.push(['圈起來的點：到甲 ÷ 到' + nb, fmt(Math.min(...R), 2) + '～' + fmt(Math.max(...R), 2)]);
@@ -656,7 +668,8 @@ function lab5() {
   }
   function run() {
     for (let i = 0; i < 1000; i++) {
-      const p = { x: Math.random() * W, y: Math.random() * H };
+      let p = { x: Math.random() * W, y: Math.random() * H };
+      while (!onLand(p)) p = { x: Math.random() * W, y: Math.random() * H };
       if (pair()) {
         const g = gap(p), dA = dist(p, S.ems.A), dB = dBof(p);
         S.samples.push({ ...p, tie: tieEms(tA(p), tB(p)), win: g < 0 ? 'A' : 'B', ratio: dA / dB, diff: dA - dB });
@@ -668,13 +681,15 @@ function lab5() {
   const LEADS = {
     ems: '拖曳十字標記換個事故地點，看看是哪一輛先到；也可以拖曳甲、乙兩個據點，改改兩邊的車速。',
     lions: '每一處都由離它最近的那尊風獅爺守護。拖曳十字標記看看誰在守護它；也可以搬動風獅爺。',
-    coast: '甲從一個據點出發；另一邊沿著整條海岸線同時出發，往最近的方向直直過去。拖曳甲、海岸線或十字標記，改改兩邊的速度。'
+    coast: '十字標記是你所在的地方。從這裡去甲據點，和走到最近的海邊，哪一個比較快？拖曳甲、海岸線或十字標記，改改兩邊的速度。'
   };
   function setMode(m) {
     S.mode = m; $('m5lead').textContent = LEADS[m];
     $('m5speed').hidden = !pair(); $('m5specialwrap').hidden = !pair();
-    $('m5vblab').textContent = m === 'coast' ? '海岸線出發的速度' : '乙車速';
-    $('m5waitlab').textContent = m === 'coast' ? '海岸線先等多久' : '乙先等多久';
+    $('m5valab').textContent = m === 'coast' ? '去甲的速度' : '甲車速';
+    $('m5vblab').textContent = m === 'coast' ? '去海邊的速度' : '乙車速';
+    $('m5waitlab').textContent = m === 'coast' ? '去海邊要多花幾分鐘' : '乙先等多久';
+    if (m === 'coast') keepLand();
     clearS(); panel(); draw();
   }
   function hit(p) {
@@ -686,16 +701,24 @@ function lab5() {
     if (best === null && S.mode === 'coast' && Math.abs(p.y - S.coast.y) < tol * 0.7) best = 'L';
     return best;
   }
+  // 海岸線模式：甲和十字標記都要在陸地上；拖海岸線時不能越過它們
+  function keepLand(k) {
+    if (S.mode !== 'coast') return;
+    const A = S.ems.A, P = S.ems.P, m = 0.15;
+    if (k === 'L') S.coast.y = clamp(S.coast.y, Math.max(A.y, P.y) + m, H - 0.05);
+    else { A.y = Math.min(A.y, S.coast.y - m); P.y = Math.min(P.y, S.coast.y - 0.05); }
+  }
   const target = k => k === 'L' ? S.coast : pair() ? S.ems[k] : (k === 'P' ? S.probe : S.lions[k]);
   st.cv.addEventListener('pointerdown', e => {
     const p = st.pos(e), k = hit(p);
-    if (k === null) { const t = target('P'); t.x = p.x; t.y = p.y; S.drag = 'P'; } else S.drag = k;
+    if (k === null) { const t = target('P'); t.x = p.x; t.y = p.y; S.drag = 'P'; keepLand(); } else S.drag = k;
     st.cv.setPointerCapture(e.pointerId); panel(); draw();
   });
   st.cv.addEventListener('pointermove', e => {
     if (S.drag === null) return;
     const p = st.pos(e), t = target(S.drag);
     if (S.drag !== 'L') t.x = clamp(p.x, 0.05, W - 0.05); t.y = clamp(p.y, 0.05, H - 0.05);
+    keepLand(S.drag);
     if (S.drag !== 'P' && S.samples.length) clearS();
     panel(); draw();
   });
