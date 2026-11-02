@@ -119,7 +119,7 @@ function rulesText(set){
   if(KIND==='個人') return '<div><b>'+esc(set.title)+'</b>：'+nRounds(set)+' 回合，每回合 2 題、'+set.minutes+' 分鐘。</div>'+
     '<div class="muted">回合時間到會自動進下一回合；進了下一回合，前面的就不能再改。每回合兩題全對 3 分、對一題 1 分。</div>';
   if(KIND==='團體') return '<div><b>'+esc(set.title)+'</b>：'+set.questions.length+' 題，倒數 '+set.minutes+' 分鐘。</div>'+
-    '<div class="muted">一隊交一份：請隊長用一台裝置作答，其他人一起算。證明題寫出過程，也可以把紙本拍照上傳。時間到會自動交卷。</div>';
+    '<div class="muted">一隊交一份：只有第一個按「開始計時」的隊員能作答，其他人到他的裝置一起討論、一起算。證明題寫出過程，也可以把紙本拍照上傳。時間到會自動交卷。</div>';
   return '<div><b>'+esc(set.title)+'</b>：'+set.questions.length+' 題，倒數 '+set.minutes+' 分鐘。</div>'+
     '<div class="muted">開始後不能暫停；切到別的畫面時間照樣走。時間到會自動交卷。</div>';
 }
@@ -133,7 +133,7 @@ function askStart(set){
     var btn=$('go'); btn.disabled=true; btn.textContent='確認代碼中…';
     var fail=function(msg){ btn.disabled=false; btn.textContent='開始計時';
       var e=c.querySelector('.err'); if(!e){ e=document.createElement('div'); e.className='err'; c.appendChild(e); } e.textContent=msg; };
-    post({action:'login',team:$('team').value,name:$('name').value,pin:$('pin').value.trim()}).then(function(d){
+    post({action:'login',team:$('team').value,name:$('name').value,pin:$('pin').value.trim(),setId:KIND==='團體'?set.id:''}).then(function(d){
       if(d.ok){ c.hidden=true; startRun(set); return; }
       fail(d.error||'代碼不對，請再確認一次。'); $('pin').focus();
     }).catch(function(){ fail('連不上題庫，請確認網路後再按一次。'); });
