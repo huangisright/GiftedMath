@@ -75,6 +75,27 @@ h2.grp{
   font-family:var(--serif); font-size:21px; margin:34px 0 4px; padding-bottom:7px;
   border-bottom:1px solid var(--edge); color:var(--ink);
 }
+/* 年段收合（2026-10-28）：每個年段是一個 details，預設收起 */
+.gbar{display:flex; justify-content:flex-end; margin:18px 0 -4px}
+.gbar button{
+  font-family:var(--sans); font-size:13px; color:var(--indigo); background:none; border:none;
+  cursor:pointer; padding:4px 2px;
+}
+.gbar button:hover{text-decoration:underline}
+details.group{margin-top:12px; background:var(--card); border:1px solid var(--edge); border-radius:11px; box-shadow:var(--shadow)}
+details.group > summary{
+  list-style:none; cursor:pointer; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  padding:14px 18px; border-radius:11px;
+}
+details.group > summary::-webkit-details-marker{display:none}
+details.group > summary:hover .gname{color:var(--indigo)}
+details.group > summary:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.gname{font-family:var(--serif); font-size:21px; color:var(--ink); font-weight:700}
+.gmeta{font-size:13px; color:var(--ink-3)}
+.chev{margin-left:auto; color:var(--ink-3); font-size:14px; transition:transform .16s ease; align-self:center}
+details.group[open] > summary .chev{transform:rotate(90deg)}
+details.group[open] > summary{border-bottom:1px solid var(--edge-soft); border-radius:11px 11px 0 0}
+details.group .cards{margin:0; padding:16px}
 .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:15px; margin-top:16px}
 /* a.unit 有自己的 display，會蓋掉瀏覽器內建的 [hidden]{display:none}；沒有這一條的話搜尋與篩選都不會作用 */
 [hidden]{display:none!important}
@@ -115,7 +136,8 @@ a.extlink{
 }
 a.extlink b{font-family:var(--serif); font-size:18px; color:var(--orange)}
 a.extlink:hover{border-color:var(--orange)}
-@media(max-width:520px){ .wrap{padding:24px 15px 54px} .tools{position:static} }
+@media(max-width:520px){ .wrap{padding:24px 15px 54px} .tools{position:static} details.group .cards{padding:12px} details.group > summary{padding:12px 14px} }
+@media(max-width:360px){ .cards{grid-template-columns:1fr} }
 
 .backline{font-size:14px; margin-bottom:18px}
 .backline a{color:var(--indigo); text-decoration:none; font-weight:600}
@@ -504,7 +526,7 @@ input[type=range]{accent-color:var(--ink)}
 
 <footer>
   <span>黃士祐 老師（IsRight）</span>
-  <span>更新於 2026-10-20</span>
+  <span>更新於 2026-10-30</span>
 </footer>
 
 </div>
