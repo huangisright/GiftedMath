@@ -96,6 +96,18 @@ details.group > summary:focus-visible{outline:2px solid var(--indigo); outline-o
 details.group[open] > summary .chev{transform:rotate(90deg)}
 details.group[open] > summary{border-bottom:1px solid var(--edge-soft); border-radius:11px 11px 0 0}
 details.group .cards{margin:0; padding:16px}
+/* 幾何明珠：外層裡面再分單元收合 */
+.subs{padding:6px 14px 14px}
+details.sub{margin-top:10px; border:1px solid var(--edge-soft); border-radius:9px; background:var(--paper)}
+details.sub > summary{list-style:none; cursor:pointer; display:flex; align-items:baseline; gap:12px; padding:10px 14px; border-radius:9px}
+details.sub > summary::-webkit-details-marker{display:none}
+details.sub > summary:hover .sname{color:var(--indigo)}
+details.sub > summary:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.sname{font-family:var(--serif); font-size:17px; font-weight:700; color:var(--ink)}
+details.sub[open] > summary .chev{transform:rotate(90deg)}
+details.sub[open] > summary{border-bottom:1px solid var(--edge-soft); border-radius:9px 9px 0 0}
+details.sub .cards{margin:0; padding:12px}
+.b.gp{background:transparent; color:var(--green); border:1px solid var(--green)}
 .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:15px; margin-top:16px}
 /* a.unit 有自己的 display，會蓋掉瀏覽器內建的 [hidden]{display:none}；沒有這一條的話搜尋與篩選都不會作用 */
 [hidden]{display:none!important}
@@ -137,7 +149,7 @@ a.extlink{
 }
 a.extlink b{font-family:var(--serif); font-size:18px; color:var(--orange)}
 a.extlink:hover{border-color:var(--orange)}
-@media(max-width:520px){ .wrap{padding:24px 15px 54px} .tools{position:static} details.group .cards{padding:12px} details.group > summary{padding:12px 14px} }
+@media(max-width:520px){ .subs{padding:4px 8px 10px} details.sub .cards{padding:10px} .wrap{padding:24px 15px 54px} .tools{position:static} details.group .cards{padding:12px} details.group > summary{padding:12px 14px} }
 @media(max-width:360px){ .cards{grid-template-columns:1fr} }
 </style>
 <!--hand-theme--><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"><link href="https://huangisright.github.io/fonts/isright-hand.css" rel="stylesheet"><style id="hand-theme">
@@ -253,6 +265,7 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
   <div class="counts">
     <div class="count"><b>31</b><span>個單元</span></div>
     <div class="count"><b>211</b><span>個探索站</span></div>
+    <div class="count"><b>28</b><span>節幾何明珠</span></div>
   </div>
   <a class="extlink" href="extend.html"><b>章後延伸報告</b><span>每章六題，上完一章後自選一題做一頁海報報告 →</span></a>
 </header>
@@ -270,6 +283,7 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
     <button class="f" data-f="正課">正課</button>
     <button class="f" data-f="補充卷">補充卷</button>
     <button class="f" data-f="專題">專題</button>
+    <button class="f" data-f="幾何明珠">幾何明珠</button>
   </div>
 </div>
 
@@ -322,11 +336,57 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
 <details class="group"><summary><span class="gname">專題</span><span class="gmeta">1 個單元・7 站</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
 <a class="unit" href="units/tp-kinmen-isochrone.html" data-grade="專題" data-kind="專題" data-search="專題 金門有多大？ 等時線 金門 在地 金城國中 走路 街道 方格 公車 時刻表 等車 平均等待 建功嶼 灘地 堤岸 轉折點 最快路線 救護車 風獅爺 分界 金門大橋 烈嶼 小金門 船班 最短路徑 時間地圖 小三通 廈門 台北 颱風 空間與形狀 資料與不確定性"><div class="badges"><span class="b ch">專題</span><span class="b proj">金門在地</span><span class="b topic">空間與形狀・資料與不確定性</span></div><h3>金門有多大？</h3><p>換一把尺，用「幾分鐘到得了」量金門：沿街走、坐公車、過灘地、兩輛救護車、金門大橋，最後畫一張時間地圖。</p><div class="foot"><span>7 站</span><span class="go">打開 →</span></div></a>
 </div></details>
+<details class="group"><summary><span class="gname">幾何明珠</span><span class="gmeta">8 個單元・28 節動態頁</span><span class="chev" aria-hidden="true">▶</span></summary><div class="subs">
+<details class="sub"><summary><span class="sname">單元一</span><span class="gmeta">3 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u1-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元一 第 1 節 單元一 一個不會變的數 拖動點 p，看它到每一條邊的距離。什麼一直在變？什麼沒有變？"><div class="badges"><span class="b ch">單元一 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>一個不會變的數</h3><p>拖動點 P，看它到每一條邊的距離。什麼一直在變？什麼沒有變？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u1-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元一 第 2 節 單元一 空白搬了家 四片一樣的直角三角形，放在同一個大正方形裡。把它們搬一搬，白色的部分變形了。什麼沒有變？"><div class="badges"><span class="b ch">單元一 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>空白搬了家</h3><p>四片一樣的直角三角形，放在同一個大正方形裡。把它們搬一搬，白色的部分變形了。什麼沒有變？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u1-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元一 第 3 節 單元一 三條線，交在一點 拖動點 o。從三個頂點各畫一條線穿過它，碰到對邊於 d、e、f。三個比一直在變，什麼沒有變？"><div class="badges"><span class="b ch">單元一 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>三條線，交在一點</h3><p>拖動點 O。從三個頂點各畫一條線穿過它，碰到對邊於 D、E、F。三個比一直在變，什麼沒有變？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元二</span><span class="gmeta">3 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u2-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元二 第 1 節 單元二 光走的那一條 從 p 出發，先碰一下直線，再走到 q。碰在哪裡，路最短？"><div class="badges"><span class="b ch">單元二 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>光走的那一條</h3><p>從 P 出發，先碰一下直線，再走到 Q。碰在哪裡，路最短？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u2-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元二 第 2 節 單元二 最短的那一圈 三角形的三邊上各取一點，連成一圈。哪一圈最短？先猜，再拖。"><div class="badges"><span class="b ch">單元二 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>最短的那一圈</h3><p>三角形的三邊上各取一點，連成一圈。哪一圈最短？先猜，再拖。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u2-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元二 第 3 節 單元二 三條路接成一條 三個村子要蓋一個轉運站 p，各修一條直路過去。p 蓋在哪裡，三條路加起來最短？"><div class="badges"><span class="b ch">單元二 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>三條路接成一條</h3><p>三個村子要蓋一個轉運站 P，各修一條直路過去。P 蓋在哪裡，三條路加起來最短？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元三</span><span class="gmeta">3 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u3-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元三 第 1 節 單元三 離 a 是離 b 的兩倍 到 a 的距離是到 b 的兩倍，這樣的點會排成什麼樣子？先猜，再拖。"><div class="badges"><span class="b ch">單元三 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>離 A 是離 B 的兩倍</h3><p>到 A 的距離是到 B 的兩倍，這樣的點會排成什麼樣子？先猜，再拖。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u3-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元三 第 2 節 單元三 從頂點到底邊的那一條 底邊不動，拖動頂點 a。三段長度的平方，乘什麼數加起來，才會一直不變？"><div class="badges"><span class="b ch">單元三 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>從頂點到底邊的那一條</h3><p>底邊不動，拖動頂點 A。三段長度的平方，乘什麼數加起來，才會一直不變？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u3-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元三 第 3 節 單元三 切下來的那一塊 等腰三角形，把底角 ∠b 平分，切下 △bcd。頂角幾度時，切下來的和原來的形狀一模一樣？"><div class="badges"><span class="b ch">單元三 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>切下來的那一塊</h3><p>等腰三角形，把底角 ∠B 平分，切下 △BCD。頂角幾度時，切下來的和原來的形狀一模一樣？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元四</span><span class="gmeta">3 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u4-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元四 第 1 節 單元四 又交在一點 從三個頂點各畫一條線。換一組畫法、拖動三角形，看三條線怎麼走。"><div class="badges"><span class="b ch">單元四 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>又交在一點</h3><p>從三個頂點各畫一條線。換一組畫法、拖動三角形，看三條線怎麼走。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u4-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元四 第 2 節 單元四 一條線穿過去 一條直線穿過三角形，碰到三條邊（或延長線）。三個比一直在變，什麼沒有變？"><div class="badges"><span class="b ch">單元四 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>一條線穿過去</h3><p>一條直線穿過三角形，碰到三條邊（或延長線）。三個比一直在變，什麼沒有變？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u4-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元四 第 3 節 單元四 三組對邊，交在一條線上 aa′、bb′、cc′ 交在 o。把對應的邊延長，交出 p、q、r。"><div class="badges"><span class="b ch">單元四 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>三組對邊，交在一條線上</h3><p>AA′、BB′、CC′ 交在 O。把對應的邊延長，交出 P、Q、R。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元五</span><span class="gmeta">3 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u5-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元五 第 1 節 單元五 三個點排成一列 o 是外心、g 是重心、h 是垂心。拖動三角形，看這三個點的位置有什麼關係。"><div class="badges"><span class="b ch">單元五 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>三個點排成一列</h3><p>O 是外心、G 是重心、H 是垂心。拖動三角形，看這三個點的位置有什麼關係。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u5-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元五 第 2 節 單元五 九個點，一個圓 灰色的圓穿過三邊的中點。一組一組按，看看還有誰也在這個圓上。h 是垂心。"><div class="badges"><span class="b ch">單元五 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>九個點，一個圓</h3><p>灰色的圓穿過三邊的中點。一組一組按，看看還有誰也在這個圓上。H 是垂心。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u5-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元五 第 3 節 單元五 三個尖，一條線 每兩個圓的兩條公切線交出一個尖。三個圓，三個尖。"><div class="badges"><span class="b ch">單元五 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>三個尖，一條線</h3><p>每兩個圓的兩條公切線交出一個尖。三個圓，三個尖。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元六</span><span class="gmeta">4 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u6-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元六 第 1 節 單元六 乘起來還是那個數 穿過 p 的直線和圓交在 a、b。拖 p，或拖藍色把手轉動直線，看 pa 和 pb 乘起來。"><div class="badges"><span class="b ch">單元六 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>乘起來還是那個數</h3><p>穿過 P 的直線和圓交在 A、B。拖 P，或拖藍色把手轉動直線，看 PA 和 PB 乘起來。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u6-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元六 第 2 節 單元六 站在兩個圓中間 從 p 對兩個圓各畫一條切線。拖 p，找兩條一樣長的地方。圓心和藍色把手也可以拖。"><div class="badges"><span class="b ch">單元六 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>站在兩個圓中間</h3><p>從 P 對兩個圓各畫一條切線。拖 P，找兩條一樣長的地方。圓心和藍色把手也可以拖。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u6-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元六 第 3 節 單元六 中點兩邊一樣長 m 是弦 ab 的中點。穿過 m 的兩條弦 cd、ef；連 cf、ed，交 ab 於 p、q。拖 c、e。"><div class="badges"><span class="b ch">單元六 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>中點兩邊一樣長</h3><p>M 是弦 AB 的中點。穿過 M 的兩條弦 CD、EF；連 CF、ED，交 AB 於 P、Q。拖 C、E。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u6-4.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元六 第 4 節 單元六 對角線乘起來 四個點依序在圓上。兩組對邊各自乘起來再相加，和兩條對角線乘起來，比一比。"><div class="badges"><span class="b ch">單元六 第 4 節</span><span class="b gp">幾何明珠</span></div><h3>對角線乘起來</h3><p>四個點依序在圓上。兩組對邊各自乘起來再相加，和兩條對角線乘起來，比一比。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元七</span><span class="gmeta">4 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u7-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元七 第 1 節 單元七 轉兩次 旗子先繞 p 轉，再繞 q 轉（逆時針為正）。轉兩次，像不像只轉了一次？"><div class="badges"><span class="b ch">單元七 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>轉兩次</h3><p>旗子先繞 P 轉，再繞 Q 轉（逆時針為正）。轉兩次，像不像只轉了一次？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u7-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元七 第 2 節 單元七 三個中心 在三角形的每一邊上作一個正三角形，取它們的中心 u、v、w。拖動三角形的頂點，看三個中心。"><div class="badges"><span class="b ch">單元七 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>三個中心</h3><p>在三角形的每一邊上作一個正三角形，取它們的中心 U、V、W。拖動三角形的頂點，看三個中心。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u7-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元七 第 3 節 單元七 中點又是正三角形 兩個正三角形 abc、pqr，對應頂點連起來取中點 d、e、f。兩個三角形放在哪裡都可以。"><div class="badges"><span class="b ch">單元七 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>中點又是正三角形</h3><p>兩個正三角形 ABC、PQR，對應頂點連起來取中點 D、E、F。兩個三角形放在哪裡都可以。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u7-4.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元七 第 4 節 單元七 轉回原樣 卡片要剛好蓋滿底座，只能轉或翻。有幾種放法？先做這個、再做那個，會變成哪一個？"><div class="badges"><span class="b ch">單元七 第 4 節</span><span class="b gp">幾何明珠</span></div><h3>轉回原樣</h3><p>卡片要剛好蓋滿底座，只能轉或翻。有幾種放法？先做這個、再做那個，會變成哪一個？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+<details class="sub"><summary><span class="sname">單元八</span><span class="gmeta">5 節</span><span class="chev" aria-hidden="true">▶</span></summary><div class="cards">
+<a class="unit" href="units/gp-u8-1.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元八 第 1 節 單元八 畫出來的地板 一片 3 × 3 的正方形磁磚地板，畫成站在旁邊看過去的樣子。拖動眼睛，看畫上哪些事還成立。"><div class="badges"><span class="b ch">單元八 第 1 節</span><span class="b gp">幾何明珠</span></div><h3>畫出來的地板</h3><p>一片 3 × 3 的正方形磁磚地板，畫成站在旁邊看過去的樣子。拖動眼睛，看畫上哪些事還成立。</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u8-2.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元八 第 2 節 單元八 一個數都不用算 從 o 拉出三條線，兩個三角形的頂點各在一條線上。三組對邊的交點，會怎樣？"><div class="badges"><span class="b ch">單元八 第 2 節</span><span class="b gp">幾何明珠</span></div><h3>一個數都不用算</h3><p>從 O 拉出三條線，兩個三角形的頂點各在一條線上。三組對邊的交點，會怎樣？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u8-3.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元八 第 3 節 單元八 圓上六個點 圓上六個點依序連成六邊形。三組對邊延長的交點 l、m、n，會怎樣？"><div class="badges"><span class="b ch">單元八 第 3 節</span><span class="b gp">幾何明珠</span></div><h3>圓上六個點</h3><p>圓上六個點依序連成六邊形。三組對邊延長的交點 L、M、N，會怎樣？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u8-4.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元八 第 4 節 單元八 翻譯過來的句子 六條直線都和圓相切，圍成六邊形 abcdef。三組對頂點的連線，會怎樣？"><div class="badges"><span class="b ch">單元八 第 4 節</span><span class="b gp">幾何明珠</span></div><h3>翻譯過來的句子</h3><p>六條直線都和圓相切，圍成六邊形 ABCDEF。三組對頂點的連線，會怎樣？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+<a class="unit" href="units/gp-u8-5.html" data-grade="幾何明珠" data-kind="幾何明珠" data-search="幾何明珠 動態頁 單元八 第 5 節 單元八 最後一題 ab ＝ ac，∠a ＝ 20°，∠dca ＝ 20°，∠abe ＝ 30°。∠cde 是多少？"><div class="badges"><span class="b ch">單元八 第 5 節</span><span class="b gp">幾何明珠</span></div><h3>最後一題</h3><p>AB ＝ AC，∠A ＝ 20°，∠DCA ＝ 20°，∠ABE ＝ 30°。∠CDE 是多少？</p><div class="foot"><span>動態頁</span><span class="go">打開 →</span></div></a>
+</div></details>
+</div></details>
 
 
 <footer>
   <span>黃士祐 老師（IsRight）</span>
-  <span>更新於 2026-10-27</span>
+  <span>更新於 2026-11-02</span>
 </footer>
 
 </div>
@@ -337,7 +397,8 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
   var cards = Array.prototype.slice.call(document.querySelectorAll('a.unit'));
   var mode = 'all';
   var groups = Array.prototype.slice.call(document.querySelectorAll('details.group'));
-  var saved = [], wasActive = false;
+  var subs = Array.prototype.slice.call(document.querySelectorAll('details.sub'));
+  var saved = [], savedS = [], wasActive = false;
   var tog = document.getElementById('toggleAll');
   function syncAll(){
     var vis = groups.filter(function(g){ return !g.hidden; });
@@ -348,6 +409,7 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
   tog.addEventListener('click', function(){
     var open = tog.textContent === '全部展開';
     groups.forEach(function(g){ if (!g.hidden) g.open = open; });
+    subs.forEach(function(g){ if (!g.hidden) g.open = open; });
     syncAll();
   });
   function apply(){
@@ -360,7 +422,13 @@ footer{border-top:1.5px dashed var(--edge-soft)!important}
       c.hidden = !(okF && okQ);
     });
     var active = !!s || mode !== 'all';
-    if (active && !wasActive) saved = groups.map(function(g){ return g.open; });
+    if (active && !wasActive){ saved = groups.map(function(g){ return g.open; }); savedS = subs.map(function(g){ return g.open; }); }
+    subs.forEach(function(g, i){
+      var any = Array.prototype.slice.call(g.querySelectorAll('a.unit')).some(function(c){ return !c.hidden; });
+      g.hidden = !any;
+      if (active) g.open = any;
+      else if (wasActive) g.open = savedS[i];
+    });
     groups.forEach(function(g, i){
       var any = Array.prototype.slice.call(g.querySelectorAll('a.unit')).some(function(c){ return !c.hidden; });
       g.hidden = !any;

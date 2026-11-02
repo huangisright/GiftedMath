@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>光走的那一條</title>
+<!--hand-theme--><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"><link href="https://huangisright.github.io/fonts/isright-hand.css" rel="stylesheet"><style id="hand-theme">
+:root{
+  --paper:#fdfcf8; --grid:transparent; --card:#fffefa;
+  --edge:#b9b5aa; --edge-soft:#dedad0; --ink:#1b1b1b; --ink-2:#4a4844; --ink-3:#77756f;
+  --indigo:#24489a; --indigo-soft:#e8edf8; --orange:#d4472b; --orange-soft:#fde9e3;
+  --green:#2f7a3a; --green-soft:#e6f2e4; --crimson:#c8321e; --black-card:#1b1b1b;
+  --shadow:none; --shadow-lift:none;
+  --mute:#77756f; --line:#d9d6cc; --blue:#24489a; --sand:#efe9d8;
+  --cardline:#1b1b1b; --tint:#fde9e3; --tint2:#e8edf8;
+  --hl:#fff2a8;
+  --serif:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif; --sans:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif; --wob:255px 14px 225px 14px/14px 225px 14px 255px; --wob2:14px 255px 14px 225px/225px 14px 255px 14px;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1c1d1f; --grid:transparent; --card:#222326;
+  --edge:#5e5f62; --edge-soft:#3a3b3e; --ink:#ecebe6; --ink-2:#c4c2bb; --ink-3:#9c9a93;
+  --indigo:#8fb0f0; --indigo-soft:#1f2a40; --orange:#ff7a5c; --orange-soft:#3d221b;
+  --green:#7cc98a; --green-soft:#1d3122; --crimson:#ff6b55; --black-card:#0d0d0e;
+  --shadow:none; --shadow-lift:none;
+  --mute:#9c9a93; --line:#3a3b3e; --blue:#8fb0f0; --sand:#33302a;
+  --cardline:#ecebe6; --tint:#3d221b; --tint2:#1f2a40;
+  --hl:#4a4320;
+}}
+:root[data-theme="dark"]{
+  --paper:#1c1d1f; --grid:transparent; --card:#222326;
+  --edge:#5e5f62; --edge-soft:#3a3b3e; --ink:#ecebe6; --ink-2:#c4c2bb; --ink-3:#9c9a93;
+  --indigo:#8fb0f0; --indigo-soft:#1f2a40; --orange:#ff7a5c; --orange-soft:#3d221b;
+  --green:#7cc98a; --green-soft:#1d3122; --crimson:#ff6b55; --black-card:#0d0d0e;
+  --shadow:none; --shadow-lift:none;
+  --mute:#9c9a93; --line:#3a3b3e; --blue:#8fb0f0; --sand:#33302a;
+  --cardline:#ecebe6; --tint:#3d221b; --tint2:#1f2a40;
+  --hl:#4a4320;
+}
+body{background:var(--paper)!important;background-image:none!important;font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;font-size:17px}
+button,input,select,textarea,label{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif}
+input[type=number],.row input[type=number]{font-family:var(--math,serif)}
+h1,h2,h3,.lab-title{font-family:"IsRight Hand","LXGW WenKai TC","Kaiti TC","KaiTi",serif;font-weight:700;letter-spacing:.02em}
+.lab-title{font-size:22px!important}
+h1{text-decoration:underline;text-decoration-color:var(--orange);text-decoration-thickness:3px;text-underline-offset:10px}
+.eyebrow{color:var(--orange)}
+.thesis{border-left:none!important;padding-left:0!important;background:linear-gradient(transparent 62%,var(--hl) 62%);display:inline}
+nav{background:var(--paper)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:1.5px dashed var(--edge-soft)!important}
+nav a{border-radius:var(--wob)!important}
+nav a:hover,nav a:focus-visible{border:1.5px solid var(--ink)!important;background:transparent!important;color:var(--ink)!important}
+
+.lab{border:2.5px solid var(--ink)!important;border-radius:var(--wob)!important;box-shadow:none!important;overflow:visible!important}
+.lab:nth-of-type(even){border-radius:var(--wob2)!important}
+.lab-head{border-bottom:1.5px dashed var(--edge-soft)!important}
+.lab-no{background:transparent!important;color:var(--ink)!important;border:2px solid var(--ink);border-radius:52% 48% 50% 46%/48% 54% 46% 52%!important;font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;width:28px!important;height:28px!important}
+.lab-foot{background:var(--hl)!important;border:none!important;margin:6px 10px 10px;border-radius:var(--wob2)}
+.lab-foot b{color:var(--ink)!important}
+
+button,.btn{border:2px solid var(--ink)!important;border-radius:var(--wob)!important;background:transparent!important;color:var(--ink)!important;box-shadow:none!important}
+button:nth-of-type(even),.btn:nth-of-type(even){border-radius:var(--wob2)!important}
+button:hover:not(:disabled),.btn:hover{background:var(--hl)!important;color:var(--ink)!important}
+button.primary,.seg.on,.seg.on:hover{background:var(--ink)!important;color:var(--paper)!important}
+button.warn{border-color:var(--orange)!important;color:var(--orange)!important}
+.chip button{border:none!important;background:none!important}
+.segwrap{border:2px solid var(--ink)!important;border-radius:var(--wob)!important}
+.seg{border:none!important;border-right:1.5px dashed var(--edge-soft)!important;border-radius:0!important}
+input[type=number],input[type=text],select,textarea{border:2px solid var(--ink)!important;border-radius:var(--wob2)!important;background:transparent!important}
+input:focus-visible,select:focus-visible{outline:none!important;background:var(--hl)!important}
+input[type=range]{accent-color:var(--ink)}
+
+.msg,.verdict,.fate,.stat,.statbox,.chip,.tape,.pan,.thumb,.idcell{border-width:1.5px!important;border-radius:var(--wob)!important;box-shadow:none!important}
+.card,.box,.panel,.callout,.note,.tip{box-shadow:none!important}
+.dot{border-radius:48% 52% 46% 54%!important}
+::selection{background:var(--hl)}
+
+.bk-top{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;font-size:15px!important}
+.bk-top a{color:var(--ink,#1b1b1b)!important;text-decoration:underline dotted!important}
+.bk-fab{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;background:var(--paper,#fdfcf8)!important;color:var(--ink,#1b1b1b)!important;
+  border:2px solid var(--ink,#1b1b1b)!important;border-radius:255px 14px 225px 14px/14px 225px 14px 255px!important;box-shadow:none!important}
+.bk-fab:hover{background:var(--hl,#fff2a8)!important}
+@media print{.lab{border-width:1.5px!important}}
+</style><!--/hand-theme--></head>
+<body>
+
+<style id="backnav">
+.bk-top{
+  max-width:1080px; margin:0 auto; padding:14px 20px 0;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:14px;
+}
+.bk-top a{color:#2E5A88; text-decoration:none; font-weight:600}
+.bk-top a:hover{text-decoration:underline}
+.bk-top .bk-sep{color:#B8AE9C; margin:0 10px}
+.bk-fab{
+  position:fixed; right:16px; bottom:16px; z-index:9999;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 15px; border-radius:24px;
+  background:#FFFDF8; border:1px solid #DFD6C4; color:#2E5A88;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:14px; font-weight:600; text-decoration:none;
+  box-shadow:0 2px 4px rgba(72,60,40,.10), 0 10px 26px rgba(72,60,40,.16);
+}
+.bk-fab:hover{border-color:#2E5A88}
+.bk-fab:focus-visible{outline:2px solid #2E5A88; outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bk-top a{color:#82ADDC}
+  :root:not([data-theme="light"]) .bk-fab{
+    background:#1F252B; border-color:#333C45; color:#82ADDC;
+    box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+  }
+  :root:not([data-theme="light"]) .bk-fab:hover{border-color:#82ADDC}
+}
+:root[data-theme="dark"] .bk-top a{color:#82ADDC}
+:root[data-theme="dark"] .bk-fab{
+  background:#1F252B; border-color:#333C45; color:#82ADDC;
+  box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+}
+@media print{ .bk-top, .bk-fab{display:none !important} }
+@media (max-width:520px){ .bk-fab{right:12px; bottom:12px; padding:8px 13px; font-size:13px} }
+</style>
+<div class="bk-top"><a href="../index.html">← 回目錄</a></div>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Crimson+Text:ital,wght@0,600;1,400;1,600&display=swap">
+<style>
+:root{
+  --paper:#F5F2E8; --grid:rgba(46,90,136,.07); --card:#FFFDF8; --edge:#DFD6C4; --edge-soft:#EBE3D4;
+  --ink:#23282D; --ink-2:#5C554A; --ink-3:#847B6C;
+  --indigo:#2E5A88; --orange:#C1652F; --green:#4A7C59; --green-soft:#E7F0E9; --crimson:#B23A3A;
+  --s1:#2E5A88; --s2:#4A7C59; --s3:#A8701E; --s4:#7A4E8C; --s5:#2D7F86;
+  --shape-fill:rgba(46,90,136,.05);
+  --serif:"Noto Serif TC","Songti TC","Times New Roman",serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --math:"Crimson Text","Times New Roman",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+    --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+    --indigo:#82ADDC; --orange:#E08A54; --green:#7FB08D; --green-soft:#1E2A22; --crimson:#E07A7A;
+    --s1:#82ADDC; --s2:#7FB08D; --s3:#D9A55A; --s4:#B892CC; --s5:#6FC0C6;
+    --shape-fill:rgba(130,173,220,.07);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+  --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+  --indigo:#82ADDC; --orange:#E08A54; --green:#7FB08D; --green-soft:#1E2A22; --crimson:#E07A7A;
+  --s1:#82ADDC; --s2:#7FB08D; --s3:#D9A55A; --s4:#B892CC; --s5:#6FC0C6;
+  --shape-fill:rgba(130,173,220,.07);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+.wrap{max-width:1120px; margin:0 auto; padding-inline:20px; padding-block:26px 40px}
+header{margin-bottom:16px}
+.eyebrow{font-size:13px; letter-spacing:.14em; color:var(--indigo); font-weight:600}
+h1{font-family:var(--serif); font-size:clamp(28px,4.6vw,40px); margin:4px 0 6px; line-height:1.25; text-wrap:balance}
+.lede{margin:0; color:var(--ink-2); font-size:16px}
+.main{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; align-items:start}
+@media (max-width:820px){.main{grid-template-columns:1fr}}
+.panel{background:var(--card); border:1px solid var(--edge); border-radius:12px; padding:14px}
+.stage{padding:8px}
+#stage{width:100%; height:auto; display:block; touch-action:none; cursor:crosshair; user-select:none}
+#stage:focus-visible{outline:2px solid var(--indigo); outline-offset:3px; border-radius:8px}
+.shape{fill:var(--shape-fill); stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round}
+.vlab{font-family:var(--math); font-style:italic; font-size:20px; fill:var(--ink-2)}
+.plab{font-family:var(--math); font-style:italic; font-size:21px; fill:var(--ink); font-weight:600}
+.foot{stroke-width:2.2; stroke-dasharray:6 4}
+.ext{stroke:var(--ink-3); stroke-width:1.2; stroke-dasharray:3 5; fill:none}
+.pdot{fill:var(--orange); stroke:var(--card); stroke-width:3}
+.hint{font-size:13px; color:var(--ink-3); margin:4px 6px 0}
+.rows{display:grid; gap:8px}
+.row{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; font-size:17px}
+.sw{width:12px; height:12px; border-radius:3px}
+.row .val{font-family:var(--math); font-size:26px; font-variant-numeric:tabular-nums; min-width:5ch; text-align:right}
+.row .val.neg{color:var(--crimson)}
+.sum{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  margin-top:10px; padding-top:10px; border-top:1px solid var(--edge)}
+.sum .k{font-size:17px; font-weight:600}
+.sum .v{font-family:var(--math); font-size:clamp(46px,7vw,64px); line-height:1; color:var(--orange);
+  font-variant-numeric:tabular-nums; font-weight:600}
+.strip-wrap{margin-top:14px}
+.strip-cap{font-size:13px; color:var(--ink-3); margin-bottom:4px}
+#strip{width:100%; height:auto; display:block}
+.tick{font-family:var(--math); font-size:12px; fill:var(--ink-3)}
+.controls{display:grid; gap:12px; margin-top:14px}
+.seg{display:flex; flex-wrap:wrap; border:1px solid var(--edge); border-radius:8px; overflow:hidden; width:fit-content; max-width:100%}
+.seg button{font:inherit; font-size:14px; padding:7px 12px; border:0; border-right:1px solid var(--edge-soft);
+  background:var(--card); color:var(--ink-2); cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--indigo); color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#161A1E}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#161A1E} }
+.btns{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.btn{font:inherit; font-size:15px; padding:8px 14px; border-radius:8px; border:1px solid var(--edge);
+  background:var(--card); color:var(--ink); cursor:pointer}
+.btn.primary{border-color:var(--orange); color:var(--orange); font-weight:600}
+.btn:hover{border-color:var(--indigo)}
+.btn:disabled{opacity:.5; cursor:default}
+.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.check{display:flex; gap:8px; align-items:center; font-size:15px; color:var(--ink-2); cursor:pointer}
+.stat{font-size:15px; color:var(--ink-2); min-height:1.6em}
+.stat b{font-family:var(--math); font-size:19px; color:var(--ink); font-variant-numeric:tabular-nums}
+.stat.same{color:var(--green)}
+.stat.same b{color:var(--green)}
+details{border-top:1px dashed var(--edge); padding-top:10px}
+summary{cursor:pointer; font-size:13px; color:var(--ink-3)}
+details .btns{margin-top:8px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<style>
+.ln{stroke:var(--ink); stroke-width:2.4; stroke-linecap:round}
+.path{stroke:var(--indigo); stroke-width:2.6; fill:none; stroke-linejoin:round}
+.ghost{stroke:var(--ink-3); stroke-width:1.4; stroke-dasharray:5 5; fill:none}
+.ghost2{stroke:var(--orange); stroke-width:1.8; stroke-dasharray:7 5; fill:none}
+.arc{stroke:var(--crimson); stroke-width:1.6; fill:none}
+.alab{font-family:var(--math); font-size:15px; fill:var(--crimson); font-weight:600}
+.lab{font-family:var(--math); font-style:italic; font-size:20px; fill:var(--ink)}
+.lab2{font-family:var(--math); font-style:italic; font-size:18px; fill:var(--ink-3)}
+.drag{fill:var(--orange); stroke:var(--card); stroke-width:3; cursor:grab}
+.drag.on{fill:var(--indigo)}
+.hit{fill:transparent; cursor:grab}
+.pt2{fill:var(--ink-3)}
+.sl{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; font-size:16px; margin-top:6px}
+.sl input{width:100%}
+.sl .num{font-family:var(--math); font-size:22px; min-width:4ch; text-align:right; font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+.q{font-size:15px; color:var(--indigo); margin:4px 0 0; font-weight:600}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">幾何明珠　單元二　第 1 節</div>
+    <h1>光走的那一條</h1>
+    <p class="lede">從 <i>P</i> 出發，先碰一下直線，再走到 <i>Q</i>。碰在哪裡，路最短？</p>
+  </header>
+
+  <div class="main">
+    <div class="panel stage">
+      <svg id="stage" viewBox="0 0 440 340" role="img" aria-label="直線與兩點的最短路徑" tabindex="0"></svg>
+      <p class="hint" id="hint">拖動橘色的點。單位 mm；預設和學習單第 1 頁一樣大。</p>
+    </div>
+
+    <div class="panel">
+      <div class="seg" role="group" aria-label="模式">
+        <button type="button" id="m1" aria-pressed="true">一條直線</button>
+        <button type="button" id="m2" aria-pressed="false">兩條公路</button>
+      </div>
+
+      <div id="read1" class="rows" style="margin-top:12px">
+        <div class="row"><span class="sw" style="background:var(--indigo)"></span><span><i>PR</i></span><span class="val" id="vPR"></span></div>
+        <div class="row"><span class="sw" style="background:var(--indigo)"></span><span><i>RQ</i></span><span class="val" id="vRQ"></span></div>
+        <div class="row"><span class="sw" style="background:var(--crimson)"></span><span>∠1　／　∠2</span><span class="val" id="vAng" style="min-width:8ch"></span></div>
+        <div class="sum"><span class="k"><i>PR</i> ＋ <i>RQ</i></span><span class="v" id="vSum"></span></div>
+      </div>
+
+      <div id="read2" class="rows" style="margin-top:12px" hidden>
+        <label class="sl"><span>夾角</span><input type="range" id="th" min="20" max="150" step="1" value="50"><span class="num" id="vth">50°</span></label>
+        <div class="row"><span class="sw" style="background:var(--ink-3)"></span><span>郵筒到路口 <i>O</i>（<i>a</i>／<i>b</i>）</span><span class="val" id="vMN" style="min-width:8ch;font-size:22px"></span></div>
+        <div class="sum"><span class="k">郵差走的路</span><span class="v" id="vPer"></span></div>
+      </div>
+
+      <div class="controls">
+        <div class="btns">
+          <button type="button" class="btn primary" id="run">隨機跑 1000 個位置</button>
+          <button type="button" class="btn" id="home">回到學習單的圖</button>
+        </div>
+        <div class="stat" id="stat" aria-live="polite"></div>
+        <p class="q" id="ask" hidden>電腦試了一千次。你還需要什麼？</p>
+        <details id="more">
+          <summary>更多</summary>
+          <div class="btns">
+            <button type="button" class="btn" id="other" aria-pressed="false">另一邊的 <i>P</i></button>
+          </div>
+          <p class="hint" id="otherNote" hidden></p>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NS = "http://www.w3.org/2000/svg", $ = (id) => document.getElementById(id);
+  const svg = $("stage");
+  const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+  const fmt = (x) => (Math.round(x * 10) / 10).toFixed(1);
+  let mode = 1, showOther = false, running = false, drag = null;
+  // 模式一（mm）：直線 y＝0
+  const S1 = { P: [0, 36], Q: [63, 48], r: 27 };
+  const s1 = JSON.parse(JSON.stringify(S1));
+  // 模式二：夾角 th（度），P 以極座標，郵筒 tN（公路 a 上）、tM（公路 b 上）
+  const S2 = { th: 50, pr: 55, pf: 22, tN: 60, tM: 20 };
+  const s2 = JSON.parse(JSON.stringify(S2));
+  const L2 = 100;
+
+  function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
+  function txt(x, y, t, cls, anchor){ const e = el("text", { x, y, class: cls, "text-anchor": anchor || "middle" }); e.textContent = t; return e; }
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  function angBetween(u, v){ const c = (u[0]*v[0] + u[1]*v[1]) / (Math.hypot(...u) * Math.hypot(...v)); return Math.acos(Math.max(-1, Math.min(1, c))) * R2D; }
+  function reflect(P, A, B){ const ux = B[0]-A[0], uy = B[1]-A[1], L = ux*ux + uy*uy; const t = ((P[0]-A[0])*ux + (P[1]-A[1])*uy) / L; const F = [A[0] + t*ux, A[1] + t*uy]; return [2*F[0] - P[0], 2*F[1] - P[1]]; }
+  function arcPath(C, r, a0, a1){ // svg 座標，角度為數學方向（度）
+    const p = (a) => [C[0] + r*Math.cos(a*D2R), C[1] - r*Math.sin(a*D2R)];
+    const A = p(a0), B = p(a1), large = Math.abs(a1 - a0) > 180 ? 1 : 0, sweep = a1 > a0 ? 0 : 1;
+    return `M${A[0]},${A[1]} A${r},${r} 0 ${large} ${sweep} ${B[0]},${B[1]}`;
+  }
+
+  // ---------- 模式一 ----------
+  let K1 = 4, O1 = [90, 300];
+  function fit(pts, xlo, xhi){ // 世界座標點集 → 縮放與原點（拖曳中不重算）
+    let x0 = Math.min(xlo, ...pts.map(p => p[0])), x1 = Math.max(xhi, ...pts.map(p => p[0]));
+    let y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
+    const k = Math.min(380 / (x1 - x0 || 1), 270 / (y1 - y0 || 1));
+    return { k, o: [30 + (380 - (x1 - x0) * k) / 2 - x0 * k, 30 + (270 - (y1 - y0) * k) / 2 + y1 * k] };
+  }
+  function frame1(){ if (drag) return; const pts = [s1.P, s1.Q, [s1.r, 0], [-20, 0], [85, 0]];
+    if (showOther) pts.push([s1.P[0], -s1.P[1]]); const f = fit(pts, -20, 85); K1 = f.k; O1 = f.o; }
+  const X1 = (p) => [O1[0] + p[0]*K1, O1[1] - p[1]*K1];
+  const W1 = (q) => [(q[0] - O1[0]) / K1, (O1[1] - q[1]) / K1];
+  function vals1(r){ const R = [r, 0]; const a = dist(s1.P, R), b = dist(R, s1.Q);
+    const a1 = angBetween([s1.P[0]-r, s1.P[1]], [-1, 0]), a2 = angBetween([s1.Q[0]-r, s1.Q[1]], [1, 0]); return { a, b, sum: a + b, a1, a2 }; }
+  function draw1(){
+    frame1(); svg.innerHTML = "";
+    const R = [s1.r, 0], P = X1(s1.P), Q = X1(s1.Q), Rs = X1(R);
+    const xa = X1([-20, 0])[0] - 10, xb = X1([85, 0])[0] + 10;
+    el("line", { x1: xa, y1: O1[1], x2: xb, y2: O1[1], class: "ln" });
+    txt(xa + 6, O1[1] + 24, "S", "lab"); txt(xb - 6, O1[1] + 24, "T", "lab");
+    if (showOther){
+      const Pp = X1([s1.P[0], -s1.P[1]]);
+      el("line", { x1: P[0], y1: P[1], x2: Pp[0], y2: Pp[1], class: "ghost" });
+      el("line", { x1: Pp[0], y1: Pp[1], x2: Rs[0], y2: Rs[1], class: "ghost" });
+      el("line", { x1: Pp[0], y1: Pp[1], x2: Q[0], y2: Q[1], class: "ghost2" });
+      el("circle", { cx: Pp[0], cy: Pp[1], r: 5, class: "pt2" }); txt(Pp[0] - 16, Pp[1] + 6, "P′", "lab2");
+    }
+    el("polyline", { points: [P, Rs, Q].map(p => p.join(",")).join(" "), class: "path" });
+    const v = vals1(s1.r), aP = Math.atan2(s1.P[1], s1.P[0] - s1.r) * R2D, aQ = Math.atan2(s1.Q[1], s1.Q[0] - s1.r) * R2D;
+    el("path", { d: arcPath(Rs, 30, aP, 180), class: "arc" }); el("path", { d: arcPath(Rs, 30, 0, aQ), class: "arc" });
+    txt(Rs[0] - 44, Rs[1] - 8, "1", "alab"); txt(Rs[0] + 44, Rs[1] - 8, "2", "alab");
+    txt(P[0] - 16, P[1] - 10, "P", "lab"); txt(Q[0] + 16, Q[1] - 10, "Q", "lab"); txt(Rs[0], Rs[1] + 26, "R", "lab");
+    handle(P, "P"); handle(Q, "Q"); handle(Rs, "R");
+    $("vPR").textContent = fmt(v.a); $("vRQ").textContent = fmt(v.b); $("vSum").textContent = fmt(v.sum);
+    $("vAng").textContent = `${fmt(v.a1)}°／${fmt(v.a2)}°`;
+  }
+
+  // ---------- 模式二 ----------
+  let K2 = 3, O2 = [60, 310];
+  function frame2(){ if (drag) return; const u = ub(), Pw = P2w();
+    const pts = [[0, 0], [L2, 0], [L2*u[0], L2*u[1]], Pw];
+    if (showOther) pts.push(reflect(Pw, [0,0], [1,0]), reflect(Pw, [0,0], u));
+    const f = fit(pts, 0, 0); K2 = f.k; O2 = f.o; }
+  const X2 = (p) => [O2[0] + p[0]*K2, O2[1] - p[1]*K2];
+  const W2 = (q) => [(q[0] - O2[0]) / K2, (O2[1] - q[1]) / K2];
+  const ub = () => [Math.cos(s2.th * D2R), Math.sin(s2.th * D2R)];
+  const P2w = () => [s2.pr * Math.cos(s2.pf * D2R), s2.pr * Math.sin(s2.pf * D2R)];
+  function per(tN, tM){ const P = P2w(), u = ub(), N = [tN, 0], M = [tM*u[0], tM*u[1]]; return dist(P, N) + dist(N, M) + dist(M, P); }
+  function draw2(){
+    frame2(); svg.innerHTML = "";
+    const u = ub(), O = X2([0, 0]), A = X2([L2, 0]), B = X2([L2*u[0], L2*u[1]]);
+    el("line", { x1: O[0], y1: O[1], x2: A[0], y2: A[1], class: "ln" }); el("line", { x1: O[0], y1: O[1], x2: B[0], y2: B[1], class: "ln" });
+    txt(A[0] - 6, A[1] + 22, "a", "lab"); txt(B[0] + (u[0] >= 0 ? 16 : -16), B[1] + 6, "b", "lab"); txt(O[0] - 4, O[1] + 22, "O", "lab");
+    el("path", { d: arcPath(O, 26, 0, s2.th), class: "arc" });
+    const Pw = P2w(), P = X2(Pw), N = X2([s2.tN, 0]), M = X2([s2.tM*u[0], s2.tM*u[1]]);
+    if (showOther){
+      const P1 = X2(reflect(Pw, [0,0], [1,0])), P2 = X2(reflect(Pw, [0,0], u));
+      el("line", { x1: P[0], y1: P[1], x2: P1[0], y2: P1[1], class: "ghost" }); el("line", { x1: P[0], y1: P[1], x2: P2[0], y2: P2[1], class: "ghost" });
+      el("line", { x1: P1[0], y1: P1[1], x2: P2[0], y2: P2[1], class: "ghost2" });
+      el("circle", { cx: P1[0], cy: P1[1], r: 5, class: "pt2" }); el("circle", { cx: P2[0], cy: P2[1], r: 5, class: "pt2" });
+      txt(P1[0] + 18, P1[1] + 6, "P₁", "lab2"); txt(P2[0] - 18, P2[1] + 6, "P₂", "lab2");
+    }
+    el("polygon", { points: [P, N, M].map(p => p.join(",")).join(" "), class: "path" });
+    txt(P[0] + 16, P[1] - 8, "P", "lab");
+    handle(P, "P2"); handle(N, "N"); handle(M, "M");
+    $("vth").textContent = s2.th + "°";
+    $("vMN").textContent = `${fmt(s2.tN)}／${fmt(s2.tM)}`;
+    $("vPer").textContent = fmt(per(s2.tN, s2.tM));
+    if (showOther){
+      const P1 = reflect(Pw, [0,0], [1,0]), P2 = reflect(Pw, [0,0], u);
+      $("otherNote").textContent = s2.th < 90 ? `P₁P₂ ＝ ${fmt(dist(P1, P2))}` : `P₁P₂ ＝ ${fmt(dist(P1, P2))}，但它碰不到兩條公路。`;
+    }
+  }
+
+  function handle(p, id){
+    el("circle", { cx: p[0], cy: p[1], r: 18, class: "hit", "data-h": id });
+    el("circle", { cx: p[0], cy: p[1], r: 8, class: "drag" + (id === "R" || id === "N" || id === "M" ? " on" : ""), "data-h": id });
+  }
+
+  function draw(){ mode === 1 ? draw1() : draw2(); }
+
+  function svgPt(ev){ const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const m = svg.getScreenCTM().inverse(); const q = pt.matrixTransform(m); return [q.x, q.y]; }
+  svg.addEventListener("pointerdown", (ev) => { const h = ev.target.getAttribute && ev.target.getAttribute("data-h"); if (!h || running) return; drag = h; svg.setPointerCapture(ev.pointerId); ev.preventDefault(); clearStat(); });
+  svg.addEventListener("pointermove", (ev) => {
+    if (!drag) return; const q = svgPt(ev);
+    if (mode === 1){ const w = W1(q);
+      if (drag === "R") s1.r = Math.max(-20, Math.min(85, w[0]));
+      else { const p = [Math.max(-20, Math.min(85, w[0])), Math.max(1, Math.min(70, w[1]))]; if (drag === "P") s1.P = p; else s1.Q = p; }
+    } else { const w = W2(q), u = ub();
+      if (drag === "N") s2.tN = Math.max(0, Math.min(L2, w[0]));
+      else if (drag === "M") s2.tM = Math.max(0, Math.min(L2, w[0]*u[0] + w[1]*u[1]));
+      else { let f = Math.atan2(w[1], w[0]) * R2D; f = Math.max(2, Math.min(s2.th - 2, f)); s2.pf = f; s2.pr = Math.max(8, Math.min(90, Math.hypot(...w))); }
+    }
+    draw();
+  });
+  const end = () => { drag = null; };
+  svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end);
+
+  function clearStat(){ $("stat").textContent = ""; $("stat").className = "stat"; $("ask").hidden = true; }
+
+  function setMode(m){ if (running) return; mode = m; $("m1").setAttribute("aria-pressed", String(m === 1)); $("m2").setAttribute("aria-pressed", String(m === 2));
+    $("read1").hidden = m !== 1; $("read2").hidden = m !== 2;
+    $("hint").textContent = m === 1 ? "拖動橘色的點。單位 mm；預設和學習單第 1 頁一樣大。" : "拖動 P 和兩個郵筒（藍色）。預設和學習單第 2 頁一樣：夾角 50°，OP ＝ 55。";
+    $("otherNote").hidden = !(showOther && m === 2); clearStat(); draw(); }
+  $("m1").addEventListener("click", () => setMode(1));
+  $("m2").addEventListener("click", () => setMode(2));
+  $("th").addEventListener("input", (e) => { s2.th = +e.target.value; s2.pf = Math.min(s2.pf, s2.th - 2); clearStat(); draw(); });
+  $("home").addEventListener("click", () => { if (running) return; Object.assign(s1, JSON.parse(JSON.stringify(S1))); Object.assign(s2, JSON.parse(JSON.stringify(S2))); $("th").value = S2.th; clearStat(); draw(); });
+  $("other").addEventListener("click", (e) => { showOther = !showOther; e.currentTarget.setAttribute("aria-pressed", String(showOther));
+    $("otherNote").hidden = !(showOther && mode === 2); draw(); });
+
+  $("run").addEventListener("click", () => {
+    if (running) return; running = true; $("run").disabled = true; clearStat();
+    const N = 1000, reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches, per_ = reduce ? N : 10;
+    let done = 0, best = Infinity, arg = null; const st = $("stat");
+    function tick(){
+      for (let i = 0; i < per_ && done < N; i++, done++){
+        if (mode === 1){ const r = -20 + Math.random() * 105, v = vals1(r).sum; if (v < best){ best = v; arg = r; } s1.r = r; }
+        else { const a = Math.random() * L2, b = Math.random() * L2, v = per(a, b); if (v < best){ best = v; arg = [a, b]; } s2.tN = a; s2.tM = b; }
+      }
+      draw();
+      st.innerHTML = `試了 <b>${done}</b> 個位置，目前最短 <b>${fmt(best)}</b>`;
+      if (done < N) requestAnimationFrame(tick);
+      else {
+        if (mode === 1){ s1.r = arg; const v = vals1(arg); draw();
+          st.innerHTML = `試了 <b>${N}</b> 個位置：最短 <b>${fmt(best)}</b>，那時 ∠1 ＝ <b>${fmt(v.a1)}°</b>、∠2 ＝ <b>${fmt(v.a2)}°</b>`; }
+        else { s2.tN = arg[0]; s2.tM = arg[1]; draw();
+          st.innerHTML = `試了 <b>${N}</b> 組：最短 <b>${fmt(best)}</b>，郵筒距 <i>O</i> <b>${fmt(arg[0])}</b>／<b>${fmt(arg[1])}</b>`; }
+        $("ask").hidden = false; running = false; $("run").disabled = false;
+      }
+    }
+    requestAnimationFrame(tick);
+  });
+
+  svg.addEventListener("keydown", (ev) => { // 鍵盤：左右鍵移動 R（模式一）或郵筒 N（模式二）
+    if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return; ev.preventDefault(); const d = ev.key === "ArrowLeft" ? -1 : 1;
+    if (mode === 1) s1.r = Math.max(-20, Math.min(85, s1.r + d)); else s2.tN = Math.max(0, Math.min(L2, s2.tN + d)); clearStat(); draw(); });
+
+  draw();
+})();
+</script>
+
+<a class="bk-fab" href="../index.html" aria-label="回到目錄頁">← 目錄</a>
+</body>
+</html>

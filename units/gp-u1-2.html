@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>空白搬了家</title>
+<!--hand-theme--><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet"><link href="https://huangisright.github.io/fonts/isright-hand.css" rel="stylesheet"><style id="hand-theme">
+:root{
+  --paper:#fdfcf8; --grid:transparent; --card:#fffefa;
+  --edge:#b9b5aa; --edge-soft:#dedad0; --ink:#1b1b1b; --ink-2:#4a4844; --ink-3:#77756f;
+  --indigo:#24489a; --indigo-soft:#e8edf8; --orange:#d4472b; --orange-soft:#fde9e3;
+  --green:#2f7a3a; --green-soft:#e6f2e4; --crimson:#c8321e; --black-card:#1b1b1b;
+  --shadow:none; --shadow-lift:none;
+  --mute:#77756f; --line:#d9d6cc; --blue:#24489a; --sand:#efe9d8;
+  --cardline:#1b1b1b; --tint:#fde9e3; --tint2:#e8edf8;
+  --hl:#fff2a8;
+  --serif:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif; --sans:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif; --wob:255px 14px 225px 14px/14px 225px 14px 255px; --wob2:14px 255px 14px 225px/225px 14px 255px 14px;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#1c1d1f; --grid:transparent; --card:#222326;
+  --edge:#5e5f62; --edge-soft:#3a3b3e; --ink:#ecebe6; --ink-2:#c4c2bb; --ink-3:#9c9a93;
+  --indigo:#8fb0f0; --indigo-soft:#1f2a40; --orange:#ff7a5c; --orange-soft:#3d221b;
+  --green:#7cc98a; --green-soft:#1d3122; --crimson:#ff6b55; --black-card:#0d0d0e;
+  --shadow:none; --shadow-lift:none;
+  --mute:#9c9a93; --line:#3a3b3e; --blue:#8fb0f0; --sand:#33302a;
+  --cardline:#ecebe6; --tint:#3d221b; --tint2:#1f2a40;
+  --hl:#4a4320;
+}}
+:root[data-theme="dark"]{
+  --paper:#1c1d1f; --grid:transparent; --card:#222326;
+  --edge:#5e5f62; --edge-soft:#3a3b3e; --ink:#ecebe6; --ink-2:#c4c2bb; --ink-3:#9c9a93;
+  --indigo:#8fb0f0; --indigo-soft:#1f2a40; --orange:#ff7a5c; --orange-soft:#3d221b;
+  --green:#7cc98a; --green-soft:#1d3122; --crimson:#ff6b55; --black-card:#0d0d0e;
+  --shadow:none; --shadow-lift:none;
+  --mute:#9c9a93; --line:#3a3b3e; --blue:#8fb0f0; --sand:#33302a;
+  --cardline:#ecebe6; --tint:#3d221b; --tint2:#1f2a40;
+  --hl:#4a4320;
+}
+body{background:var(--paper)!important;background-image:none!important;font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;font-size:17px}
+button,input,select,textarea,label{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif}
+input[type=number],.row input[type=number]{font-family:var(--math,serif)}
+h1,h2,h3,.lab-title{font-family:"IsRight Hand","LXGW WenKai TC","Kaiti TC","KaiTi",serif;font-weight:700;letter-spacing:.02em}
+.lab-title{font-size:22px!important}
+h1{text-decoration:underline;text-decoration-color:var(--orange);text-decoration-thickness:3px;text-underline-offset:10px}
+.eyebrow{color:var(--orange)}
+.thesis{border-left:none!important;padding-left:0!important;background:linear-gradient(transparent 62%,var(--hl) 62%);display:inline}
+nav{background:var(--paper)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:1.5px dashed var(--edge-soft)!important}
+nav a{border-radius:var(--wob)!important}
+nav a:hover,nav a:focus-visible{border:1.5px solid var(--ink)!important;background:transparent!important;color:var(--ink)!important}
+
+.lab{border:2.5px solid var(--ink)!important;border-radius:var(--wob)!important;box-shadow:none!important;overflow:visible!important}
+.lab:nth-of-type(even){border-radius:var(--wob2)!important}
+.lab-head{border-bottom:1.5px dashed var(--edge-soft)!important}
+.lab-no{background:transparent!important;color:var(--ink)!important;border:2px solid var(--ink);border-radius:52% 48% 50% 46%/48% 54% 46% 52%!important;font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;width:28px!important;height:28px!important}
+.lab-foot{background:var(--hl)!important;border:none!important;margin:6px 10px 10px;border-radius:var(--wob2)}
+.lab-foot b{color:var(--ink)!important}
+
+button,.btn{border:2px solid var(--ink)!important;border-radius:var(--wob)!important;background:transparent!important;color:var(--ink)!important;box-shadow:none!important}
+button:nth-of-type(even),.btn:nth-of-type(even){border-radius:var(--wob2)!important}
+button:hover:not(:disabled),.btn:hover{background:var(--hl)!important;color:var(--ink)!important}
+button.primary,.seg.on,.seg.on:hover{background:var(--ink)!important;color:var(--paper)!important}
+button.warn{border-color:var(--orange)!important;color:var(--orange)!important}
+.chip button{border:none!important;background:none!important}
+.segwrap{border:2px solid var(--ink)!important;border-radius:var(--wob)!important}
+.seg{border:none!important;border-right:1.5px dashed var(--edge-soft)!important;border-radius:0!important}
+input[type=number],input[type=text],select,textarea{border:2px solid var(--ink)!important;border-radius:var(--wob2)!important;background:transparent!important}
+input:focus-visible,select:focus-visible{outline:none!important;background:var(--hl)!important}
+input[type=range]{accent-color:var(--ink)}
+
+.msg,.verdict,.fate,.stat,.statbox,.chip,.tape,.pan,.thumb,.idcell{border-width:1.5px!important;border-radius:var(--wob)!important;box-shadow:none!important}
+.card,.box,.panel,.callout,.note,.tip{box-shadow:none!important}
+.dot{border-radius:48% 52% 46% 54%!important}
+::selection{background:var(--hl)}
+
+.bk-top{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;font-size:15px!important}
+.bk-top a{color:var(--ink,#1b1b1b)!important;text-decoration:underline dotted!important}
+.bk-fab{font-family:"LXGW WenKai TC","Kaiti TC","KaiTi","STKaiti",serif!important;background:var(--paper,#fdfcf8)!important;color:var(--ink,#1b1b1b)!important;
+  border:2px solid var(--ink,#1b1b1b)!important;border-radius:255px 14px 225px 14px/14px 225px 14px 255px!important;box-shadow:none!important}
+.bk-fab:hover{background:var(--hl,#fff2a8)!important}
+@media print{.lab{border-width:1.5px!important}}
+</style><!--/hand-theme--></head>
+<body>
+
+<style id="backnav">
+.bk-top{
+  max-width:1080px; margin:0 auto; padding:14px 20px 0;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif; font-size:14px;
+}
+.bk-top a{color:#2E5A88; text-decoration:none; font-weight:600}
+.bk-top a:hover{text-decoration:underline}
+.bk-top .bk-sep{color:#B8AE9C; margin:0 10px}
+.bk-fab{
+  position:fixed; right:16px; bottom:16px; z-index:9999;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 15px; border-radius:24px;
+  background:#FFFDF8; border:1px solid #DFD6C4; color:#2E5A88;
+  font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:14px; font-weight:600; text-decoration:none;
+  box-shadow:0 2px 4px rgba(72,60,40,.10), 0 10px 26px rgba(72,60,40,.16);
+}
+.bk-fab:hover{border-color:#2E5A88}
+.bk-fab:focus-visible{outline:2px solid #2E5A88; outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bk-top a{color:#82ADDC}
+  :root:not([data-theme="light"]) .bk-fab{
+    background:#1F252B; border-color:#333C45; color:#82ADDC;
+    box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+  }
+  :root:not([data-theme="light"]) .bk-fab:hover{border-color:#82ADDC}
+}
+:root[data-theme="dark"] .bk-top a{color:#82ADDC}
+:root[data-theme="dark"] .bk-fab{
+  background:#1F252B; border-color:#333C45; color:#82ADDC;
+  box-shadow:0 2px 4px rgba(0,0,0,.35), 0 10px 26px rgba(0,0,0,.45);
+}
+@media print{ .bk-top, .bk-fab{display:none !important} }
+@media (max-width:520px){ .bk-fab{right:12px; bottom:12px; padding:8px 13px; font-size:13px} }
+</style>
+<div class="bk-top"><a href="../index.html">← 回目錄</a></div>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Crimson+Text:ital,wght@0,600;1,400;1,600&display=swap">
+<style>
+:root{
+  --paper:#F5F2E8; --grid:rgba(46,90,136,.07); --card:#FFFDF8; --edge:#DFD6C4; --edge-soft:#EBE3D4;
+  --ink:#23282D; --ink-2:#5C554A; --ink-3:#847B6C;
+  --indigo:#2E5A88; --orange:#C1652F; --green:#4A7C59; --green-soft:#E7F0E9; --crimson:#B23A3A;
+  --s1:#2E5A88; --s2:#4A7C59; --s3:#A8701E; --s4:#7A4E8C; --s5:#2D7F86;
+  --shape-fill:rgba(46,90,136,.05);
+  --serif:"Noto Serif TC","Songti TC","Times New Roman",serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --math:"Crimson Text","Times New Roman",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+    --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+    --indigo:#82ADDC; --orange:#E08A54; --green:#7FB08D; --green-soft:#1E2A22; --crimson:#E07A7A;
+    --s1:#82ADDC; --s2:#7FB08D; --s3:#D9A55A; --s4:#B892CC; --s5:#6FC0C6;
+    --shape-fill:rgba(130,173,220,.07);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#161A1E; --grid:rgba(127,169,214,.07); --card:#1F252B; --edge:#333C45; --edge-soft:#2A323A;
+  --ink:#E7E2D6; --ink-2:#B3AC9E; --ink-3:#8B857A;
+  --indigo:#82ADDC; --orange:#E08A54; --green:#7FB08D; --green-soft:#1E2A22; --crimson:#E07A7A;
+  --s1:#82ADDC; --s2:#7FB08D; --s3:#D9A55A; --s4:#B892CC; --s5:#6FC0C6;
+  --shape-fill:rgba(130,173,220,.07);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+.wrap{max-width:1120px; margin:0 auto; padding-inline:20px; padding-block:26px 40px}
+header{margin-bottom:16px}
+.eyebrow{font-size:13px; letter-spacing:.14em; color:var(--indigo); font-weight:600}
+h1{font-family:var(--serif); font-size:clamp(28px,4.6vw,40px); margin:4px 0 6px; line-height:1.25; text-wrap:balance}
+.lede{margin:0; color:var(--ink-2); font-size:16px}
+.main{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; align-items:start}
+@media (max-width:820px){.main{grid-template-columns:1fr}}
+.panel{background:var(--card); border:1px solid var(--edge); border-radius:12px; padding:14px}
+.stage{padding:8px}
+#stage{width:100%; height:auto; display:block; touch-action:none; cursor:crosshair; user-select:none}
+#stage:focus-visible{outline:2px solid var(--indigo); outline-offset:3px; border-radius:8px}
+.shape{fill:var(--shape-fill); stroke:var(--ink); stroke-width:2.2; stroke-linejoin:round}
+.vlab{font-family:var(--math); font-style:italic; font-size:20px; fill:var(--ink-2)}
+.plab{font-family:var(--math); font-style:italic; font-size:21px; fill:var(--ink); font-weight:600}
+.foot{stroke-width:2.2; stroke-dasharray:6 4}
+.ext{stroke:var(--ink-3); stroke-width:1.2; stroke-dasharray:3 5; fill:none}
+.pdot{fill:var(--orange); stroke:var(--card); stroke-width:3}
+.hint{font-size:13px; color:var(--ink-3); margin:4px 6px 0}
+.rows{display:grid; gap:8px}
+.row{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; font-size:17px}
+.sw{width:12px; height:12px; border-radius:3px}
+.row .val{font-family:var(--math); font-size:26px; font-variant-numeric:tabular-nums; min-width:5ch; text-align:right}
+.row .val.neg{color:var(--crimson)}
+.sum{display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  margin-top:10px; padding-top:10px; border-top:1px solid var(--edge)}
+.sum .k{font-size:17px; font-weight:600}
+.sum .v{font-family:var(--math); font-size:clamp(46px,7vw,64px); line-height:1; color:var(--orange);
+  font-variant-numeric:tabular-nums; font-weight:600}
+.strip-wrap{margin-top:14px}
+.strip-cap{font-size:13px; color:var(--ink-3); margin-bottom:4px}
+#strip{width:100%; height:auto; display:block}
+.tick{font-family:var(--math); font-size:12px; fill:var(--ink-3)}
+.controls{display:grid; gap:12px; margin-top:14px}
+.seg{display:flex; flex-wrap:wrap; border:1px solid var(--edge); border-radius:8px; overflow:hidden; width:fit-content; max-width:100%}
+.seg button{font:inherit; font-size:14px; padding:7px 12px; border:0; border-right:1px solid var(--edge-soft);
+  background:var(--card); color:var(--ink-2); cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--indigo); color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#161A1E}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#161A1E} }
+.btns{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.btn{font:inherit; font-size:15px; padding:8px 14px; border-radius:8px; border:1px solid var(--edge);
+  background:var(--card); color:var(--ink); cursor:pointer}
+.btn.primary{border-color:var(--orange); color:var(--orange); font-weight:600}
+.btn:hover{border-color:var(--indigo)}
+.btn:disabled{opacity:.5; cursor:default}
+.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--indigo); outline-offset:2px}
+.check{display:flex; gap:8px; align-items:center; font-size:15px; color:var(--ink-2); cursor:pointer}
+.stat{font-size:15px; color:var(--ink-2); min-height:1.6em}
+.stat b{font-family:var(--math); font-size:19px; color:var(--ink); font-variant-numeric:tabular-nums}
+.stat.same{color:var(--green)}
+.stat.same b{color:var(--green)}
+details{border-top:1px dashed var(--edge); padding-top:10px}
+summary{cursor:pointer; font-size:13px; color:var(--ink-3)}
+details .btns{margin-top:8px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<style>
+.tri{stroke:var(--ink); stroke-width:1.4; stroke-linejoin:round}
+.box{fill:var(--card); stroke:var(--ink); stroke-width:2.4}
+.white{fill:var(--card)}
+.lab{font-family:var(--math); font-style:italic; font-size:20px; fill:var(--ink-2)}
+.ang{font-family:var(--math); font-size:15px; fill:var(--crimson); font-weight:600}
+.sl{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; font-size:17px}
+.sl input{width:100%}
+.sl .num{font-family:var(--math); font-size:22px; min-width:3ch; text-align:right; font-variant-numeric:tabular-nums}
+.arr{display:grid; gap:4px; padding:10px 0; border-top:1px solid var(--edge)}
+.arr .t{font-size:15px; color:var(--ink-2)}
+.arr .f{font-family:var(--math); font-size:22px; font-variant-numeric:tabular-nums}
+.arr.on .t{color:var(--indigo); font-weight:600}
+.big{font-family:var(--math); color:var(--orange); font-weight:600; font-size:clamp(34px,5vw,46px); font-variant-numeric:tabular-nums}
+#garf{width:100%; max-width:300px; height:auto; display:block; margin:8px auto 0}
+.note{font-size:14px; color:var(--ink-2); margin:6px 0 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">幾何明珠　單元一　第 2 節</div>
+    <h1>空白搬了家</h1>
+    <p class="lede">四片一樣的直角三角形，放在同一個大正方形裡。把它們搬一搬，白色的部分變形了。什麼沒有變？</p>
+  </header>
+
+  <div class="main">
+    <div class="panel stage">
+      <svg id="stage" viewBox="0 0 440 440" role="img" aria-label="大正方形裡的四片直角三角形" tabindex="0"></svg>
+      <p class="hint">單位：mm。預設 <i>a</i> ＝ 30、<i>b</i> ＝ 40，和學習單上的圖一樣大。</p>
+    </div>
+
+    <div class="panel">
+      <div class="rows">
+        <label class="sl"><span><i>a</i></span><input type="range" id="ra" min="0" max="60" step="1" value="30"><span class="num" id="va">30</span></label>
+        <label class="sl"><span><i>b</i></span><input type="range" id="rb" min="0" max="60" step="1" value="40"><span class="num" id="vb">40</span></label>
+      </div>
+      <div class="arr on" id="a1"><span class="t">擺法 1　白色部分</span><span class="f" id="f1"></span></div>
+      <div class="arr" id="a2"><span class="t">擺法 2　白色部分</span><span class="f" id="f2"></span></div>
+      <div class="sum"><span class="k">現在畫面上的白色部分</span><span class="big" id="now"></span></div>
+
+      <div class="controls">
+        <div class="btns">
+          <button type="button" class="btn primary" id="move">搬過去</button>
+          <button type="button" class="btn" id="run">隨機跑 1000 組 <i>a</i>、<i>b</i></button>
+          <button type="button" class="btn" id="home">回到 30、40</button>
+        </div>
+        <div class="stat" id="stat" aria-live="polite"></div>
+        <details id="more">
+          <summary>更多</summary>
+          <div class="btns">
+            <button type="button" class="btn" id="angBtn" aria-pressed="false">中間那塊的角</button>
+            <button type="button" class="btn" id="garfBtn" aria-pressed="false">兩片的拼法</button>
+          </div>
+          <div id="angInfo" class="note" hidden></div>
+          <div id="garfBox" hidden>
+            <svg id="garf" viewBox="0 0 300 320" aria-label="兩片直角三角形拼成的梯形"></svg>
+            <p class="note" id="garfNote"></p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NS = "http://www.w3.org/2000/svg", $ = (id) => document.getElementById(id);
+  const stage = $("stage"), garf = $("garf");
+  const COL = ["--s1", "--s2", "--s3", "--s4"];
+  let a = 30, b = 40, t = 0, target = 0, anim = null, running = false, showAng = false;
+
+  function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  const rad = (d) => d * Math.PI / 180;
+  // 直角頂點 R，股 a 沿角度 th，股 b 沿 th+90°
+  function tri(R, th, a, b){ return [R, [R[0] + a*Math.cos(rad(th)), R[1] + a*Math.sin(rad(th))], [R[0] + b*Math.cos(rad(th+90)), R[1] + b*Math.sin(rad(th+90))]]; }
+  function layout(a, b, t){
+    const s = a + b, ROT = [0, 90, 180, 270];
+    const P1 = [[0,0],[s,0],[s,s],[0,s]], P2 = [[0,a],[s,0],[a,s],[a,a]];
+    return ROT.map((th, i) => tri([P1[i][0] + (P2[i][0]-P1[i][0])*t, P1[i][1] + (P2[i][1]-P1[i][1])*t], th, a, b));
+  }
+  function shoelace(p){ let s = 0; for (let i = 0; i < p.length; i++){ const q = p[i], r = p[(i+1) % p.length]; s += q[0]*r[1] - r[0]*q[1]; } return Math.abs(s) / 2; }
+  // 擺法 1：中間的四邊形由四片三角形的斜邊圍成；擺法 2：兩塊白色正方形由三角形的頂點量出邊長
+  function white1(a, b){ const T = layout(a, b, 0); return shoelace([T[0][1], T[1][1], T[2][1], T[3][1]]); }
+  function white2(a, b){ // 左下、右上兩塊白色正方形：邊長由第 4 片三角形的直角頂點位置量出
+    const T = layout(a, b, 1), R = T[3][0], sA = R[0], sB = (a + b) - R[1]; return [sA * sA, sB * sB]; }
+
+  const fmt = (x) => (Math.round(x * 10) / 10).toFixed(1);
+  const fmt0 = (x) => String(Math.round(x));
+
+  function draw(){
+    const s = a + b, k = s > 0 ? 360 / s : 1, ox = 40, oy = 400;
+    const X = (p) => [ox + p[0]*k, oy - p[1]*k];
+    stage.innerHTML = "";
+    el("rect", { x: ox, y: oy - s*k, width: s*k, height: s*k, class: "box" }, stage);
+    const T = layout(a, b, t);
+    T.forEach((tr, i) => el("polygon", { points: tr.map(p => X(p).join(",")).join(" "), class: "tri", fill: `var(${COL[i]})`, "fill-opacity": .32 }, stage));
+    if (t === 0 && showAng && a > 0 && b > 0){
+      const Q = [T[0][1], T[1][1], T[2][1], T[3][1]];
+      Q.forEach((q, i) => { const p = Q[(i+3) % 4], r = Q[(i+1) % 4];
+        const v1 = [p[0]-q[0], p[1]-q[1]], v2 = [r[0]-q[0], r[1]-q[1]];
+        const ang = Math.acos((v1[0]*v2[0] + v1[1]*v2[1]) / (Math.hypot(...v1) * Math.hypot(...v2))) * 180 / Math.PI;
+        const m = [(p[0]+r[0])/2 - q[0], (p[1]+r[1])/2 - q[1]], L = Math.hypot(...m) || 1;
+        const pos = X([q[0] + m[0]/L*s*0.11, q[1] + m[1]/L*s*0.11]);
+        const tx = el("text", { x: pos[0], y: pos[1] + 5, "text-anchor": "middle", class: "ang" }, stage); tx.textContent = fmt(ang) + "°";
+      });
+    }
+    // 底邊標 a、b
+    const y = oy + 24;
+    const la = el("text", { x: ox + a*k/2, y: y, "text-anchor": "middle", class: "lab" }, stage); la.textContent = "a";
+    const lb = el("text", { x: ox + (a + b/2)*k, y: y, "text-anchor": "middle", class: "lab" }, stage); lb.textContent = "b";
+    readout();
+  }
+
+  function readout(){
+    const w1 = white1(a, b), [x, y] = white2(a, b);
+    $("f1").textContent = `${fmt0(w1)} mm²`;
+    $("f2").textContent = `${fmt0(x)} ＋ ${fmt0(y)} ＝ ${fmt0(x + y)} mm²`;
+    $("a1").classList.toggle("on", t === 0); $("a2").classList.toggle("on", t === 1);
+    $("now").textContent = t === 0 ? fmt0(w1) : t === 1 ? fmt0(x + y) : "…";
+    $("va").textContent = a; $("vb").textContent = b;
+    const c = Math.hypot(a, b);
+    if (showAng) $("angInfo").textContent = (t === 0) ? `中間那塊：四條邊都是 ${fmt(c)}（每一條都是一片三角形的斜邊）。` : "搬回擺法 1 才看得到中間那塊。";
+    drawGarf();
+  }
+
+  function drawGarf(){
+    if ($("garfBox").hidden) return;
+    garf.innerHTML = "";
+    const s = a + b; if (s === 0) return;
+    const k = 270 / s, ox = 40, oy = 300, X = (p) => [ox + p[0]*k, oy - p[1]*k];
+    const t1 = [[0,0],[0,a],[b,0]], t2 = [[0,s],[0,a],[a,s]], mid = [[0,a],[b,0],[a,s]];
+    [[t1, "--s1"], [t2, "--s2"], [mid, "--s3"]].forEach(([p, c]) => el("polygon", { points: p.map(q => X(q).join(",")).join(" "), class: "tri", fill: `var(${c})`, "fill-opacity": .32 }, garf));
+    el("polygon", { points: [[0,0],[b,0],[a,s],[0,s]].map(q => X(q).join(",")).join(" "), fill: "none", stroke: "var(--ink)", "stroke-width": 2.4 }, garf);
+    $("garfNote").innerHTML = `整個梯形：½(<i>a</i>＋<i>b</i>)(<i>a</i>＋<i>b</i>) ＝ ${fmt(s*s/2)}<br>拆成三塊：½<i>ab</i> ＋ ½<i>ab</i> ＋ ½<i>c</i>² ＝ ${fmt(a*b + (a*a + b*b)/2)}`;
+  }
+
+  function go(to){
+    if (anim) cancelAnimationFrame(anim);
+    target = to; $("move").textContent = to === 1 ? "搬回來" : "搬過去";
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce){ t = to; draw(); return; }
+    const t0 = t, start = performance.now(), dur = 1400;
+    function step(now){ const u = Math.min(1, (now - start) / dur), e = u < .5 ? 2*u*u : 1 - Math.pow(-2*u + 2, 2) / 2;
+      t = u >= 1 ? to : t0 + (to - t0) * e; draw(); if (u < 1) anim = requestAnimationFrame(step); else anim = null; }
+    anim = requestAnimationFrame(step);
+  }
+
+  $("move").addEventListener("click", () => { if (!running) go(target === 0 ? 1 : 0); });
+  $("ra").addEventListener("input", (e) => { a = +e.target.value; clearStat(); draw(); });
+  $("rb").addEventListener("input", (e) => { b = +e.target.value; clearStat(); draw(); });
+  $("home").addEventListener("click", () => { a = 30; b = 40; $("ra").value = 30; $("rb").value = 40; clearStat(); draw(); });
+  function clearStat(){ const s = $("stat"); s.textContent = ""; s.className = "stat"; }
+
+  $("run").addEventListener("click", () => {
+    if (running) return; running = true; $("run").disabled = true;
+    const N = 1000; let done = 0, worst = 0; const s = $("stat"); s.className = "stat";
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const per = reduce ? N : 10;
+    function tick(){
+      for (let i = 0; i < per && done < N; i++, done++){
+        const A = Math.random() * 60, B = Math.random() * 60;
+        const w1 = white1(A, B), [x, y] = white2(A, B);
+        worst = Math.max(worst, Math.abs(w1 - x - y));
+        if (i === per - 1 || done === N - 1){ a = Math.round(A); b = Math.round(B); }
+      }
+      $("ra").value = a; $("rb").value = b; draw();
+      s.innerHTML = `檢查了 <b>${done}</b> 組 <i>a</i>、<i>b</i>：兩種擺法的白色部分，最多差 <b>${worst.toFixed(6)}</b> mm²`;
+      if (done < N) requestAnimationFrame(tick);
+      else { running = false; $("run").disabled = false;
+        if (worst < 1e-6){ s.classList.add("same"); s.innerHTML = `檢查了 <b>${N}</b> 組 <i>a</i>、<i>b</i>，兩種擺法的白色部分<b>每一次都一樣大</b>`; } }
+    }
+    requestAnimationFrame(tick);
+  });
+
+  $("angBtn").addEventListener("click", (e) => { showAng = !showAng; e.currentTarget.setAttribute("aria-pressed", String(showAng));
+    $("angInfo").hidden = !showAng; e.currentTarget.textContent = showAng ? "收起角度" : "中間那塊的角"; if (showAng && target !== 0) go(0); else draw(); });
+  $("garfBtn").addEventListener("click", (e) => { const on = $("garfBox").hidden; $("garfBox").hidden = !on;
+    e.currentTarget.setAttribute("aria-pressed", String(on)); e.currentTarget.textContent = on ? "收起兩片的拼法" : "兩片的拼法"; draw(); });
+  stage.addEventListener("keydown", (ev) => { if (ev.key === " " || ev.key === "Enter"){ ev.preventDefault(); if (!running) go(target === 0 ? 1 : 0); } });
+
+  draw();
+})();
+</script>
+
+<a class="bk-fab" href="../index.html" aria-label="回到目錄頁">← 目錄</a>
+</body>
+</html>
