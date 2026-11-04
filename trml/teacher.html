@@ -89,6 +89,26 @@ th.n{text-align:right}
 .grade .done{color:var(--moss);font-weight:700}
 .sub{font-size:.85rem;color:var(--muted)}
 button.ghost{background:transparent;color:var(--indigo)}
+/* 週四講解 */
+.lec-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.lec-cols{grid-template-columns:minmax(0,1fr)}}
+.lec-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.lec-side>header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lec-side>header input{font-family:var(--f-display);font-weight:700;font-size:1.05rem;flex:1;min-width:8em}
+.lec-card{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lec-card.off{opacity:.45}
+.lec-card .hd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.lec-card .hd b{font-family:var(--f-display);font-size:1rem}
+.lec-card img{max-width:100%;height:auto;background:#fff;border-radius:2px}
+.lec-card .key{background:var(--indigo-soft);color:var(--ink);border-left:4px solid var(--indigo);padding:6px 10px;border-radius:3px}
+.lec-card .key.none{background:var(--blank);color:var(--muted);border-left-color:var(--line)}
+.lec-card .acts{display:flex;gap:6px;flex-wrap:wrap}
+.lec-card .acts button{padding:4px 10px;font-size:.85rem}
+.lec-card details summary{cursor:pointer;color:var(--indigo);font-size:.9rem}
+.tag{font-size:.8rem;background:var(--blank);border-radius:3px;padding:1px 6px;margin-right:4px;white-space:nowrap}
+.split td{white-space:normal}
+.split .who{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:2px 9px;margin:2px;display:inline-block;font-size:.88rem;background:var(--card)}
+.split .who small{color:var(--muted);font-family:var(--f-mono)}
 </style>
 </head>
 <body>
@@ -167,6 +187,29 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div class="sheet"><h2>每一題的感受</h2><div class="tbl-wrap"><table id="tNoteQ"></table></div></div>
       <div id="noteList" style="display:flex;flex-direction:column;gap:12px"></div>
     </div>
+    <div id="vLec" hidden style="display:flex;flex-direction:column;gap:16px">
+      <div class="sheet">
+        <div class="row">
+          <label class="f" for="lFrom">從<input type="date" id="lFrom"></label>
+          <label class="f" for="lTo">到<input type="date" id="lTo"></label>
+          <label class="f" for="lN">挑幾題<select id="lN"><option>6</option><option selected>8</option><option>10</option><option>12</option><option>16</option></select></label>
+          <label class="chk"><input type="checkbox" id="lK競速" checked> 競速</label>
+          <label class="chk"><input type="checkbox" id="lK個人" checked> 個人</label>
+          <label class="chk"><input type="checkbox" id="lK團體" checked> 團體</label>
+        </div>
+        <div class="sub" id="lNote"></div>
+      </div>
+      <div class="sheet">
+        <h2>分組：每一隊分兩邊</h2>
+        <div class="sub">每隊兩人去 A、兩人去 B，依競速、個人賽「誰在哪一邊的題目錯得多」自動排（名字旁是他在 A、B 兩邊各錯幾題）；點名字可以換到另一邊。</div>
+        <div class="tbl-wrap"><table class="split" id="tSplit"></table></div>
+        <div class="row"><button type="button" id="btnSplitPrint" class="ghost">列印分組名單</button><button type="button" id="btnSplitReset" class="ghost">分組恢復自動</button></div>
+      </div>
+      <div class="lec-cols">
+        <section class="lec-side" id="sideA"></section>
+        <section class="lec-side" id="sideB"></section>
+      </div>
+    </div>
     <div id="vGrade" hidden style="display:flex;flex-direction:column;gap:14px">
       <div class="sub">團體賽的證明題（questions 表答案寫「人工」的題目）在這裡給分，每題 0～8 分。存檔後會寫回試算表，那一隊的總分跟著更新。</div>
       <div id="gradeList" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -195,7 +238,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
+var TABS=[['講解','週四講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -226,7 +269,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('vStats').hidden=!kindTab; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
+  $('vStats').hidden=!kindTab; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
     var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
@@ -261,6 +304,7 @@ $('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport()
 
 function render(){
   if(!data) return;
+  if(tab==='講解') return renderLec();
   if(tab==='學生') return renderStudent();
   if(tab==='批改') return renderGrade();
   if(tab==='回饋') return renderNotes();
@@ -375,6 +419,122 @@ function renderStats(kind){
       }).join('');
   }
 }
+
+
+/* ---------- 週四講解：這段期間錯最多的題目，分給兩位老師 ---------- */
+var GEO=['平面幾何','圓'];
+function jget(k,d){try{var v=JSON.parse(lget(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function jset(k,v){lset(k,JSON.stringify(v));}
+function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function dayOf(t){var m=String(t||'').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);return m?m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2):'';}
+function lecDefaults(){
+  if($('lFrom').value) return;
+  var now=new Date(), back=(now.getDay()+2)%7; // 上一個週五（週四講完的隔天）起算
+  var f=new Date(now); f.setDate(now.getDate()-back);
+  $('lFrom').value=ymd(f); $('lTo').value=ymd(now);
+}
+function qLabel(q){var m=String(q).match(/^(\d{4})-([SIT])(\d+)/);if(!m)return q;return m[1]+' '+({S:'競速',I:'個人',T:'團體'})[m[2]]+' 第 '+Number(m[3])+' 題';}
+function imgSrc(q){var x=qinfo[q]||{};var s=x.img?(/^(https?:|\/)/.test(x.img)?x.img:IMG+x.img):IMG+q+'.png';return new URL(s,location.href).href;}
+function solSrc(q){var x=qinfo[q]||{};return x.sol?new URL(IMG.replace(/img\/$/,'')+x.sol,location.href).href:'';}
+function lecData(){
+  var y=$('fYear').value, from=$('lFrom').value, to=$('lTo').value;
+  var kinds=['競速','個人','團體'].filter(function(k){return $('lK'+k).checked;});
+  var roster=data.roster.filter(function(r){return r.year===y&&r.team!=='測試';});
+  var size={}; roster.forEach(function(r){size[r.team]=(size[r.team]||0)+1;});
+  var subs=data.submissions.filter(function(s){var d=dayOf(s.time);return s.year===y&&s.attemptNo===1&&s.team!=='測試'&&kinds.indexOf(s.kind)>=0&&d&&d>=from&&d<=to;});
+  var sub={}; subs.forEach(function(s){sub[s.attemptId]=s;});
+  var Q={};
+  data.responses.forEach(function(r){
+    var s=sub[r.attemptId]; if(!s) return;
+    var man=isManual((qinfo[r.qid]||{}).answer), ok;
+    if(man){ if(r.points==null) return; ok=r.points>=6; } else ok=r.correct;
+    var x=Q[r.qid]||(Q[r.qid]={qid:r.qid,kind:s.kind,set:s.setId,n:0,no:0,np:0,nop:0,wrong:{},who:[],okWho:[],blank:0,man:man});
+    var w=s.kind==='團體'?(size[s.team]||1):1, label=s.kind==='團體'?('第 '+s.team+' 隊'):s.name;
+    x.n++; x.np+=w; if(ok) x.okWho.push(label);
+    if(!ok){ x.no++; x.nop+=w; x.who.push({label:label,team:s.team,sid:s.sid,isTeam:s.kind==='團體'});
+      if(!man){ if(r.answer) x.wrong[r.answer]=(x.wrong[r.answer]||0)+1; else x.blank++; } }
+  });
+  var list=Object.keys(Q).map(function(k){return Q[k];}).filter(function(x){return x.no>0;});
+  list.sort(function(a,b){return b.nop-a.nop||(b.no/b.n)-(a.no/a.n);});
+  var notes={}; (data.notes||[]).forEach(function(n){ if(n.year!==y) return; var d=dayOf(n.time); (notes[n.qid]||(notes[n.qid]=[])).push(n); });
+  return {y:y,roster:roster,subs:subs,list:list,notes:notes,top:list.slice(0,Number($('lN').value)),from:from,to:to};
+}
+function sideOf(q){var o=jget('trml-lec-side',{});return o[q]||(GEO.indexOf((qinfo[q]||{}).topic)>=0?'B':'A');}
+function lecNames(){return jget('trml-lec-names',{A:'老師 A・代數',B:'老師 B・幾何'});}
+function lecSplit(D,sel){
+  var over=jget('trml-lec-who',{}), teams=uniq(D.roster.map(function(r){return r.team;})), out={};
+  var need={}; D.roster.forEach(function(r){need[r.id]={A:0,B:0};});
+  sel.forEach(function(x){ var sd=sideOf(x.qid); x.who.forEach(function(w){
+    if(!w.isTeam&&need[w.sid]) need[w.sid][sd]+=1; }); }); // 團體賽是全隊一起錯，不影響怎麼分
+  teams.forEach(function(t){
+    var ms=D.roster.filter(function(r){return r.team===t;}).slice().sort(function(a,b){return (need[b.id].A-need[b.id].B)-(need[a.id].A-need[a.id].B);});
+    var half=Math.ceil(ms.length/2), g={A:[],B:[]};
+    ms.forEach(function(r,i){ var sd=over[D.y+'|'+r.id]||(i<half?'A':'B'); g[sd].push({r:r,need:need[r.id]}); });
+    out[t]=g;
+  });
+  return out;
+}
+function lecCard(x,D,screen){
+  var q=x.qid, info=qinfo[q]||{}, rate=x.no/x.n, ns=D.notes[q]||[];
+  var wrongs=Object.keys(x.wrong).sort(function(a,b){return x.wrong[b]-x.wrong[a];}).slice(0,4).map(function(a){return '<span class="tag">'+esc(a)+'（'+x.wrong[a]+'）</span>';}).join('')+(x.blank?'<span class="tag">空白（'+x.blank+'）</span>':'');
+  var stuck={}, diff={}; ns.forEach(function(n){ (n.stuck||[]).forEach(function(t){stuck[t]=(stuck[t]||0)+1;}); if(n.diff) diff[n.diff]=(diff[n.diff]||0)+1; });
+  var texts=ns.filter(function(n){return n.text;});
+  var unit=x.kind==='團體'?'隊':'人';
+  return '<div class="lec-card'+(screen&&jget('trml-lec-off',{})[q]?' off':'')+'" data-q="'+esc(q)+'">'+
+    '<div class="hd"><b>'+esc(qLabel(q))+'</b><span class="tag">'+esc(info.topic||'未分類')+'</span><span class="low">錯 '+x.no+'/'+x.n+' '+unit+'（'+pct(rate)+'）</span></div>'+
+    (info.text?'<div>'+esc(info.text)+'</div>':'')+'<img loading="lazy" src="'+esc(imgSrc(q))+'" alt="'+esc(qLabel(q))+' 題目">'+
+    '<div>正確答案：<b>'+esc(showAns(info.answer))+'</b></div>'+
+    (wrongs?'<div class="sub">常見錯答：'+wrongs+'</div>':'')+
+    '<div class="sub">'+(x.no>x.n/2?'答對的'+unit+'：'+(x.okWho.length?esc(x.okWho.join('、')):'沒有'):'錯的'+unit+'：'+esc(x.who.map(function(w){return w.label;}).join('、')))+'</div>'+
+    (Object.keys(stuck).length||Object.keys(diff).length?'<div class="sub">學生回饋：'+Object.keys(diff).map(function(k){return '<span class="tag">'+esc(k)+' '+diff[k]+'</span>';}).join('')+Object.keys(stuck).map(function(k){return '<span class="tag">卡在'+esc(k)+' '+stuck[k]+'</span>';}).join('')+'</div>':'')+
+    (texts.length?'<div class="sub">'+texts.slice(0,4).map(function(n){return '「'+esc(n.text)+'」—'+esc(n.name);}).join('<br>')+'</div>':'')+
+    '<div class="key'+(info.key?'':' none')+'">核心關鍵：'+(info.key?esc(info.key):'還沒寫。可以在試算表 questions 工作表的 F 欄「關鍵」補上。')+'</div>'+
+    (solSrc(q)?(screen?'<details><summary>看詳解</summary><img loading="lazy" src="'+esc(solSrc(q))+'" alt="詳解"></details>':'<div class="sol"><b>詳解</b><img src="'+esc(solSrc(q))+'" alt="詳解"></div>'):'')+
+    (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button></div>':'')+
+  '</div>';
+}
+function renderLec(){
+  lecDefaults();
+  var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
+  var sel=D.top.filter(function(x){return !off[x.qid];});
+  $('lNote').textContent='這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放 B，其他放 A。只算第一次作答，證明題要批改完才算（6 分以上算會）。';
+  var split=lecSplit(D,sel);
+  $('tSplit').innerHTML='<tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+Object.keys(split).map(function(t){
+    var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'">'+esc(m.r.name)+' <small>錯 A'+m.need.A+'・B'+m.need.B+'</small></span>';}).join('');};
+    return '<tr><td>第 '+esc(t)+' 隊</td><td>'+cell('A')+'</td><td>'+cell('B')+'</td></tr>';}).join('')+
+    '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(split).reduce(function(a,t){return a+split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr>';
+  Array.prototype.forEach.call($('tSplit').querySelectorAll('.who'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
+  ['A','B'].forEach(function(sd){
+    var mine=D.top.filter(function(x){return sideOf(x.qid)===sd;});
+    $('side'+sd).innerHTML='<header><input type="text" value="'+esc(names[sd])+'" aria-label="'+sd+' 邊老師與主題"><button type="button" data-print="'+sd+'">列印講義</button></header>'+
+      '<div class="sub">'+mine.filter(function(x){return !off[x.qid];}).length+' 題'+(mine.length?'':'。這邊目前沒有題目，可以從另一邊「移到另一邊」。')+'</div>'+
+      mine.map(function(x){return lecCard(x,D,true);}).join('');
+    $('side'+sd).querySelector('input').onchange=function(e){ var n=lecNames(); n[sd]=e.target.value.trim()||sd; jset('trml-lec-names',n); renderLec(); };
+    $('side'+sd).querySelector('[data-print]').onclick=function(){ lecPrint(sd); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); renderLec(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-off]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-off'), o=jget('trml-lec-off',{}); if(o[q]) delete o[q]; else o[q]=1; jset('trml-lec-off',o); renderLec(); }; });
+  $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); renderLec(); };
+  $('btnSplitPrint').onclick=function(){
+    var w=window.open('','_blank'); if(!w) return;
+    w.document.write('<!doctype html><meta charset="utf-8"><title>週四講解分組</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:14mm;color:#111}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 12px;color:#555}table{border-collapse:collapse;width:100%;font-size:18px}th,td{border:1px solid #999;padding:10px 12px;text-align:left}th{background:#eee}</style>'+
+      '<h1>週四講解分組</h1><p>'+esc(D.from)+' ～ '+esc(D.to)+' 的練習</p><table><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
+      Object.keys(split).map(function(t){return '<tr><td>第 '+esc(t)+' 隊</td><td>'+split[t].A.map(function(m){return esc(m.r.name);}).join('、')+'</td><td>'+split[t].B.map(function(m){return esc(m.r.name);}).join('、')+'</td></tr>';}).join('')+'</table>');
+    w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
+  };
+  function lecPrint(sd){
+    var mine=D.top.filter(function(x){return sideOf(x.qid)===sd&&!off[x.qid];});
+    var who=Object.keys(split).map(function(t){return '第 '+t+' 隊：'+split[t][sd].map(function(m){return m.r.name;}).join('、');}).join('　');
+    var w=window.open('','_blank'); if(!w) return;
+    w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(names[sd])+' 講解</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:13px;line-height:1.5}h1{font-size:20px;margin:0}p.m{color:#555;margin:2px 0 10px}.lec-card{border:1px solid #bbb;border-radius:4px;padding:10px 12px;margin-bottom:10px;break-inside:avoid}.lec-card img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.lec-card .sol img{width:68%}.hd b{font-size:15px}.tag{background:#eee;border-radius:3px;padding:0 5px;margin-right:4px}.low{font-weight:700}.sub{color:#444}.key{border-left:4px solid #2f3f8f;background:#eef0f8;padding:5px 9px;margin:4px 0}.key.none{border-left-color:#bbb;background:#f3f3f3;color:#777}</style>'+
+      '<h1>'+esc(names[sd])+'　週四講解</h1><p class="m">'+esc(D.from)+' ～ '+esc(D.to)+' 錯最多的題目，共 '+mine.length+' 題。<br>來聽的同學　'+esc(who)+'</p>'+
+      mine.map(function(x){return lecCard(x,D,false);}).join(''));
+    w.document.close(); w.focus();
+    var imgs=w.document.images, left=imgs.length, go=function(){ if(--left<=0) setTimeout(function(){w.print();},200); };
+    if(!left) go(); else Array.prototype.forEach.call(imgs,function(im){ if(im.complete) go(); else { im.onload=go; im.onerror=go; } });
+  }
+}
+['lFrom','lTo','lN','lK競速','lK個人','lK團體'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='講解') renderLec(); });});
 
 /* ---------- 學生檔案（跨卷子、跨年度） ---------- */
 function renderApins(){
