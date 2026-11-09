@@ -189,7 +189,7 @@ $('vSplit').innerHTML='<div class="sheet"><div class="bar"><button type="button"
 
 /* ---- 學生個人分析 ---- */
 function stuSheet(s){
-  var whereTxt={me:'週四你這邊講',other:'另一邊講，跟隊友要講義',self:'自己看詳解'};
+  var whereTxt={me:'週四你這邊',other:'另一邊講，問隊友',self:'自己看詳解'};
   var topics=s.topics.slice().sort(function(a,b){return (a.ok/a.n-a.cls)-(b.ok/b.n-b.cls);});
   return '<article class="stu">'+
     '<header><h2>'+esc(s.name)+'　<span class="sub" style="font-family:var(--f-body)">第 '+esc(s.team)+' 隊</span></h2><span class="sub">'+esc(P.from)+' ～ '+esc(P.to)+'　週四去：<b>'+esc(s.side?P.names[s.side]:'—')+'</b></span></header>'+
@@ -204,8 +204,18 @@ function stuSheet(s){
       s.sets.map(function(x){return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.title)+(x.kind==='團體'?'（全隊）':'')+'</td><td class="n">'+esc(x.score)+'/'+esc(x.max)+'</td><td class="n">'+mmss(x.usedSec)+'</td></tr>';}).join('')+'</table></div></div>':'<div class="sub">這段期間沒有交卷。</div>')+
     (topics.length?'<div><h3>題型答對率（今年累積，不含團體賽）</h3><div class="tbl"><table><tr><th>題型</th><th class="n">題數</th><th>你的答對率　｜＝全體平均</th><th class="n">差距</th></tr>'+
       topics.map(function(t){var r=t.ok/t.n, d=r-t.cls;return '<tr><td>'+esc(t.t)+'</td><td class="n">'+t.n+'</td><td><span class="track"><i style="width:'+Math.round(r*100)+'%"></i><em style="left:'+Math.round(t.cls*100)+'%"></em></span> '+pct(r)+'</td><td class="n'+(d<-0.1?' low':'')+'">'+(d>=0?'+':'')+Math.round(d*100)+'</td></tr>';}).join('')+'</table></div></div>':'')+
-    (s.wrong.length?'<div><h3>這段期間錯的題目（'+s.wrong.length+' 題）</h3><div class="tbl"><table><tr><th>題目</th><th>你的答案</th><th>正確答案</th><th>核心關鍵</th><th>哪裡補</th></tr>'+
-      s.wrong.map(function(w){return '<tr><td>'+esc(w.label)+(w.team?'（團體）':'')+'</td><td>'+esc(w.mine||'空白')+'</td><td><b>'+esc(w.correct)+'</b></td><td>'+esc(w.key||'')+'</td><td><span class="where '+w.where+'">'+whereTxt[w.where]+'</span></td></tr>';}).join('')+'</table></div></div>':'<div class="sub">這段期間沒有錯題。</div>')+
+    (function(){
+      if(!s.wrong.length) return '<div class="sub">這段期間沒有錯題。</div>';
+      var lec=s.wrong.filter(function(w){return w.where!=='self';}), self=s.wrong.filter(function(w){return w.where==='self';});
+      var groups={}, order=[];
+      self.forEach(function(w){ var m=w.label.match(/^(.*) 第 (\d+) 題$/), k=m?m[1]:w.label; if(!groups[k]){groups[k]=[];order.push(k);} groups[k].push(m?m[2]:w.label); });
+      return '<div><h3>這段期間錯的題目：共 '+s.wrong.length+' 題</h3>'+
+        (lec.length?'<div class="sub" style="margin:2px 0 4px">週四會講的（'+lec.length+' 題）：先對照答案，上課專心聽這幾題。</div><div class="tbl"><table><tr><th>題目</th><th>你的答案</th><th>正確答案</th><th>核心關鍵</th><th>哪裡講</th></tr>'+
+          lec.map(function(w){return '<tr><td>'+esc(w.label)+(w.team?'（團體）':'')+'</td><td>'+esc(w.mine||'空白')+'</td><td><b>'+esc(w.correct)+'</b></td><td>'+esc(w.key||'')+'</td><td><span class="where '+w.where+'">'+whereTxt[w.where]+'</span></td></tr>';}).join('')+'</table></div>':'')+
+        (self.length?'<div class="sub" style="margin:8px 0 4px">回家自己看詳解（'+self.length+' 題）：到練習系統打開那份卷子的詳解，先看核心關鍵再自己算一次。</div><div class="tbl"><table>'+
+          order.map(function(k){return '<tr><td style="white-space:nowrap">'+esc(k)+'</td><td>第 '+groups[k].join('、')+' 題</td></tr>';}).join('')+'</table></div>':'')+
+      '</div>';
+    })()+
   '</article>';
 }
 $('vStu').innerHTML='<div class="sheet noprint"><div class="bar"><button type="button" class="b" data-print="Stu">列印全部（一人一頁）</button><label class="sub">只看 <select id="stuPick"><option value="">全部</option>'+P.students.map(function(s,i){return '<option value="'+i+'">第 '+esc(s.team)+' 隊 '+esc(s.name)+'</option>';}).join('')+'</select></label></div>'+
