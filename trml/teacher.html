@@ -89,7 +89,7 @@ th.n{text-align:right}
 .grade .done{color:var(--moss);font-weight:700}
 .sub{font-size:.85rem;color:var(--muted)}
 button.ghost{background:transparent;color:var(--indigo)}
-/* 週四講解 */
+/* 講解 */
 .lec-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:900px){.lec-cols{grid-template-columns:minmax(0,1fr)}}
 .lec-side{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -241,7 +241,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['講解','週四講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
+var TABS=[['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -424,7 +424,7 @@ function renderStats(kind){
 }
 
 
-/* ---------- 週四講解：這段期間錯最多的題目，分給兩位老師 ---------- */
+/* ---------- 講解：這段期間錯最多的題目，分給兩位老師 ---------- */
 var GEO=['平面幾何','圓'];
 function jget(k,d){try{var v=JSON.parse(lget(k)||'null');return v==null?d:v;}catch(e){return d;}}
 function jset(k,v){lset(k,JSON.stringify(v));}
@@ -432,8 +432,8 @@ function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+
 function dayOf(t){var m=String(t||'').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);return m?m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2):'';}
 function lecDefaults(){
   if($('lFrom').value) return;
-  var now=new Date(), back=(now.getDay()+2)%7; // 上一個週五（週四講完的隔天）起算
-  var f=new Date(now); f.setDate(now.getDate()-back);
+  var now=new Date(), back=(now.getDay()+2)%7; // 預設最近 7 天（今天往前 6 天）
+  var f=new Date(now); f.setDate(now.getDate()-6);
   $('lFrom').value=ymd(f); $('lTo').value=ymd(now);
 }
 function qLabel(q){var m=String(q).match(/^(\d{4})-([SIT])(\d+)/);if(!m)return q;return m[1]+' '+({S:'競速',I:'個人',T:'團體'})[m[2]]+' 第 '+Number(m[3])+' 題';}
@@ -536,8 +536,8 @@ function renderLec(){
   $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); renderLec(); };
   $('btnSplitPrint').onclick=function(){
     var w=window.open('','_blank'); if(!w) return;
-    w.document.write('<!doctype html><meta charset="utf-8"><title>週四講解分組</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:14mm;color:#111}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 12px;color:#555}table{border-collapse:collapse;width:100%;font-size:18px}th,td{border:1px solid #999;padding:10px 12px;text-align:left}th{background:#eee}</style>'+
-      '<h1>週四講解分組</h1><p>'+esc(D.from)+' ～ '+esc(D.to)+' 的練習</p><table><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
+    w.document.write('<!doctype html><meta charset="utf-8"><title>講解分組</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:14mm;color:#111}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 12px;color:#555}table{border-collapse:collapse;width:100%;font-size:18px}th,td{border:1px solid #999;padding:10px 12px;text-align:left}th{background:#eee}</style>'+
+      '<h1>講解分組</h1><p>'+esc(D.from)+' ～ '+esc(D.to)+' 的練習</p><table><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
       Object.keys(split).map(function(t){return '<tr><td>第 '+esc(t)+' 隊</td><td>'+split[t].A.map(function(m){return esc(m.r.name);}).join('、')+'</td><td>'+split[t].B.map(function(m){return esc(m.r.name);}).join('、')+'</td></tr>';}).join('')+'</table>');
     w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
   };
@@ -546,7 +546,7 @@ function renderLec(){
     var who=Object.keys(split).map(function(t){return '第 '+t+' 隊：'+split[t][sd].map(function(m){return m.r.name;}).join('、');}).join('　');
     var w=window.open('','_blank'); if(!w) return;
     w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(names[sd])+' 講解</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:13px;line-height:1.5}h1{font-size:20px;margin:0}p.m{color:#555;margin:2px 0 10px}.lec-card{border:1px solid #bbb;border-radius:4px;padding:10px 12px;margin-bottom:10px;break-inside:avoid}.lec-card img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.lec-card .sol img{width:68%}.hd b{font-size:15px}.tag{background:#eee;border-radius:3px;padding:0 5px;margin-right:4px}.low{font-weight:700}.sub{color:#444}.key{border-left:4px solid #2f3f8f;background:#eef0f8;padding:5px 9px;margin:4px 0}.key.none{border-left-color:#bbb;background:#f3f3f3;color:#777}</style>'+
-      '<h1>'+esc(names[sd])+'　週四講解</h1><p class="m">'+esc(D.from)+' ～ '+esc(D.to)+' 錯最多的題目，共 '+mine.length+' 題。<br>來聽的同學　'+esc(who)+'</p>'+
+      '<h1>'+esc(names[sd])+'　講解</h1><p class="m">'+esc(D.from)+' ～ '+esc(D.to)+' 錯最多的題目，共 '+mine.length+' 題。<br>來聽的同學　'+esc(who)+'</p>'+
       mine.map(function(x){return lecCard(x,D,false);}).join(''));
     w.document.close(); w.focus();
     var imgs=w.document.images, left=imgs.length, go=function(){ if(--left<=0) setTimeout(function(){w.print();},200); };
@@ -610,7 +610,7 @@ function buildPack(){
     if(spd!=null&&cspd!=null&&spd>cspd*1.3) advice.push('競速每題比全體慢不少，先把會的題目寫快。');
     if(!mySubs.length) advice.push('這段期間沒有交卷，先把這週的卷子補寫。');
     var self=wrong.filter(function(w){return w.where==='self';}).length;
-    if(self) advice.push('有 '+self+' 題週四不會講，回家打開詳解自己看。');
+    if(self) advice.push('有 '+self+' 題講解不會講到，回家打開詳解自己看。');
     return {name:r.name,team:r.team,side:side,
       sets:mySubs.map(function(x){return {date:dayOf(x.time),title:titles[x.setId]||x.setId,kind:x.kind,score:x.score,max:x.max||x.total,usedSec:x.usedSec};}).sort(function(a,b){return a.date<b.date?-1:1;}),
       period:{sets:mySubs.length,n:per.n,ok:per.ok},year:yr,clsRate:clsAll.n?clsAll.ok/clsAll.n:null,

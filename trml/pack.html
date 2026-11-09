@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TRML 週四講解包</title>
+<title>TRML 講解包</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -118,7 +118,7 @@ td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
 <body>
 <div class="wrap" id="app">
   <div class="noprint">
-    <div class="sub">TRML 練習・週四講解包</div>
+    <div class="sub">TRML 練習・講解包</div>
     <h1 id="ttl">讀取中…</h1>
     <div class="sub" id="meta"></div>
   </div>
@@ -139,9 +139,9 @@ var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function pct(x){return Math.round(x*100)+'%';}
 function mmss(s){s=Math.round(s||0);return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
-if(!P){ $('ttl').textContent='沒有資料'; $('meta').innerHTML='請從老師頁「週四講解」按「一鍵產生講解包」打開這一頁。<a href="teacher.html">回老師頁</a>'; return; }
+if(!P){ $('ttl').textContent='沒有資料'; $('meta').innerHTML='請從老師頁「講解」按「一鍵產生講解包」打開這一頁。<a href="teacher.html">回老師頁</a>'; return; }
 
-$('ttl').textContent=P.set?('週四講解包　'+P.set.title):('週四講解包　'+P.from+' ～ '+P.to);
+$('ttl').textContent=P.set?('講解包　'+P.set.title):('講解包　'+P.from+' ～ '+P.to);
 $('meta').textContent='產生時間 '+P.made+'。'+P.names.A+' 講 '+P.sides.A.length+' 題，'+P.names.B+' 講 '+P.sides.B.length+' 題；學生分析 '+P.students.length+' 人。';
 
 var TABS=(P.all?[['Book','① 學生題本']]:[]).concat([['A',(P.all?'② ':'')+P.names.A],['B',(P.all?'② ':'')+P.names.B]]).concat(P.all?[['Sol','③ 學生帶回家的詳解']]:[]).concat([['Split','分組名單'],['Stu','學生個人分析']]), cur=TABS[0][0];
@@ -168,7 +168,7 @@ function qCard(q,withNames){
 ['A','B'].forEach(function(sd){
   var L=P.sides[sd];
   $('v'+sd).innerHTML='<div class="sheet"><div class="bar"><button type="button" class="b" data-play="'+sd+'">播放簡報</button><button type="button" class="b ghost" data-pptx="'+sd+'">下載 PowerPoint</button><button type="button" class="b ghost" data-print="'+sd+'">列印講義</button><span class="sub" id="pp'+sd+'"></span></div>'+
-    '<h2>'+esc(P.names[sd])+'　週四講解</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 錯最多的題目，共 '+L.length+' 題。簡報 '+(L.length*4+3)+' 張：每題「題目 → 大家錯在哪 → 核心關鍵 → 詳解」。</div>'+
+    '<h2>'+esc(P.names[sd])+'　講解</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 錯最多的題目，共 '+L.length+' 題。簡報 '+(L.length*4+3)+' 張：每題「題目 → 大家錯在哪 → 核心關鍵 → 詳解」。</div>'+
     '<div class="sub"><b>來聽的同學</b>　'+esc(who(sd))+'</div></div>'+
     (L.length?L.map(function(q){return qCard(q,true);}).join(''):'<div class="sheet sub">這邊沒有題目。回老師頁把題目「移到另一邊」再產生一次。</div>');
 });
@@ -181,7 +181,7 @@ document.addEventListener('click',function(e){
 
 /* ---- 分組名單 ---- */
 $('vSplit').innerHTML='<div class="sheet"><div class="bar"><button type="button" class="b ghost" data-print="Split">列印分組名單</button></div>'+
-  '<h2>週四講解分組</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 的練習。每隊分兩邊，聽完回隊上互相講給對方聽。</div>'+
+  '<h2>講解分組</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 的練習。每隊分兩邊，聽完回隊上互相講給對方聽。</div>'+
   '<div class="tbl"><table style="font-size:1.05rem"><tr><th>隊伍</th><th>'+esc(P.names.A)+'</th><th>'+esc(P.names.B)+'</th></tr>'+
   P.split.map(function(g){return '<tr><td>第 '+esc(g.team)+' 隊</td><td>'+esc(g.A.join('、'))+'</td><td>'+esc(g.B.join('、'))+'</td></tr>';}).join('')+
   '<tr><td class="sub">人數</td><td class="sub">'+P.split.reduce(function(a,g){return a+g.A.length;},0)+' 人</td><td class="sub">'+P.split.reduce(function(a,g){return a+g.B.length;},0)+' 人</td></tr></table></div>'+
@@ -189,10 +189,10 @@ $('vSplit').innerHTML='<div class="sheet"><div class="bar"><button type="button"
 
 /* ---- 學生個人分析 ---- */
 function stuSheet(s){
-  var whereTxt={me:'週四你這邊',other:'另一邊講，問隊友',self:'自己看詳解'};
+  var whereTxt={me:'講解時你這邊',other:'另一邊講，問隊友',self:'自己看詳解'};
   var topics=s.topics.slice().sort(function(a,b){return (a.ok/a.n-a.cls)-(b.ok/b.n-b.cls);});
   return '<article class="stu">'+
-    '<header><h2>'+esc(s.name)+'　<span class="sub" style="font-family:var(--f-body)">第 '+esc(s.team)+' 隊</span></h2><span class="sub">'+esc(P.from)+' ～ '+esc(P.to)+'　週四去：<b>'+esc(s.side?P.names[s.side]:'—')+'</b></span></header>'+
+    '<header><h2>'+esc(s.name)+'　<span class="sub" style="font-family:var(--f-body)">第 '+esc(s.team)+' 隊</span></h2><span class="sub">'+esc(P.from)+' ～ '+esc(P.to)+'　講解時去：<b>'+esc(s.side?P.names[s.side]:'—')+'</b></span></header>'+
     '<div class="kpis">'+
       '<div class="kpi"><b>'+s.period.sets+'</b><span>這段期間寫了幾份</span></div>'+
       '<div class="kpi"><b>'+(s.period.n?pct(s.period.ok/s.period.n):'—')+'</b><span>這段期間答對率（'+s.period.ok+'/'+s.period.n+'）</span></div>'+
@@ -210,7 +210,7 @@ function stuSheet(s){
       var groups={}, order=[];
       self.forEach(function(w){ var m=w.label.match(/^(.*) 第 (\d+) 題$/), k=m?m[1]:w.label; if(!groups[k]){groups[k]=[];order.push(k);} groups[k].push(m?m[2]:w.label); });
       return '<div><h3>這段期間錯的題目：共 '+s.wrong.length+' 題</h3>'+
-        (lec.length?'<div class="sub" style="margin:2px 0 4px">週四會講的（'+lec.length+' 題）：先對照答案，上課專心聽這幾題。</div><div class="tbl"><table><tr><th>題目</th><th>你的答案</th><th>正確答案</th><th>核心關鍵</th><th>哪裡講</th></tr>'+
+        (lec.length?'<div class="sub" style="margin:2px 0 4px">講解會講到的（'+lec.length+' 題）：先對照答案，上課專心聽這幾題。</div><div class="tbl"><table><tr><th>題目</th><th>你的答案</th><th>正確答案</th><th>核心關鍵</th><th>哪裡講</th></tr>'+
           lec.map(function(w){return '<tr><td>'+esc(w.label)+(w.team?'（團體）':'')+'</td><td>'+esc(w.mine||'空白')+'</td><td><b>'+esc(w.correct)+'</b></td><td>'+esc(w.key||'')+'</td><td><span class="where '+w.where+'">'+whereTxt[w.where]+'</span></td></tr>';}).join('')+'</table></div>':'')+
         (self.length?'<div class="sub" style="margin:8px 0 4px">回家自己看詳解（'+self.length+' 題）：到練習系統打開那份卷子的詳解，先看核心關鍵再自己算一次。</div><div class="tbl"><table>'+
           order.map(function(k){return '<tr><td style="white-space:nowrap">'+esc(k)+'</td><td>第 '+groups[k].join('、')+' 題</td></tr>';}).join('')+'</table></div>':'')+
@@ -219,14 +219,14 @@ function stuSheet(s){
   '</article>';
 }
 $('vStu').innerHTML='<div class="sheet noprint"><div class="bar"><button type="button" class="b" data-print="Stu">列印全部（一人一頁）</button><label class="sub">只看 <select id="stuPick"><option value="">全部</option>'+P.students.map(function(s,i){return '<option value="'+i+'">第 '+esc(s.team)+' 隊 '+esc(s.name)+'</option>';}).join('')+'</select></label></div>'+
-  '<div class="sub">每人一頁：這段期間寫了什麼、題型強弱（和全體比）、錯題的正確答案與核心關鍵，以及週四在哪一邊講。選一個人再按列印就只印他那一頁。</div></div>'+
+  '<div class="sub">每人一頁：這段期間寫了什麼、題型強弱（和全體比）、錯題的正確答案與核心關鍵，以及講解時在哪一邊講。選一個人再按列印就只印他那一頁。</div></div>'+
   '<div id="stuList" style="display:flex;flex-direction:column;gap:14px">'+P.students.map(stuSheet).join('')+'</div>';
 $('stuPick').onchange=function(){ var v=this.value; Array.prototype.forEach.call($('stuList').children,function(el,i){ el.hidden=v!==''&&String(i)!==v; }); };
 
 /* ---- 簡報內容（播放與 PowerPoint 共用） ---- */
 function slidesOf(sd){
   var L=P.sides[sd], S=[];
-  S.push({t:'title',h:(P.set?P.set.title+'　':'')+P.names[sd],sub:(P.set?'週四講解　':'')+P.from+' ～ '+P.to+'　共 '+L.length+' 題',who:who(sd)});
+  S.push({t:'title',h:(P.set?P.set.title+'　':'')+P.names[sd],sub:(P.set?'講解　':'')+P.from+' ～ '+P.to+'　共 '+L.length+' 題',who:who(sd)});
   S.push({t:'list',h:'今天講這幾題',rows:L.map(function(q,i){return [String(i+1),q.label,q.topic,'錯 '+q.no+'/'+q.n+' '+q.unit];})});
   L.forEach(function(q,i){
     var tag=(i+1)+'/'+L.length+'　'+q.label;
@@ -240,7 +240,7 @@ function slidesOf(sd){
 }
 function slideHTML(s,i,n){
   var foot='<div class="foot"><span>'+esc(s.tag||'')+'</span><span>'+(i+1)+' / '+n+'</span></div>';
-  if(s.t==='title') return '<div class="sl" style="justify-content:center"><div class="lab">TRML 練習・週四講解</div><h2 style="font-size:60px">'+esc(s.h)+'</h2><div class="big">'+esc(s.sub)+'</div><div style="font-size:24px;color:#5b6272;margin-top:24px;line-height:1.7">'+esc(s.who).replace(/　/g,'<br>')+'</div>'+foot+'</div>';
+  if(s.t==='title') return '<div class="sl" style="justify-content:center"><div class="lab">TRML 練習・講解</div><h2 style="font-size:60px">'+esc(s.h)+'</h2><div class="big">'+esc(s.sub)+'</div><div style="font-size:24px;color:#5b6272;margin-top:24px;line-height:1.7">'+esc(s.who).replace(/　/g,'<br>')+'</div>'+foot+'</div>';
   if(s.t==='list') return '<div class="sl"><h2>'+esc(s.h)+'</h2><table>'+s.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('')+'</table>'+foot+'</div>';
   if(s.t==='q') return '<div class="sl"><div class="timer"><button type="button" data-tm="60">1 分</button><button type="button" data-tm="120">2 分</button><button type="button" data-tm="180">3 分</button><b id="tmv"></b></div><div class="lab">'+esc(s.lab)+'</div><h2>'+esc(s.h)+'</h2>'+(s.text?'<div class="big">'+esc(s.text)+'</div>':'')+'<div class="imgbox"><img src="'+esc(s.img)+'" alt=""></div>'+foot+'</div>';
   if(s.t==='why') return '<div class="sl"><h2>'+esc(s.h)+'</h2><div class="big" style="color:#b85a1f;font-weight:700">'+esc(s.rate)+'</div>'+
@@ -287,12 +287,12 @@ function pptx(sd,btn){
   loadScript().then(function(){
     return Promise.all(Object.keys(urls).map(function(u){ return imgData(u).then(function(d){urls[u]=d;}).catch(function(){urls[u]=null;}); }));
   }).then(function(){
-    var p=new PptxGenJS(); p.layout='LAYOUT_WIDE'; p.title=P.names[sd]+' 週四講解';
+    var p=new PptxGenJS(); p.layout='LAYOUT_WIDE'; p.title=P.names[sd]+' 講解';
     var F='Microsoft JhengHei', INK='1C2230', IND='2F3F8F', OCH='B85A1F', MUT='5B6272';
     S.forEach(function(s,i){
       var sl=p.addSlide(); sl.background={color:'FBFBF8'};
       sl.addText((s.tag?s.tag+'　':'')+(i+1)+' / '+S.length,{x:0.5,y:7.05,w:12.3,h:0.3,fontFace:F,fontSize:10,color:'8A8F99',align:'right'});
-      if(s.t==='title'){ sl.addText('TRML 練習・週四講解',{x:0.8,y:1.3,w:11.7,h:0.5,fontFace:F,fontSize:16,color:MUT});
+      if(s.t==='title'){ sl.addText('TRML 練習・講解',{x:0.8,y:1.3,w:11.7,h:0.5,fontFace:F,fontSize:16,color:MUT});
         sl.addText(s.h,{x:0.8,y:1.9,w:11.7,h:1.2,fontFace:F,fontSize:40,bold:true,color:IND});
         sl.addText(s.sub,{x:0.8,y:3.1,w:11.7,h:0.6,fontFace:F,fontSize:22,color:INK});
         sl.addText(s.who.split('　').join('\n'),{x:0.8,y:3.9,w:11.7,h:2.8,fontFace:F,fontSize:16,color:MUT,valign:'top'}); }
@@ -317,7 +317,7 @@ function pptx(sd,btn){
       else { sl.addText(s.h,{x:0.6,y:1.5,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
         sl.addText(s.lines.map(function(l){return {text:l,options:{bullet:true}};}),{x:0.8,y:2.6,w:11.8,h:3,fontFace:F,fontSize:24,color:INK,valign:'top',paraSpaceAfter:14}); }
     });
-    return p.writeFile({fileName:'TRML週四講解_'+P.names[sd].replace(/[\\\/:*?"<>|・\s]/g,'')+'_'+P.to+'.pptx'});
+    return p.writeFile({fileName:'TRML講解_'+P.names[sd].replace(/[\\\/:*?"<>|・\s]/g,'')+'_'+P.to+'.pptx'});
   }).then(function(){ msg.textContent='已下載。'; },function(e){ msg.textContent='沒做成：'+e.message; }).then(function(){ btn.disabled=false; });
 }
 
@@ -328,7 +328,7 @@ $('btnSave').onclick=function(){
     var data=JSON.stringify(P).replace(/</g,'\\u003c');
     var html=src.replace('<head>','<head>\n<base href="'+base+'">\n<script>window.__PACK='+data+';<\/script>');
     var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-    a.download='TRML週四講解包_'+P.from+'_'+P.to+'.html'; document.body.appendChild(a); a.click(); a.remove();
+    a.download='TRML講解包_'+P.from+'_'+P.to+'.html'; document.body.appendChild(a); a.click(); a.remove();
     $('saveMsg').textContent='已下載。這個檔案在自己電腦上打開也能播放與列印（圖片要連網）。';
   });
 };
