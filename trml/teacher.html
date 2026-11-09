@@ -201,7 +201,10 @@ button.ghost{background:transparent;color:var(--indigo)}
         </div>
         <div class="sub" id="lNote"></div>
         <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub" id="packNote"></span></div>
-        <div class="row" style="align-items:center" id="solRow"><button type="button" id="btnSolOpen" class="ghost">開放詳解給學生</button><span class="sub" id="solNote"></span></div>
+        <div id="solRow" style="display:flex;flex-direction:column;gap:6px">
+          <div class="row" style="align-items:center"><b>學生看詳解</b><span id="solState" class="tag"></span><button type="button" id="btnSolOn">開放</button><button type="button" id="btnSolOff" class="ghost">關閉</button><span class="sub" id="solNote"></span></div>
+          <div class="sub" id="solList"></div>
+        </div>
       </div>
       <div class="sheet">
         <h2>分組：每一隊分兩邊</h2>
@@ -562,20 +565,25 @@ function curSet(){ return data.sets.filter(function(x){return x.id===$('lSet').v
 function renderSolBtn(){
   var st=curSet(); if(!st) return;
   var on=!!st.solOpen, url=new URL('sol.html#'+st.id,location.href).href;
-  $('btnSolOpen').textContent=on?'關閉詳解':'開放詳解給學生';
-  $('btnSolOpen').className=on?'ghost':'';
-  $('solNote').innerHTML=on?('〈'+esc(st.title)+'〉的詳解<b>已開放</b>：學生到首頁「看詳解」，用隊伍代碼登入就能看（不必作答）。網址：<a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(url)+'</a>')
-    :('〈'+esc(st.title)+'〉的詳解目前<b>沒有開放</b>。講解完按這個鈕，學生就能在網頁上看整份詳解，不用印。');
+  $('solState').textContent=on?'〈'+st.title+'〉開放中':'〈'+st.title+'〉未開放';
+  $('solState').style.cssText=on?'background:var(--moss-soft,#e1eed9);color:var(--moss,#3f6f2e);font-weight:700':'';
+  $('btnSolOn').disabled=on; $('btnSolOff').disabled=!on;
+  $('solNote').innerHTML=on?('學生到首頁「看詳解」，用隊伍代碼登入就能看：<a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(url)+'</a>')
+    :'講解完按「開放」，學生就能在網頁上看整份詳解，不用印；要收回按「關閉」。';
+  var opened=data.sets.filter(function(x){return x.solOpen;});
+  $('solList').innerHTML=opened.length?('目前開放中的詳解：'+opened.map(function(x){return '<span class="tag" style="margin-right:6px">'+esc(x.title)+' <a href="#" data-solclose="'+esc(x.id)+'">關閉</a></span>';}).join('')):'目前沒有開放任何一份詳解。';
+  Array.prototype.forEach.call($('solList').querySelectorAll('[data-solclose]'),function(a){ a.onclick=function(e){ e.preventDefault(); setSol(a.getAttribute('data-solclose'),false); }; });
 }
-$('btnSolOpen').addEventListener('click',function(){
-  var st=curSet(); if(!st) return; var want=!st.solOpen, b=$('btnSolOpen');
-  b.disabled=true; $('solNote').textContent=want?'開放中…':'關閉中…';
-  postJ(API,{action:'solOpen',key:lget('trml-key'),setId:st.id,open:want}).then(function(d){
-    b.disabled=false;
-    if(!d||!d.ok){ $('solNote').textContent='沒有成功：'+((d&&d.error)||'請稍後再試'); return; }
+function setSol(id,want){
+  var st=data.sets.filter(function(x){return x.id===id;})[0]; if(!st) return;
+  $('btnSolOn').disabled=$('btnSolOff').disabled=true; $('solNote').textContent=(want?'開放':'關閉')+'〈'+st.title+'〉中…';
+  postJ(API,{action:'solOpen',key:lget('trml-key'),setId:id,open:want}).then(function(d){
+    if(!d||!d.ok){ renderSolBtn(); $('solNote').textContent='沒有成功：'+((d&&d.error)||'請稍後再試'); return; }
     st.solOpen=d.solOpen; renderSolBtn();
-  }).catch(function(){ b.disabled=false; $('solNote').textContent='連不上後端，請確認網路後再試。'; });
-});
+  }).catch(function(){ renderSolBtn(); $('solNote').textContent='連不上後端，請確認網路後再試。'; });
+}
+$('btnSolOn').addEventListener('click',function(){ var st=curSet(); if(st) setSol(st.id,true); });
+$('btnSolOff').addEventListener('click',function(){ var st=curSet(); if(st) setSol(st.id,false); });
 /* ---------- 一鍵產生講解包（pack.html） ---------- */
 function buildPack(){
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
