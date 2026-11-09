@@ -626,7 +626,7 @@ function buildPack(){
 $('btnPack').addEventListener('click',function(){
   try{ window.__TRML_PACK=buildPack(); }catch(e){ alertMsg('產生失敗：'+e.message); return; }
   try{ localStorage.setItem('trml-pack',JSON.stringify(window.__TRML_PACK)); }catch(e){}
-  var w=window.open('pack.html','_blank'); if(!w) $('lNote').textContent='瀏覽器擋了新視窗，請允許這個網站開新視窗後再按一次。';
+  var w=window.open('pack.html?t='+Date.now(),'_blank'); if(!w) $('lNote').textContent='瀏覽器擋了新視窗，請允許這個網站開新視窗後再按一次。';
 });
 function alertMsg(t){ $('lNote').textContent=t; }
 
