@@ -841,7 +841,7 @@ function aiBox(r,i){
     '<div class="alt"><div class="row" style="align-items:center"><b>另解</b>'+(x.alt_worthy?'<span class="badge">AI 認為可以當另解</span>':'')+
       (al&&al.on?'<span class="badge">已公開</span>':'')+'</div>'+
       '<textarea id="alt-'+i+'" placeholder="這個解法的思路與關鍵步驟（公開時會跟照片一起出現在這題的詳解下面）">'+esc(sum)+'</textarea>'+
-      '<div class="row" style="align-items:center"><label class="chk"><input type="checkbox" id="altn-'+i+'"'+(al&&al.showName?' checked':'')+'> 顯示隊名</label>'+
+      '<div class="row" style="align-items:center"><label class="chk"><input type="checkbox" id="altn-'+i+'"'+(!al||al.showName?' checked':'')+'> 顯示隊伍成員</label>'+
       '<button type="button" data-alt="'+i+'"'+(al&&al.on?' class="ghost"':'')+'>'+(al&&al.on?'取消公開':'公開為另解')+'</button><span class="sub" id="alts-'+i+'"></span></div></div>'+
   '</div>';
 }
