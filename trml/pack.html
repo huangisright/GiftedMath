@@ -134,12 +134,12 @@ td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
 <script>
 (function(){
 'use strict';
-var P=window.__PACK||(function(){try{return window.opener&&window.opener.__TRML_PACK;}catch(e){return null;}})();
+var P=window.__PACK||(function(){try{return window.opener&&window.opener.__TRML_PACK;}catch(e){return null;}})()||(function(){try{return JSON.parse(localStorage.getItem('trml-pack')||'null');}catch(e){return null;}})();
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function pct(x){return Math.round(x*100)+'%';}
 function mmss(s){s=Math.round(s||0);return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
-if(!P){ $('ttl').textContent='沒有資料'; $('meta').textContent='請從老師頁「週四講解」按「一鍵產生講解包」打開這一頁。'; return; }
+if(!P){ $('ttl').textContent='沒有資料'; $('meta').innerHTML='請從老師頁「週四講解」按「一鍵產生講解包」打開這一頁。<a href="teacher.html">回老師頁</a>'; return; }
 
 $('ttl').textContent=P.set?('週四講解包　'+P.set.title):('週四講解包　'+P.from+' ～ '+P.to);
 $('meta').textContent='產生時間 '+P.made+'。'+P.names.A+' 講 '+P.sides.A.length+' 題，'+P.names.B+' 講 '+P.sides.B.length+' 題；學生分析 '+P.students.length+' 人。';
