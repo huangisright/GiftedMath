@@ -190,15 +190,17 @@ button.ghost{background:transparent;color:var(--indigo)}
     <div id="vLec" hidden style="display:flex;flex-direction:column;gap:16px">
       <div class="sheet">
         <div class="row">
+          <label class="f" for="lMode">講什麼<select id="lMode"><option value="set">一份卷子整份講</option><option value="top">這段期間錯最多的題目</option></select></label>
+          <label class="f" for="lSet" id="wlSet">卷子<select id="lSet"></select></label>
           <label class="f" for="lFrom">從<input type="date" id="lFrom"></label>
           <label class="f" for="lTo">到<input type="date" id="lTo"></label>
-          <label class="f" for="lN">挑幾題<select id="lN"><option>6</option><option selected>8</option><option>10</option><option>12</option><option>16</option></select></label>
-          <label class="chk"><input type="checkbox" id="lK競速" checked> 競速</label>
+          <label class="f" for="lN" id="wlN">挑幾題<select id="lN"><option>6</option><option selected>8</option><option>10</option><option>12</option><option>16</option></select></label>
+          <span id="wlK" style="display:contents"><label class="chk"><input type="checkbox" id="lK競速" checked> 競速</label>
           <label class="chk"><input type="checkbox" id="lK個人" checked> 個人</label>
-          <label class="chk"><input type="checkbox" id="lK團體" checked> 團體</label>
+          <label class="chk"><input type="checkbox" id="lK團體" checked> 團體</label></span>
         </div>
         <div class="sub" id="lNote"></div>
-        <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub">兩位老師各自的簡報（可播放、可下載 PowerPoint）、講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。</span></div>
+        <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub" id="packNote"></span></div>
       </div>
       <div class="sheet">
         <h2>分組：每一隊分兩邊</h2>
@@ -442,6 +444,8 @@ function lecData(){
   var kinds=['競速','個人','團體'].filter(function(k){return $('lK'+k).checked;});
   var roster=data.roster.filter(function(r){return r.year===y&&r.team!=='測試';});
   var size={}; roster.forEach(function(r){size[r.team]=(size[r.team]||0)+1;});
+  var mode=$('lMode').value, theSet=mode==='set'?data.sets.filter(function(x){return x.id===$('lSet').value;})[0]:null;
+  if(theSet) kinds=['競速','個人','團體'];
   var subs=data.submissions.filter(function(s){var d=dayOf(s.time);return s.year===y&&s.attemptNo===1&&s.team!=='測試'&&kinds.indexOf(s.kind)>=0&&d&&d>=from&&d<=to;});
   var sub={}; subs.forEach(function(s){sub[s.attemptId]=s;});
   var Q={};
@@ -458,7 +462,9 @@ function lecData(){
   var list=Object.keys(Q).map(function(k){return Q[k];}).filter(function(x){return x.no>0;});
   list.sort(function(a,b){return b.nop-a.nop||(b.no/b.n)-(a.no/a.n);});
   var notes={}; (data.notes||[]).forEach(function(n){ if(n.year!==y) return; var d=dayOf(n.time); (notes[n.qid]||(notes[n.qid]=[])).push(n); });
-  return {y:y,roster:roster,subs:subs,list:list,notes:notes,top:list.slice(0,Number($('lN').value)),from:from,to:to};
+  var top=list.slice(0,Number($('lN').value));
+  if(theSet) top=theSet.qids.map(function(q){ return Q[q]||{qid:q,kind:theSet.kind||'競速',set:theSet.id,n:0,no:0,np:0,nop:0,wrong:{},who:[],okWho:[],blank:0,man:isManual((qinfo[q]||{}).answer)}; });
+  return {y:y,roster:roster,subs:subs,list:list,notes:notes,top:top,from:from,to:to,mode:mode,set:theSet};
 }
 function sideOf(q){var o=jget('trml-lec-side',{});return o[q]||(GEO.indexOf((qinfo[q]||{}).topic)>=0?'B':'A');}
 function lecNames(){return jget('trml-lec-names',{A:'老師 A・代數',B:'老師 B・幾何'});}
@@ -482,11 +488,11 @@ function lecCard(x,D,screen){
   var texts=ns.filter(function(n){return n.text;});
   var unit=x.kind==='團體'?'隊':'人';
   return '<div class="lec-card'+(screen&&jget('trml-lec-off',{})[q]?' off':'')+'" data-q="'+esc(q)+'">'+
-    '<div class="hd"><b>'+esc(qLabel(q))+'</b><span class="tag">'+esc(info.topic||'未分類')+'</span><span class="low">錯 '+x.no+'/'+x.n+' '+unit+'（'+pct(rate)+'）</span></div>'+
+    '<div class="hd"><b>'+esc(qLabel(q))+'</b><span class="tag">'+esc(info.topic||'未分類')+'</span>'+(x.n?'<span class="low">錯 '+x.no+'/'+x.n+' '+unit+'（'+pct(rate)+'）</span>':'<span class="sub">這段期間還沒有人寫</span>')+'</div>'+
     (info.text?'<div>'+esc(info.text)+'</div>':'')+'<img loading="lazy" src="'+esc(imgSrc(q))+'" alt="'+esc(qLabel(q))+' 題目">'+
     '<div>正確答案：<b>'+esc(showAns(info.answer))+'</b></div>'+
     (wrongs?'<div class="sub">常見錯答：'+wrongs+'</div>':'')+
-    '<div class="sub">'+(x.no>x.n/2?'答對的'+unit+'：'+(x.okWho.length?esc(x.okWho.join('、')):'沒有'):'錯的'+unit+'：'+esc(x.who.map(function(w){return w.label;}).join('、')))+'</div>'+
+    (!x.n?'':'<div class="sub">'+(x.no>x.n/2?'答對的'+unit+'：'+(x.okWho.length?esc(x.okWho.join('、')):'沒有'):'錯的'+unit+'：'+esc(x.who.map(function(w){return w.label;}).join('、')))+'</div>')+
     (Object.keys(stuck).length||Object.keys(diff).length?'<div class="sub">學生回饋：'+Object.keys(diff).map(function(k){return '<span class="tag">'+esc(k)+' '+diff[k]+'</span>';}).join('')+Object.keys(stuck).map(function(k){return '<span class="tag">卡在'+esc(k)+' '+stuck[k]+'</span>';}).join('')+'</div>':'')+
     (texts.length?'<div class="sub">'+texts.slice(0,4).map(function(n){return '「'+esc(n.text)+'」—'+esc(n.name);}).join('<br>')+'</div>':'')+
     '<div class="key'+(info.key?'':' none')+'">核心關鍵：'+(info.key?esc(info.key):'還沒寫。可以在試算表 questions 工作表的 F 欄「關鍵」補上。')+'</div>'+
@@ -494,11 +500,23 @@ function lecCard(x,D,screen){
     (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button></div>':'')+
   '</div>';
 }
+function lecSets(){
+  var sel=$('lSet'), order={'團體':0,'個人':1,'競速':2}, L=data.sets.slice().sort(function(a,b){return (order[a.kind||'競速']-order[b.kind||'競速'])||0;});
+  if(!sel.options.length) sel.innerHTML=L.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.title)+'</option>';}).join('');
+  if(window.__lecSetManual) return;
+  var from=$('lFrom').value, to=$('lTo').value, last=null;
+  data.submissions.forEach(function(x){ var d=dayOf(x.time); if(x.kind==='團體'&&x.team!=='測試'&&d>=from&&d<=to&&(!last||d>=last.d)) last={d:d,id:x.setId}; });
+  var saved=lget('trml-lec-set');
+  sel.value=last?last.id:(saved&&L.some(function(x){return x.id===saved;})?saved:(L[0]||{}).id);
+}
 function renderLec(){
-  lecDefaults();
+  lecDefaults(); lecSets();
+  var setMode=$('lMode').value==='set';
+  $('wlSet').hidden=!setMode; $('wlN').hidden=setMode; $('wlK').hidden=setMode;
+  $('packNote').textContent=setMode?'一次做好：學生題本、兩位老師的簡報（一題一題秀：題目 → 先想一下（可計時）→ 錯在哪 → 核心關鍵 → 詳解；可下載 PowerPoint）、老師講義、學生帶回家的詳解、分組名單、每位學生一頁的個人分析。':'兩位老師各自的簡報（可播放、可下載 PowerPoint）、講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。';
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
   var sel=D.top.filter(function(x){return !off[x.qid];});
-  $('lNote').textContent='這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放 B，其他放 A。只算第一次作答，證明題要批改完才算（6 分以上算會）。';
+  $('lNote').textContent=setMode&&D.set?('整份講〈'+D.set.title+'〉，共 '+D.top.length+' 題，依題號順序。錯誤率用這段期間的第一次作答（不含測試組）；平面幾何、圓預設放 B，其他放 A，可以「移到另一邊」或「這題不講」（不講的題目仍在題本和學生詳解裡）。'):('這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放 B，其他放 A。只算第一次作答，證明題要批改完才算（6 分以上算會）。');
   var split=lecSplit(D,sel);
   $('tSplit').innerHTML='<tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+Object.keys(split).map(function(t){
     var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'">'+esc(m.r.name)+' <small>錯 A'+m.need.A+'・B'+m.need.B+'</small></span>';}).join('');};
@@ -547,7 +565,7 @@ function buildPack(){
     ns.forEach(function(n){ (n.stuck||[]).forEach(function(t){st[t]=(st[t]||0)+1;}); if(n.diff) df[n.diff]=(df[n.diff]||0)+1; });
     var pairs=function(o){return Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1];});};
     var unit=x.kind==='團體'?'隊':'人';
-    return {qid:x.qid,label:qLabel(x.qid),topic:info.topic||'未分類',answer:showAns(info.answer),key:info.key||'',text:info.text||'',img:imgSrc(x.qid),sol:solSrc(x.qid),
+    return {qid:x.qid,manual:isManual(info.answer),num:Number((String(x.qid).match(/(\d+)$/)||[])[1]||0),label:qLabel(x.qid),topic:info.topic||'未分類',answer:showAns(info.answer),key:info.key||'',text:info.text||'',img:imgSrc(x.qid),sol:solSrc(x.qid),
       no:x.no,n:x.n,unit:unit,wrongs:pairs(x.wrong).slice(0,4),blank:x.blank,stuck:pairs(st),diff:pairs(df),
       quotes:ns.filter(function(n){return n.text;}).slice(0,4).map(function(n){return {name:n.name,text:n.text};}),
       whoLine:x.no>x.n/2?('答對的'+unit+'：'+(x.okWho.join('、')||'沒有')):('錯的'+unit+'：'+x.who.map(function(w){return w.label;}).join('、'))};
@@ -599,7 +617,8 @@ function buildPack(){
       speedSec:spd,clsSpeed:cspd,topics:topics,wrong:wrong,advice:advice};
   }
   var now=new Date();
-  return {made:ymd(now)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2),from:D.from,to:D.to,year:D.y,names:names,
+  var setInfo=D.set?{id:D.set.id,title:D.set.title,kind:D.set.kind||'競速'}:null;
+  return {mode:D.mode,set:setInfo,all:D.set?D.top.map(qObj):null,made:ymd(now)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2),from:D.from,to:D.to,year:D.y,names:names,
     sides:{A:sel.filter(function(x){return sideQ[x.qid]==='A';}).map(qObj),B:sel.filter(function(x){return sideQ[x.qid]==='B';}).map(qObj)},
     split:Object.keys(split).map(function(t){return {team:t,A:split[t].A.map(function(m){return m.r.name;}),B:split[t].B.map(function(m){return m.r.name;})};}),
     students:D.roster.map(stuObj)};
@@ -610,7 +629,8 @@ $('btnPack').addEventListener('click',function(){
 });
 function alertMsg(t){ $('lNote').textContent=t; }
 
-['lFrom','lTo','lN','lK競速','lK個人','lK團體'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='講解') renderLec(); });});
+$('lSet').addEventListener('change',function(){window.__lecSetManual=1;lset('trml-lec-set',this.value);});
+['lMode','lSet','lFrom','lTo','lN','lK競速','lK個人','lK團體'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='講解') renderLec(); });});
 
 /* ---------- 學生檔案（跨卷子、跨年度） ---------- */
 function renderApins(){
