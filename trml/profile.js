@@ -96,14 +96,14 @@ function paperTotals(subs){
   Object.keys(first).forEach(function(k){ var s=first[k], m=String(s.setId).match(/^(\d{4})(.*)$/); if(!m) return;
     var key=s.year+'|'+m[1], x=P[key]||(P[key]={train:s.year,paper:m[1],a:null,b:null,full:null,ind:null,team:null});
     var t=m[2]; if(t==='a') x.a=s; else if(t==='b') x.b=s; else if(t==='full') x.full=s; else if(t==='ind') x.ind=s; else if(t==='team') x.team=s; });
-  return Object.keys(P).map(function(k){ var x=P[k], sp=null, spNote='';
+  return Object.keys(P).map(function(k){ var x=P[k], sp=null, spNote='', spPart=null;
     var halves=x.a&&x.b?{score:Number(x.a.score)+Number(x.b.score),t:Math.max(tnum(x.a.time),tnum(x.b.time))}:null;
     if(x.full&&(!halves||tnum(x.full.time)<=halves.t)){ sp=Number(x.full.score); spNote='全卷'; }
     else if(halves){ sp=halves.score; spNote='前半 '+x.a.score+'＋後半 '+x.b.score; }
-    else if(x.a||x.b){ var h=x.a||x.b; spNote=(x.a?'只寫了前半 ':'只寫了後半 ')+h.score+'/13'; }
+    else if(x.a||x.b){ var h=x.a||x.b; spPart=Number(h.score); spNote=(x.a?'只寫了前半 ':'只寫了後半 ')+h.score+'/13'; }
     var ind=x.ind?Number(x.ind.score):null, team=x.team?Number(x.team.score):null;
     var done=(sp!=null)+(ind!=null)+(team!=null);
-    return {train:x.train,paper:x.paper,sp:sp,spNote:spNote,ind:ind,team:team,teamPending:x.team?Number(x.team.pending)||0:0,teamName:x.team?x.team.team:'',
+    return {train:x.train,paper:x.paper,sp:sp,spPart:spPart,spNote:spNote,ind:ind,team:team,teamPending:x.team?Number(x.team.pending)||0:0,teamName:x.team?x.team.team:'',
       mine:(sp!=null&&ind!=null)?sp+ind:null,done:done};
   }).sort(function(a,b){return (b.train-a.train)||(b.paper-a.paper);});
 }
@@ -198,5 +198,5 @@ function render(el,data,opts){
     });
   });
 }
-root.TRMLProfile={render:render,compute:compute};
+root.TRMLProfile={render:render,compute:compute,paperTotals:paperTotals};
 })(typeof window!=='undefined'?window:this);

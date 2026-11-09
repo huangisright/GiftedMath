@@ -171,6 +171,18 @@ button.ghost{background:transparent;color:var(--indigo)}
       </div>
     </div>
 
+    <div id="vTotal" hidden style="display:flex;flex-direction:column;gap:16px">
+      <div class="sheet">
+        <div class="row" style="align-items:flex-end">
+          <label class="f" for="tPaper">試卷<select id="tPaper"></select></label>
+          <button type="button" id="btnTotalPrint" class="ghost">列印</button>
+        </div>
+        <div class="sub">照正式比賽計分：每人競速 26＋個人 12＝小計 38，四人小計加總 152，再加團體賽 48，全隊滿分 200。每份卷子只算第一次作答；競速寫全卷或前後兩半都算。還沒寫完的人照目前分數算，旁邊標出缺什麼，所以總分是「目前累計」。</div>
+      </div>
+      <div class="sheet"><div class="tbl-wrap"><table id="tTotal"></table></div></div>
+      <div class="sheet"><h2 style="margin:0 0 8px">每個人</h2><div class="tbl-wrap"><table id="tTotalStu"></table></div></div>
+    </div>
+
     <div id="vStudent" hidden style="display:flex;flex-direction:column;gap:18px">
       <details class="sheet" id="apinBox">
         <summary style="cursor:pointer;font-weight:700">「我的分析」的分析密碼（學生忘記時在這裡查）</summary>
@@ -245,7 +257,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
+var TABS=[['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -276,7 +288,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('vStats').hidden=!kindTab; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'; $('vStudent').hidden=tab!=='學生'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
+  $('vStats').hidden=!kindTab; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
     var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
@@ -313,6 +325,7 @@ function render(){
   if(!data) return;
   if(tab==='講解') return renderLec();
   if(tab==='學生') return renderStudent();
+  if(tab==='總表') return renderTotal();
   if(tab==='批改') return renderGrade();
   if(tab==='回饋') return renderNotes();
   renderStats(tab);
@@ -584,6 +597,55 @@ function setSol(id,want){
 }
 $('btnSolOn').addEventListener('click',function(){ var st=curSet(); if(st) setSol(st.id,true); });
 $('btnSolOff').addEventListener('click',function(){ var st=curSet(); if(st) setSol(st.id,false); });
+
+/* ---------- 全隊總表：照正式比賽計分，四人（競速＋個人）＋團體 ＝ 200 ---------- */
+function totalsOf(y){
+  var roster=data.roster.filter(function(r){return r.year===y&&r.team!=='測試';}), per={};
+  roster.forEach(function(r){
+    var subs=data.submissions.filter(function(s){ return s.year===y&&(s.kind==='團體'?s.team===r.team:s.sid===r.id); });
+    per[r.id]=TRMLProfile.paperTotals(subs);
+  });
+  return {roster:roster,per:per};
+}
+function renderTotal(){
+  var y=$('fYear').value, T=totalsOf(y), papers={};
+  Object.keys(T.per).forEach(function(id){ T.per[id].forEach(function(r){ papers[r.paper]=(papers[r.paper]||0)+(r.done); }); });
+  var plist=Object.keys(papers).sort(function(a,b){return papers[b]-papers[a]||b-a;}), prev=$('tPaper').value;
+  $('tPaper').innerHTML=plist.map(function(p){return '<option value="'+p+'">'+p+' 年試卷</option>';}).join('')||'<option value="">（還沒有成績）</option>';
+  if(prev&&papers[prev]!=null) $('tPaper').value=prev;
+  var P=$('tPaper').value; if(!P){ $('tTotal').innerHTML=''; $('tTotalStu').innerHTML=''; return; }
+  var teams=uniq(T.roster.map(function(r){return r.team;})), rows=[], stuRows=[];
+  teams.forEach(function(t){
+    var ms=T.roster.filter(function(r){return r.team===t;}), sp=0, ind=0, team=null, pend=0, miss=[];
+    ms.forEach(function(r){
+      var x=(T.per[r.id]||[]).filter(function(z){return z.paper===P;})[0]||{};
+      if(x.sp!=null) sp+=x.sp; else if(x.spPart!=null) sp+=x.spPart; if(x.ind!=null) ind+=x.ind;
+      if(x.team!=null){ team=x.team; pend=x.teamPending; }
+      var lack=[]; if(x.sp==null) lack.push(/前半/.test(x.spNote||'')?'競速缺後半':/後半/.test(x.spNote||'')?'競速缺前半':'競速'); if(x.ind==null) lack.push('個人');
+      if(lack.length) miss.push(r.name+'（'+lack.join('、')+'）');
+      stuRows.push({team:t,name:r.name,sp:x.sp,spNote:x.spNote,ind:x.ind,mine:x.mine});
+    });
+    rows.push({team:t,n:ms.length,sp:sp,ind:ind,team48:team,pend:pend,total:sp+ind+(team||0),miss:miss});
+  });
+  rows.sort(function(a,b){return b.total-a.total;});
+  var rank=0,last=null; rows.forEach(function(r,i){ if(r.total!==last){rank=i+1;last=r.total;} r.rank=rank; });
+  var c=function(v){return v==null?'<span class="muted">–</span>':v;};
+  $('tTotal').innerHTML='<tr><th class="n">名次</th><th>隊伍</th><th class="n">競速 /104</th><th class="n">個人 /48</th><th class="n">團體 /48</th><th class="n">總分 /200</th><th>還沒寫完</th></tr>'+
+    rows.map(function(r){ return '<tr><td class="n">'+r.rank+'</td><td><b>第 '+esc(r.team)+' 隊</b></td><td class="n">'+r.sp+'</td><td class="n">'+r.ind+'</td>'+
+      '<td class="n">'+c(r.team48)+(r.pend?' <span class="muted">待批改 '+r.pend+'</span>':'')+'</td>'+
+      '<td class="n"><b style="font-size:1.1rem;color:var(--indigo)">'+r.total+'</b> <span class="muted">'+pct(r.total/200)+'</span></td>'+
+      '<td style="white-space:normal">'+(r.miss.length||r.team48==null?'<span class="low">'+esc((r.team48==null?['團體賽']:[]).concat(r.miss).join('、'))+'</span>':'<span style="color:var(--moss,#3f6f2e);font-weight:700">全部寫完</span>')+'</td></tr>'; }).join('');
+  stuRows.sort(function(a,b){return (b.mine==null?-1:b.mine)-(a.mine==null?-1:a.mine);});
+  $('tTotalStu').innerHTML='<tr><th>隊伍</th><th>姓名</th><th class="n">競速 /26</th><th class="n">個人 /12</th><th class="n">小計 /38</th></tr>'+
+    stuRows.map(function(r){return '<tr><td>第 '+esc(r.team)+' 隊</td><td>'+esc(r.name)+'</td><td class="n">'+c(r.sp)+(r.sp==null&&r.spNote?' <span class="muted">'+esc(r.spNote)+'</span>':'')+'</td><td class="n">'+c(r.ind)+'</td><td class="n"><b>'+c(r.mine)+'</b></td></tr>';}).join('');
+}
+$('tPaper').addEventListener('change',function(){ if(tab==='總表') renderTotal(); });
+$('btnTotalPrint').addEventListener('click',function(){
+  var w=window.open('','_blank'); if(!w) return;
+  w.document.write('<!doctype html><meta charset="utf-8"><title>全隊總表</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:13px}h1{font-size:20px;margin:0 0 4px}p{color:#555;margin:0 0 10px}table{border-collapse:collapse;width:100%;margin-bottom:14px}th,td{border:1px solid #999;padding:5px 8px;text-align:left}th{background:#eee}td.n,th.n{text-align:right}.muted{color:#666;font-size:11px}.low{color:#a33}</style>'+
+    '<h1>'+esc($('tPaper').value)+' 年試卷　全隊總表</h1><p>每人競速 26＋個人 12，四人加總 152，加團體 48，滿分 200；只算第一次作答。</p><table>'+$('tTotal').innerHTML+'</table><table>'+$('tTotalStu').innerHTML+'</table>');
+  w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
+});
 /* ---------- 一鍵產生講解包（pack.html） ---------- */
 function buildPack(){
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
