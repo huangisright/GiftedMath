@@ -87,8 +87,9 @@ function render(d){
         '<img loading="lazy" src="'+esc(src(q.img||(q.qid+'.png')))+'" alt="第 '+q.num+' 題題目">'+
         '<div class="ans">答案：<b>'+esc(q.answer)+'</b>'+(q.manual?'（證明題，看詳解的寫法）':'')+'</div>'+
         (q.key?'<div class="keyline">核心關鍵：'+esc(q.key)+'</div>':'')+
-        '<details><summary>展開完整詳解</summary><img loading="lazy" src="'+esc(ROOT+q.sol)+'" alt="第 '+q.num+' 題詳解"></details></div>';
+        '<details><summary>展開完整詳解</summary><img loading="lazy" src="'+esc(ROOT+q.sol)+'" alt="第 '+q.num+' 題詳解"><div class="shr" data-q="'+esc(q.qid)+'"></div></details></div>';
     }).join('')+'</div>';
+  if(window.TRMLNote) Array.prototype.forEach.call(document.querySelectorAll('.shr'),function(el){ var sh=(d.shared||{})[el.getAttribute('data-q')]; if(sh&&sh.length) TRMLNote.mount(el,{readonly:true,shared:sh}); });
   $('hide').onchange=function(){ $('out').classList.toggle('hideans',this.checked); };
   $('print').onclick=function(){ var ds=document.querySelectorAll('.sq details'); Array.prototype.forEach.call(ds,function(x){x.open=true;}); setTimeout(function(){window.print();},300); };
 }

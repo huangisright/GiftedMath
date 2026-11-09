@@ -89,6 +89,15 @@ th.n{text-align:right}
 .grade .done{color:var(--moss);font-weight:700}
 .sub{font-size:.85rem;color:var(--muted)}
 button.ghost{background:transparent;color:var(--indigo)}
+/* AI 批改建議 */
+.ai{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.ai .res{background:var(--blank);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;font-size:.92rem}
+.ai .res .big{font-family:var(--f-display);font-size:1.3rem;font-weight:900;color:var(--indigo)}
+.ai .res ul{margin:0;padding-left:1.2em}
+.ai .alt{border:1px solid var(--line);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ai .alt textarea{width:100%;min-height:64px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink)}
+.ai .badge{display:inline-block;background:var(--moss-soft,#e1eed9);color:var(--moss,#3f6f2e);border-radius:3px;padding:1px 8px;font-weight:700;font-size:.85rem}
+.grade .thumbs img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:3px;background:#fff}
 /* 講解 */
 .lec-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:900px){.lec-cols{grid-template-columns:minmax(0,1fr)}}
@@ -806,6 +815,64 @@ function renderNotes(){
 }
 
 /* ---------- 證明題批改 ---------- */
+
+/* ---------- AI 批改建議與另解 ---------- */
+function aiOf(r){ return (data.ai||[]).filter(function(x){return x.attemptId===r.attemptId&&x.qid===r.qid;}).pop()||null; }
+function altOf(r){ return (data.alts||[]).filter(function(x){return x.attemptId===r.attemptId&&x.qid===r.qid;})[0]||null; }
+function aiResHtml(a){
+  if(!a||!a.result) return '';
+  var x=a.result, li=function(arr){return (arr&&arr.length)?'<ul>'+arr.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':'';};
+  return '<div class="res"><div><span class="big">建議 '+x.score+' / 8 分</span>　<span class="sub">'+esc(a.time||'')+(x.same_as_reference===false?'・解法和參考詳解不同':'・解法和參考詳解相同')+'</span></div>'+
+    ((x.parts||[]).length?'<div>'+x.parts.map(function(p){return '<span class="tag">'+esc(p.part)+' '+esc(p.score)+'/'+esc(p.max)+'</span> '+esc(p.why||'');}).join('<br>')+'</div>':'')+
+    (x.method?'<div><b>方法</b>：'+esc(x.method)+'</div>':'')+
+    ((x.correct_points||[]).length?'<div><b>做對的</b>'+li(x.correct_points)+'</div>':'')+
+    ((x.issues||[]).length?'<div><b>要扣分或補強</b>'+li(x.issues)+'</div>':'')+
+    (x.unclear?'<div class="low">看不清楚：'+esc(x.unclear)+'</div>':'')+
+    (x.comment?'<div><b>評語</b>：'+esc(x.comment)+'</div>':'')+
+  '</div>';
+}
+function aiBox(r,i){
+  var a=aiOf(r), al=altOf(r), x=a&&a.result||{};
+  var sum=al&&al.summary?al.summary:(x.alt_summary||'');
+  return '<div class="ai">'+
+    '<div class="row" style="align-items:center"><button type="button" class="ghost" data-ai="'+i+'">'+(a?'重新分析':'AI 建議')+'</button>'+
+      (a?'<button type="button" data-aiapply="'+i+'">套用建議分數與評語</button>':'')+'<span class="sub" id="ais-'+i+'">'+(a?'':'AI 會看照片、題目和參考詳解，給分數建議、判斷解法；按「存分數」才會真的記分。')+'</span></div>'+
+    '<div id="air-'+i+'">'+aiResHtml(a)+'</div>'+
+    '<div class="alt"><div class="row" style="align-items:center"><b>另解</b>'+(x.alt_worthy?'<span class="badge">AI 認為可以當另解</span>':'')+
+      (al&&al.on?'<span class="badge">已公開</span>':'')+'</div>'+
+      '<textarea id="alt-'+i+'" placeholder="這個解法的思路與關鍵步驟（公開時會跟照片一起出現在這題的詳解下面）">'+esc(sum)+'</textarea>'+
+      '<div class="row" style="align-items:center"><label class="chk"><input type="checkbox" id="altn-'+i+'"'+(al&&al.showName?' checked':'')+'> 顯示隊名</label>'+
+      '<button type="button" data-alt="'+i+'"'+(al&&al.on?' class="ghost"':'')+'>'+(al&&al.on?'取消公開':'公開為另解')+'</button><span class="sub" id="alts-'+i+'"></span></div></div>'+
+  '</div>';
+}
+function wireAi(r,i){
+  var box=$('gradeList');
+  var bAi=box.querySelector('[data-ai="'+i+'"]'), bAp=box.querySelector('[data-aiapply="'+i+'"]'), bAlt=box.querySelector('[data-alt="'+i+'"]');
+  if(bAp) bAp.onclick=function(){ var a=aiOf(r); if(!a) return; $('pt-'+i).value=a.result.score; if(a.result.comment) $('nt-'+i).value=a.result.comment; $('gs-'+i).className='sub'; $('gs-'+i).textContent='已填入建議，確認後按「存分數」。'; };
+  if(bAi) bAi.onclick=function(){
+    var had=!!aiOf(r); bAi.disabled=true; $('ais-'+i).textContent='AI 分析中，約 20～40 秒…';
+    postJ(API,{action:'aiGrade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,force:had}).then(function(d){
+      bAi.disabled=false;
+      if(!d||!d.ok){ $('ais-'+i).innerHTML='<span class="err">'+esc((d&&d.error)||'分析失敗')+'</span>'; return; }
+      (data.ai=data.ai||[]).push({attemptId:r.attemptId,qid:r.qid,time:d.time,result:d.result});
+      var wrap=bAi.closest('.ai'); var tmp=document.createElement('div'); tmp.innerHTML=aiBox(r,i); wrap.replaceWith(tmp.firstChild); wireAi(r,i);
+    }).catch(function(){ bAi.disabled=false; $('ais-'+i).innerHTML='<span class="err">連不上後端（AI 分析較久），請再按一次。</span>'; });
+  };
+  if(bAlt) bAlt.onclick=function(){
+    var al=altOf(r), want=!(al&&al.on), sum=$('alt-'+i).value.trim();
+    if(want&&!sum){ $('alts-'+i).innerHTML='<span class="err">先寫一兩句這個解法的思路，再公開。</span>'; return; }
+    bAlt.disabled=true; $('alts-'+i).textContent=want?'公開中…':'收回中…';
+    postJ(API,{action:'altSet',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,on:want,summary:sum,showName:$('altn-'+i).checked}).then(function(d){
+      bAlt.disabled=false;
+      if(!d||!d.ok){ $('alts-'+i).innerHTML='<span class="err">'+esc((d&&d.error)||'沒有成功')+'</span>'; return; }
+      var o=altOf(r); if(!o){ o={attemptId:r.attemptId,qid:r.qid}; (data.alts=data.alts||[]).push(o); }
+      o.on=d.on; o.summary=sum; o.showName=$('altn-'+i).checked;
+      var wrap=bAlt.closest('.ai'); var tmp=document.createElement('div'); tmp.innerHTML=aiBox(r,i); wrap.replaceWith(tmp.firstChild); wireAi(r,i);
+      $('alts-'+i).textContent=d.on?('已公開：學生看這題詳解時，會在「同學分享的另解」看到。'+(d.warn?' '+d.warn:'')):'已收回。';
+    }).catch(function(){ bAlt.disabled=false; $('alts-'+i).innerHTML='<span class="err">連不上，請再按一次。</span>'; });
+  };
+}
+
 function renderGrade(){
   var y=$('fYear').value, setId=$('fSet').value, team=$('fTeam').value, showDone=$('fDone').checked;
   var subBy={}; data.submissions.forEach(function(s){subBy[s.attemptId]=s;});
@@ -827,12 +894,15 @@ function renderGrade(){
         '<div class="sub">參考答案：'+esc(String(info.answer||'').replace(/^人工[:：]?/,'')||'（沒填）')+'</div></div>'+
       '<div style="display:flex;flex-direction:column;gap:10px">'+
         (r.answer?'<div class="work">'+esc(r.answer)+'</div>':'<div class="sub">沒有打字作答。</div>')+
-        (photos.length?'<div class="ph">'+photos.map(function(u,k){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">照片 '+(k+1)+' ↗</a>';}).join('')+'</div>':'<div class="sub">沒有上傳照片（可能是交紙本）。</div>')+
+        (photos.length?'<div class="ph">'+photos.map(function(u,k){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">照片 '+(k+1)+' ↗</a>';}).join('')+'</div>'+
+          '<div class="thumbs">'+photos.map(function(u,k){var m=String(u).match(/[-\w]{25,}/);return m?'<img loading="lazy" src="https://drive.google.com/thumbnail?id='+m[0]+'&sz=w1000" alt="照片 '+(k+1)+'" onerror="this.remove()">':'';}).join('')+'</div>':'<div class="sub">沒有上傳照片（可能是交紙本）。</div>')+
         '<div class="row" style="align-items:center"><label class="f" for="pt-'+i+'">得分（0～8）<input type="number" id="pt-'+i+'" min="0" max="8" step="1" value="'+(r.points==null?'':r.points)+'"></label>'+
         '<label class="f" for="nt-'+i+'" style="flex:1 1 160px">備註（可不填）<input type="text" id="nt-'+i+'" value="'+esc(String(r.graded||'').replace(/^已批改：?|^待批改/,''))+'"></label>'+
         '<button data-g="'+i+'">存分數</button><span id="gs-'+i+'" class="'+(r.points!=null?'done':'sub')+'">'+(r.points!=null?'已批改 '+r.points+' 分':'')+'</span></div>'+
+        aiBox(r,i)+
       '</div></div>';
   }).join('');
+  list.forEach(function(r,i){ wireAi(r,i); });
   Array.prototype.forEach.call($('gradeList').querySelectorAll('[data-g]'),function(b){
     var i=+b.getAttribute('data-g'), r=list[i];
     b.onclick=function(){
