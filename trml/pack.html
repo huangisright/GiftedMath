@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TRML 週四講解包</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* 講解包：上方切換老師 A／B、分組、學生分析；每一區可播放簡報、下載 PowerPoint、列印 */
+:root{
+  --paper:#f3f4ee; --card:#fff; --ink:#1c2230; --muted:#5b6272; --line:#d6d9cc;
+  --indigo:#2f3f8f; --indigo-soft:#e4e7f5; --ochre:#b85a1f; --ochre-soft:#f7e6d8; --moss:#3f6f2e; --moss-soft:#e1eed9; --blank:#eceee6;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#13151b; --card:#1b1e26; --ink:#e7e8ec; --muted:#9ba1ad; --line:#2d313b;
+  --indigo:#9aa8ff; --indigo-soft:#262b45; --ochre:#ec9a5f; --ochre-soft:#3a2a1f; --moss:#93c47d; --moss-soft:#22301d; --blank:#23262e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#13151b; --card:#1b1e26; --ink:#e7e8ec; --muted:#9ba1ad; --line:#2d313b;
+  --indigo:#9aa8ff; --indigo-soft:#262b45; --ochre:#ec9a5f; --ochre-soft:#3a2a1f; --moss:#93c47d; --moss-soft:#22301d; --blank:#23262e; color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:1.6rem;font-weight:900}
+.sub{color:var(--muted);font-size:.9rem}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{background:transparent;color:var(--muted);border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 14px;font:inherit;font-weight:500;cursor:pointer}
+.tabs button.on{color:var(--indigo);border-bottom-color:var(--indigo);font-weight:700}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button.b{font:inherit;cursor:pointer;border-radius:4px;border:1px solid var(--indigo);background:var(--indigo);color:var(--card);padding:8px 14px;font-weight:700}
+button.b.ghost{background:transparent;color:var(--indigo)}
+button.b:disabled{opacity:.5;cursor:wait}
+button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.q{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:12px 14px;display:flex;flex-direction:column;gap:6px;break-inside:avoid}
+.q img{max-width:100%;height:auto;background:#fff;display:block}
+.q .sol img{max-width:80%}
+.tag{font-size:.8rem;background:var(--blank);border-radius:3px;padding:1px 6px;margin-right:4px;white-space:nowrap}
+.low{color:var(--ochre);font-weight:700}
+.key{background:var(--indigo-soft);border-left:4px solid var(--indigo);padding:6px 10px;border-radius:3px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:.8rem}
+td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+.tbl{overflow-x:auto}
+/* 學生分析單 */
+.stu{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.stu header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.stu h2{font-size:1.35rem}
+.stu h3{font-size:1rem;color:var(--indigo)}
+.kpis{display:flex;gap:24px;flex-wrap:wrap}
+.kpi b{display:block;font-family:var(--f-display);font-size:1.5rem;font-weight:900;color:var(--indigo);line-height:1.1}
+.kpi span{font-size:.8rem;color:var(--muted)}
+.track{display:inline-block;width:110px;height:9px;background:var(--blank);border-radius:2px;vertical-align:middle;position:relative;overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;background:var(--moss)}
+.track em{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.adv{background:var(--ochre-soft);border-radius:4px;padding:8px 12px}
+.where{font-size:.82rem;border-radius:3px;padding:1px 6px;white-space:nowrap}
+.where.me{background:var(--moss-soft);color:var(--moss);font-weight:700}
+.where.other{background:var(--indigo-soft);color:var(--indigo)}
+.where.self{background:var(--ochre-soft);color:var(--ochre)}
+/* 簡報播放 */
+#show{position:fixed;inset:0;background:#111;z-index:50;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;background:#fbfbf8;color:#1c2230;position:relative;transform-origin:center center;overflow:hidden;font-family:var(--f-body)}
+.sl{position:absolute;inset:0;padding:48px 64px;display:flex;flex-direction:column;gap:18px}
+.sl h2{font-family:var(--f-display);font-size:40px;color:#2f3f8f}
+.sl .lab{font-size:22px;color:#5b6272;letter-spacing:.08em}
+.sl .big{font-size:34px;line-height:1.5}
+.sl .imgbox{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.sl .imgbox img{max-width:100%;max-height:100%;object-fit:contain;background:#fff}
+.sl .keybox{font-size:40px;line-height:1.5;border-left:10px solid #2f3f8f;background:#e4e7f5;padding:24px 32px;border-radius:6px}
+.sl .ans{font-size:30px}
+.sl .ans b{color:#b85a1f;font-family:var(--f-mono)}
+.sl table{font-size:24px}
+.sl td,.sl th{border-bottom:1px solid #d6d9cc;padding:8px 10px}
+.sl .chips span{display:inline-block;font-size:26px;background:#eceee6;border-radius:6px;padding:4px 14px;margin:0 10px 10px 0}
+.sl .foot{position:absolute;left:64px;right:64px;bottom:18px;display:flex;justify-content:space-between;font-size:16px;color:#8a8f99}
+.ctl{position:fixed;bottom:12px;right:16px;z-index:51;display:flex;gap:8px}
+.ctl button{font:inherit;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:6px 12px;cursor:pointer}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff;color:#111;font-size:12.5px}
+  .noprint,.tabs,.bar{display:none!important}
+  .wrap{max-width:none;padding:0;gap:8px}
+  .sheet,.q,.stu{border-color:#bbb}
+    .stu{break-after:page;border:0;padding:0;gap:7px;font-size:11px}
+  .stu h2{font-size:17px}
+  .stu h3{font-size:12px}
+  .stu th,.stu td{padding:2px 5px;font-size:10.5px}
+  .stu .kpi b{font-size:18px}
+  .stu .adv{padding:5px 8px}
+  .stu:last-child{break-after:auto}
+  .q img{max-width:85%}
+  .q .sol img{max-width:70%}
+  .track i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .where,.key,.adv,.tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="noprint">
+    <div class="sub">TRML 練習・週四講解包</div>
+    <h1 id="ttl">讀取中…</h1>
+    <div class="sub" id="meta"></div>
+  </div>
+  <div class="bar noprint"><button type="button" class="b ghost" id="btnSave">存成檔案（帶回本機保存）</button><span class="sub" id="saveMsg"></span></div>
+  <nav class="tabs" id="tabs" aria-label="講解包分區"></nav>
+  <section id="vA"></section>
+  <section id="vB"></section>
+  <section id="vSplit"></section>
+  <section id="vStu"></section>
+</div>
+<div id="show" hidden><div id="stage"></div></div>
+<div class="ctl" id="ctl" hidden><button type="button" id="cPrev">← 上一張</button><span id="cPos" style="color:#fff;align-self:center;font-family:var(--f-mono)"></span><button type="button" id="cNext">下一張 →</button><button type="button" id="cFull">全螢幕</button><button type="button" id="cClose">結束</button></div>
+<script>
+(function(){
+'use strict';
+var P=window.__PACK||(function(){try{return window.opener&&window.opener.__TRML_PACK;}catch(e){return null;}})();
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pct(x){return Math.round(x*100)+'%';}
+function mmss(s){s=Math.round(s||0);return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
+if(!P){ $('ttl').textContent='沒有資料'; $('meta').textContent='請從老師頁「週四講解」按「一鍵產生講解包」打開這一頁。'; return; }
+
+$('ttl').textContent='週四講解包　'+P.from+' ～ '+P.to;
+$('meta').textContent='產生時間 '+P.made+'。'+P.names.A+' 講 '+P.sides.A.length+' 題，'+P.names.B+' 講 '+P.sides.B.length+' 題；學生分析 '+P.students.length+' 人。';
+
+var TABS=[['A',P.names.A],['B',P.names.B],['Split','分組名單'],['Stu','學生個人分析']], cur='A';
+$('tabs').innerHTML=TABS.map(function(t){return '<button type="button" data-t="'+t[0]+'">'+esc(t[1])+'</button>';}).join('');
+function show(t){ cur=t; TABS.forEach(function(x){ $('v'+x[0]).hidden=x[0]!==t; }); Array.prototype.forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':'';}); }
+Array.prototype.forEach.call($('tabs').children,function(b){ b.onclick=function(){show(b.getAttribute('data-t'));}; });
+
+function who(sd){ return P.split.map(function(g){return '第 '+g.team+' 隊：'+g[sd].join('、');}).join('　'); }
+
+/* ---- 老師講義 ---- */
+function qCard(q,withNames){
+  return '<div class="q"><div><b style="font-family:var(--f-display);font-size:1.05rem">'+esc(q.label)+'</b> <span class="tag">'+esc(q.topic)+'</span><span class="low">錯 '+q.no+'/'+q.n+' '+q.unit+'（'+pct(q.no/q.n)+'）</span></div>'+
+    (q.text?'<div>'+esc(q.text)+'</div>':'')+'<img src="'+esc(q.img)+'" alt="'+esc(q.label)+' 題目">'+
+    '<div>正確答案：<b>'+esc(q.answer)+'</b></div>'+
+    (q.wrongs.length||q.blank?'<div class="sub">常見錯答：'+q.wrongs.map(function(w){return '<span class="tag">'+esc(w[0])+'（'+w[1]+'）</span>';}).join('')+(q.blank?'<span class="tag">空白（'+q.blank+'）</span>':'')+'</div>':'')+
+    (withNames?'<div class="sub">'+esc(q.whoLine)+'</div>':'')+
+    (q.stuck.length||q.diff.length?'<div class="sub">學生回饋：'+q.diff.map(function(d){return '<span class="tag">'+esc(d[0])+' '+d[1]+'</span>';}).join('')+q.stuck.map(function(d){return '<span class="tag">卡在'+esc(d[0])+' '+d[1]+'</span>';}).join('')+'</div>':'')+
+    (q.quotes.length?'<div class="sub">'+q.quotes.map(function(x){return '「'+esc(x.text)+'」—'+esc(x.name);}).join('<br>')+'</div>':'')+
+    '<div class="key">核心關鍵：'+(q.key?esc(q.key):'（還沒寫，可在試算表 questions 的 F 欄補）')+'</div>'+
+    (q.sol?'<div class="sol"><b>詳解</b><img src="'+esc(q.sol)+'" alt="詳解"></div>':'')+
+  '</div>';
+}
+['A','B'].forEach(function(sd){
+  var L=P.sides[sd];
+  $('v'+sd).innerHTML='<div class="sheet"><div class="bar"><button type="button" class="b" data-play="'+sd+'">播放簡報</button><button type="button" class="b ghost" data-pptx="'+sd+'">下載 PowerPoint</button><button type="button" class="b ghost" data-print="'+sd+'">列印講義</button><span class="sub" id="pp'+sd+'"></span></div>'+
+    '<h2>'+esc(P.names[sd])+'　週四講解</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 錯最多的題目，共 '+L.length+' 題。簡報 '+(L.length*4+3)+' 張：每題「題目 → 大家錯在哪 → 核心關鍵 → 詳解」。</div>'+
+    '<div class="sub"><b>來聽的同學</b>　'+esc(who(sd))+'</div></div>'+
+    (L.length?L.map(function(q){return qCard(q,true);}).join(''):'<div class="sheet sub">這邊沒有題目。回老師頁把題目「移到另一邊」再產生一次。</div>');
+});
+document.addEventListener('click',function(e){
+  var t=e.target.closest('button'); if(!t) return;
+  if(t.hasAttribute('data-print')){ show(t.getAttribute('data-print')); setTimeout(function(){window.print();},50); }
+  if(t.hasAttribute('data-play')) play(t.getAttribute('data-play'));
+  if(t.hasAttribute('data-pptx')) pptx(t.getAttribute('data-pptx'),t);
+});
+
+/* ---- 分組名單 ---- */
+$('vSplit').innerHTML='<div class="sheet"><div class="bar"><button type="button" class="b ghost" data-print="Split">列印分組名單</button></div>'+
+  '<h2>週四講解分組</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 的練習。每隊分兩邊，聽完回隊上互相講給對方聽。</div>'+
+  '<div class="tbl"><table style="font-size:1.05rem"><tr><th>隊伍</th><th>'+esc(P.names.A)+'</th><th>'+esc(P.names.B)+'</th></tr>'+
+  P.split.map(function(g){return '<tr><td>第 '+esc(g.team)+' 隊</td><td>'+esc(g.A.join('、'))+'</td><td>'+esc(g.B.join('、'))+'</td></tr>';}).join('')+
+  '<tr><td class="sub">人數</td><td class="sub">'+P.split.reduce(function(a,g){return a+g.A.length;},0)+' 人</td><td class="sub">'+P.split.reduce(function(a,g){return a+g.B.length;},0)+' 人</td></tr></table></div>'+
+  '<h3 style="margin-top:8px">兩邊各講哪些題</h3><div class="tbl"><table><tr><th>'+esc(P.names.A)+'</th><th>'+esc(P.names.B)+'</th></tr><tr><td>'+P.sides.A.map(function(q){return esc(q.label);}).join('<br>')+'</td><td>'+P.sides.B.map(function(q){return esc(q.label);}).join('<br>')+'</td></tr></table></div></div>';
+
+/* ---- 學生個人分析 ---- */
+function stuSheet(s){
+  var whereTxt={me:'週四你這邊講',other:'另一邊講，跟隊友要講義',self:'自己看詳解'};
+  var topics=s.topics.slice().sort(function(a,b){return (a.ok/a.n-a.cls)-(b.ok/b.n-b.cls);});
+  return '<article class="stu">'+
+    '<header><h2>'+esc(s.name)+'　<span class="sub" style="font-family:var(--f-body)">第 '+esc(s.team)+' 隊</span></h2><span class="sub">'+esc(P.from)+' ～ '+esc(P.to)+'　週四去：<b>'+esc(s.side?P.names[s.side]:'—')+'</b></span></header>'+
+    '<div class="kpis">'+
+      '<div class="kpi"><b>'+s.period.sets+'</b><span>這段期間寫了幾份</span></div>'+
+      '<div class="kpi"><b>'+(s.period.n?pct(s.period.ok/s.period.n):'—')+'</b><span>這段期間答對率（'+s.period.ok+'/'+s.period.n+'）</span></div>'+
+      '<div class="kpi"><b>'+(s.year.n?pct(s.year.ok/s.year.n):'—')+'</b><span>今年累積（全體 '+(s.clsRate!=null?pct(s.clsRate):'—')+'）</span></div>'+
+      '<div class="kpi"><b>'+(s.speedSec!=null?mmss(s.speedSec):'—')+'</b><span>競速每題平均（全體 '+(s.clsSpeed!=null?mmss(s.clsSpeed):'—')+'）</span></div>'+
+    '</div>'+
+    (s.advice.length?'<div class="adv"><b>這週建議</b>　'+s.advice.map(esc).join('　')+'</div>':'')+
+    (s.sets.length?'<div><h3>這段期間寫的卷子（第一次作答）</h3><div class="tbl"><table><tr><th>日期</th><th>卷子</th><th class="n">得分</th><th class="n">用時</th></tr>'+
+      s.sets.map(function(x){return '<tr><td>'+esc(x.date)+'</td><td>'+esc(x.title)+(x.kind==='團體'?'（全隊）':'')+'</td><td class="n">'+esc(x.score)+'/'+esc(x.max)+'</td><td class="n">'+mmss(x.usedSec)+'</td></tr>';}).join('')+'</table></div></div>':'<div class="sub">這段期間沒有交卷。</div>')+
+    (topics.length?'<div><h3>題型答對率（今年累積，不含團體賽）</h3><div class="tbl"><table><tr><th>題型</th><th class="n">題數</th><th>你的答對率　｜＝全體平均</th><th class="n">差距</th></tr>'+
+      topics.map(function(t){var r=t.ok/t.n, d=r-t.cls;return '<tr><td>'+esc(t.t)+'</td><td class="n">'+t.n+'</td><td><span class="track"><i style="width:'+Math.round(r*100)+'%"></i><em style="left:'+Math.round(t.cls*100)+'%"></em></span> '+pct(r)+'</td><td class="n'+(d<-0.1?' low':'')+'">'+(d>=0?'+':'')+Math.round(d*100)+'</td></tr>';}).join('')+'</table></div></div>':'')+
+    (s.wrong.length?'<div><h3>這段期間錯的題目（'+s.wrong.length+' 題）</h3><div class="tbl"><table><tr><th>題目</th><th>你的答案</th><th>正確答案</th><th>核心關鍵</th><th>哪裡補</th></tr>'+
+      s.wrong.map(function(w){return '<tr><td>'+esc(w.label)+(w.team?'（團體）':'')+'</td><td>'+esc(w.mine||'空白')+'</td><td><b>'+esc(w.correct)+'</b></td><td>'+esc(w.key||'')+'</td><td><span class="where '+w.where+'">'+whereTxt[w.where]+'</span></td></tr>';}).join('')+'</table></div></div>':'<div class="sub">這段期間沒有錯題。</div>')+
+  '</article>';
+}
+$('vStu').innerHTML='<div class="sheet noprint"><div class="bar"><button type="button" class="b" data-print="Stu">列印全部（一人一頁）</button><label class="sub">只看 <select id="stuPick"><option value="">全部</option>'+P.students.map(function(s,i){return '<option value="'+i+'">第 '+esc(s.team)+' 隊 '+esc(s.name)+'</option>';}).join('')+'</select></label></div>'+
+  '<div class="sub">每人一頁：這段期間寫了什麼、題型強弱（和全體比）、錯題的正確答案與核心關鍵，以及週四在哪一邊講。選一個人再按列印就只印他那一頁。</div></div>'+
+  '<div id="stuList" style="display:flex;flex-direction:column;gap:14px">'+P.students.map(stuSheet).join('')+'</div>';
+$('stuPick').onchange=function(){ var v=this.value; Array.prototype.forEach.call($('stuList').children,function(el,i){ el.hidden=v!==''&&String(i)!==v; }); };
+
+/* ---- 簡報內容（播放與 PowerPoint 共用） ---- */
+function slidesOf(sd){
+  var L=P.sides[sd], S=[];
+  S.push({t:'title',h:P.names[sd]+'　週四講解',sub:P.from+' ～ '+P.to+'　共 '+L.length+' 題',who:who(sd)});
+  S.push({t:'list',h:'今天講這幾題',rows:L.map(function(q,i){return [String(i+1),q.label,q.topic,'錯 '+q.no+'/'+q.n+' '+q.unit];})});
+  L.forEach(function(q,i){
+    var tag=(i+1)+'/'+L.length+'　'+q.label;
+    S.push({t:'q',h:q.label,tag:tag,img:q.img,text:q.text,lab:'先自己再想 2 分鐘'});
+    S.push({t:'why',h:'大家錯在哪',tag:tag,rate:'錯 '+q.no+'/'+q.n+' '+q.unit+'（'+pct(q.no/q.n)+'）',wrongs:q.wrongs.map(function(w){return w[0]+'（'+w[1]+'）';}).concat(q.blank?['空白（'+q.blank+'）']:[]),stuck:q.stuck.map(function(d){return '卡在'+d[0]+' '+d[1];}).concat(q.diff.filter(function(d){return d[0]==='難';}).map(function(d){return '覺得難 '+d[1];})),quotes:q.quotes.map(function(x){return x.text;})});
+    S.push({t:'key',h:'核心關鍵',tag:tag,key:q.key||'（還沒寫）',ans:q.answer});
+    if(q.sol) S.push({t:'sol',h:'詳解',tag:tag,img:q.sol});
+  });
+  S.push({t:'end',h:'回去之後',lines:['回隊上把今天聽到的講給另一邊的隊友聽','到練習系統打開這幾題的詳解再看一次','還是卡住的題目，在回饋裡寫下卡在哪']});
+  return S;
+}
+function slideHTML(s,i,n){
+  var foot='<div class="foot"><span>'+esc(s.tag||'')+'</span><span>'+(i+1)+' / '+n+'</span></div>';
+  if(s.t==='title') return '<div class="sl" style="justify-content:center"><div class="lab">TRML 練習・週四講解</div><h2 style="font-size:60px">'+esc(s.h)+'</h2><div class="big">'+esc(s.sub)+'</div><div style="font-size:24px;color:#5b6272;margin-top:24px;line-height:1.7">'+esc(s.who).replace(/　/g,'<br>')+'</div>'+foot+'</div>';
+  if(s.t==='list') return '<div class="sl"><h2>'+esc(s.h)+'</h2><table>'+s.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('')+'</table>'+foot+'</div>';
+  if(s.t==='q') return '<div class="sl"><div class="lab">'+esc(s.lab)+'</div><h2>'+esc(s.h)+'</h2>'+(s.text?'<div class="big">'+esc(s.text)+'</div>':'')+'<div class="imgbox"><img src="'+esc(s.img)+'" alt=""></div>'+foot+'</div>';
+  if(s.t==='why') return '<div class="sl"><h2>'+esc(s.h)+'</h2><div class="big" style="color:#b85a1f;font-weight:700">'+esc(s.rate)+'</div>'+
+    (s.wrongs.length?'<div><div class="lab">常見的答案</div><div class="chips">'+s.wrongs.map(function(w){return '<span>'+esc(w)+'</span>';}).join('')+'</div></div>':'')+
+    (s.stuck.length?'<div><div class="lab">大家說卡在</div><div class="chips">'+s.stuck.map(function(w){return '<span>'+esc(w)+'</span>';}).join('')+'</div></div>':'')+
+    (s.quotes.length?'<div style="font-size:24px;color:#5b6272">'+s.quotes.slice(0,3).map(function(q){return '「'+esc(q)+'」';}).join('<br>')+'</div>':'')+
+    (!s.wrongs.length&&!s.stuck.length&&!s.quotes.length?'<div class="big" style="color:#5b6272">先請答對的同學說說怎麼想的。</div>':'')+foot+'</div>';
+  if(s.t==='key') return '<div class="sl" style="justify-content:center"><h2>'+esc(s.h)+'</h2><div class="keybox">'+esc(s.key)+'</div><div class="ans">答案：<b>'+esc(s.ans)+'</b></div>'+foot+'</div>';
+  if(s.t==='sol') return '<div class="sl" style="padding-bottom:44px"><div class="imgbox"><img src="'+esc(s.img)+'" alt=""></div>'+foot+'</div>';
+  return '<div class="sl" style="justify-content:center"><h2>'+esc(s.h)+'</h2>'+s.lines.map(function(l){return '<div class="big">・'+esc(l)+'</div>';}).join('')+foot+'</div>';
+}
+var SL=[], pos=0;
+function fit(){ var k=Math.min(innerWidth/1280,innerHeight/720); $('stage').style.transform='scale('+k+')'; }
+function render(){ $('stage').innerHTML=slideHTML(SL[pos],pos,SL.length); $('cPos').textContent=(pos+1)+' / '+SL.length; }
+function play(sd){ SL=slidesOf(sd); pos=0; $('show').hidden=false; $('ctl').hidden=false; fit(); render(); }
+function stop(){ $('show').hidden=true; $('ctl').hidden=true; if(document.fullscreenElement) document.exitFullscreen(); }
+function go(d){ pos=Math.max(0,Math.min(SL.length-1,pos+d)); render(); }
+$('cPrev').onclick=function(){go(-1);}; $('cNext').onclick=function(){go(1);}; $('cClose').onclick=stop;
+$('cFull').onclick=function(){ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(function(){}); };
+$('stage').onclick=function(e){ var r=$('stage').getBoundingClientRect(); go(e.clientX<r.left+r.width/3?-1:1); };
+addEventListener('resize',function(){ if(!$('show').hidden) fit(); });
+addEventListener('keydown',function(e){ if($('show').hidden) return;
+  if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();go(1);}
+  else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();go(-1);}
+  else if(e.key==='Escape') stop(); else if(e.key==='f'||e.key==='F') $('cFull').click(); });
+
+/* ---- PowerPoint ---- */
+function loadScript(src){ return new Promise(function(ok,no){ if(window.PptxGenJS) return ok(); var s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=function(){no(new Error('載入 PowerPoint 工具失敗，請確認網路'));}; document.head.appendChild(s); }); }
+function imgData(url){ return fetch(url).then(function(r){ if(!r.ok) throw new Error('圖片 '+r.status); return r.blob(); }).then(function(b){ return new Promise(function(ok){ var fr=new FileReader(); fr.onload=function(){ var im=new Image(); im.onload=function(){ ok({data:fr.result,w:im.naturalWidth,h:im.naturalHeight}); }; im.src=fr.result; }; fr.readAsDataURL(b); }); }); }
+function fitBox(im,x,y,w,h){ var k=Math.min(w/im.w,h/im.h); var W=im.w*k,H=im.h*k; return {data:im.data,x:x+(w-W)/2,y:y+(h-H)/2,w:W,h:H}; }
+function pptx(sd,btn){
+  var msg=$('pp'+sd); btn.disabled=true; msg.textContent='製作中…';
+  var S=slidesOf(sd), urls={};
+  S.forEach(function(s){ if(s.img) urls[s.img]=1; });
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js').then(function(){
+    return Promise.all(Object.keys(urls).map(function(u){ return imgData(u).then(function(d){urls[u]=d;}).catch(function(){urls[u]=null;}); }));
+  }).then(function(){
+    var p=new PptxGenJS(); p.layout='LAYOUT_WIDE'; p.title=P.names[sd]+' 週四講解';
+    var F='Microsoft JhengHei', INK='1C2230', IND='2F3F8F', OCH='B85A1F', MUT='5B6272';
+    S.forEach(function(s,i){
+      var sl=p.addSlide(); sl.background={color:'FBFBF8'};
+      sl.addText((s.tag?s.tag+'　':'')+(i+1)+' / '+S.length,{x:0.5,y:7.05,w:12.3,h:0.3,fontFace:F,fontSize:10,color:'8A8F99',align:'right'});
+      if(s.t==='title'){ sl.addText('TRML 練習・週四講解',{x:0.8,y:1.3,w:11.7,h:0.5,fontFace:F,fontSize:16,color:MUT});
+        sl.addText(s.h,{x:0.8,y:1.9,w:11.7,h:1.2,fontFace:F,fontSize:40,bold:true,color:IND});
+        sl.addText(s.sub,{x:0.8,y:3.1,w:11.7,h:0.6,fontFace:F,fontSize:22,color:INK});
+        sl.addText(s.who.split('　').join('\n'),{x:0.8,y:3.9,w:11.7,h:2.8,fontFace:F,fontSize:16,color:MUT,valign:'top'}); }
+      else if(s.t==='list'){ sl.addText(s.h,{x:0.6,y:0.4,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
+        sl.addTable(s.rows.map(function(r){return r.map(function(c){return {text:c,options:{fontFace:F,fontSize:16,color:INK}};});}),{x:0.6,y:1.4,w:12.1,colW:[0.6,4.6,3.4,3.5],border:{type:'solid',pt:0.5,color:'D6D9CC'}}); }
+      else if(s.t==='q'||s.t==='sol'){
+        var top=0.4;
+        if(s.t==='q'){ sl.addText(s.lab,{x:0.6,y:0.3,w:12,h:0.4,fontFace:F,fontSize:14,color:MUT}); sl.addText(s.h,{x:0.6,y:0.65,w:12,h:0.7,fontFace:F,fontSize:26,bold:true,color:IND}); top=1.45;
+          if(s.text){ sl.addText(s.text,{x:0.6,y:top,w:12.1,h:1.2,fontFace:F,fontSize:20,color:INK,valign:'top'}); top+=1.3; } }
+        var im=urls[s.img]; if(im) sl.addImage(fitBox(im,0.6,top,12.1,6.9-top)); else sl.addText('（圖片讀不到）',{x:0.6,y:3,w:12,h:1,fontFace:F,fontSize:20,color:MUT,align:'center'}); }
+      else if(s.t==='why'){ sl.addText(s.h,{x:0.6,y:0.4,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
+        var t=[{text:s.rate+'\n',options:{fontSize:24,bold:true,color:OCH}}];
+        if(s.wrongs.length) t.push({text:'常見的答案：'+s.wrongs.join('　')+'\n',options:{fontSize:20,color:INK}});
+        if(s.stuck.length) t.push({text:'大家說：'+s.stuck.join('　')+'\n',options:{fontSize:20,color:INK}});
+        s.quotes.slice(0,3).forEach(function(q){ t.push({text:'「'+q+'」\n',options:{fontSize:18,color:MUT}}); });
+        if(t.length===1) t.push({text:'先請答對的同學說說怎麼想的。',options:{fontSize:20,color:MUT}});
+        sl.addText(t,{x:0.6,y:1.4,w:12.1,h:5.4,fontFace:F,valign:'top',paraSpaceAfter:10}); }
+      else if(s.t==='key'){ sl.addText(s.h,{x:0.6,y:1.2,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
+        sl.addText(s.key,{x:0.6,y:2.2,w:12.1,h:2.4,fontFace:F,fontSize:30,color:INK,fill:{color:'E4E7F5'},margin:20,valign:'middle'});
+        sl.addShape(p.ShapeType.rect,{x:0.6,y:2.2,w:0.12,h:2.4,fill:{color:IND},line:{color:IND}});
+        sl.addText([{text:'答案：',options:{color:INK}},{text:s.ans,options:{color:OCH,bold:true}}],{x:0.6,y:4.9,w:12,h:0.8,fontFace:F,fontSize:26}); }
+      else { sl.addText(s.h,{x:0.6,y:1.5,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
+        sl.addText(s.lines.map(function(l){return {text:l,options:{bullet:true}};}),{x:0.8,y:2.6,w:11.8,h:3,fontFace:F,fontSize:24,color:INK,valign:'top',paraSpaceAfter:14}); }
+    });
+    return p.writeFile({fileName:'TRML週四講解_'+P.names[sd].replace(/[\\\/:*?"<>|・\s]/g,'')+'_'+P.to+'.pptx'});
+  }).then(function(){ msg.textContent='已下載。'; },function(e){ msg.textContent='沒做成：'+e.message; }).then(function(){ btn.disabled=false; });
+}
+
+/* ---- 存成檔案 ---- */
+$('btnSave').onclick=function(){
+  fetch(location.href.split('#')[0],{cache:'no-store'}).then(function(r){return r.text();}).catch(function(){return document.documentElement.outerHTML;}).then(function(src){
+    var base=new URL('.',location.href).href;
+    var data=JSON.stringify(P).replace(/</g,'\\u003c');
+    var html=src.replace('<head>','<head>\n<base href="'+base+'">\n<script>window.__PACK='+data+';<\/script>');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+    a.download='TRML週四講解包_'+P.from+'_'+P.to+'.html'; document.body.appendChild(a); a.click(); a.remove();
+    $('saveMsg').textContent='已下載。這個檔案在自己電腦上打開也能播放與列印（圖片要連網）。';
+  });
+};
+show('A');
+})();
+</script>
+</body>
+</html>

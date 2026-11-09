@@ -198,6 +198,7 @@ button.ghost{background:transparent;color:var(--indigo)}
           <label class="chk"><input type="checkbox" id="lK團體" checked> 團體</label>
         </div>
         <div class="sub" id="lNote"></div>
+        <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub">兩位老師各自的簡報（可播放、可下載 PowerPoint）、講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。</span></div>
       </div>
       <div class="sheet">
         <h2>分組：每一隊分兩邊</h2>
@@ -534,6 +535,81 @@ function renderLec(){
     if(!left) go(); else Array.prototype.forEach.call(imgs,function(im){ if(im.complete) go(); else { im.onload=go; im.onerror=go; } });
   }
 }
+
+/* ---------- 一鍵產生講解包（pack.html） ---------- */
+function buildPack(){
+  var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
+  var sel=D.top.filter(function(x){return !off[x.qid];});
+  var split=lecSplit(D,sel), titles={}; data.sets.forEach(function(st){titles[st.id]=st.title;});
+  var sideQ={}; sel.forEach(function(x){sideQ[x.qid]=sideOf(x.qid);});
+  function qObj(x){
+    var info=qinfo[x.qid]||{}, ns=D.notes[x.qid]||[], st={}, df={};
+    ns.forEach(function(n){ (n.stuck||[]).forEach(function(t){st[t]=(st[t]||0)+1;}); if(n.diff) df[n.diff]=(df[n.diff]||0)+1; });
+    var pairs=function(o){return Object.keys(o).map(function(k){return [k,o[k]];}).sort(function(a,b){return b[1]-a[1];});};
+    var unit=x.kind==='團體'?'隊':'人';
+    return {qid:x.qid,label:qLabel(x.qid),topic:info.topic||'未分類',answer:showAns(info.answer),key:info.key||'',text:info.text||'',img:imgSrc(x.qid),sol:solSrc(x.qid),
+      no:x.no,n:x.n,unit:unit,wrongs:pairs(x.wrong).slice(0,4),blank:x.blank,stuck:pairs(st),diff:pairs(df),
+      quotes:ns.filter(function(n){return n.text;}).slice(0,4).map(function(n){return {name:n.name,text:n.text};}),
+      whoLine:x.no>x.n/2?('答對的'+unit+'：'+(x.okWho.join('、')||'沒有')):('錯的'+unit+'：'+x.who.map(function(w){return w.label;}).join('、'))};
+  }
+  // 全體（今年、第一次、非團體）題型答對率與競速速度
+  var cls={}, clsAll={n:0,ok:0}, clsSp={n:0,sec:0}, testIds={};
+  data.roster.forEach(function(r){ if(r.year===D.y&&r.team==='測試') testIds[r.id]=1; });
+  data.responses.forEach(function(r){
+    if(r.year!==D.y||r.attemptNo!==1||r.kind==='團體'||testIds[r.sid]||r.team==='測試') return;
+    var t=(qinfo[r.qid]||{}).topic||'未分類', c=cls[t]||(cls[t]={n:0,ok:0}); c.n++; if(r.correct) c.ok++;
+    clsAll.n++; if(r.correct) clsAll.ok++;
+    if(r.kind==='競速'){clsSp.n++;clsSp.sec+=r.seconds;}
+  });
+  var subById={}; data.submissions.forEach(function(x){subById[x.attemptId]=x;});
+  var inPeriod={}; D.subs.forEach(function(x){inPeriod[x.attemptId]=1;});
+  function stuObj(r){
+    var side=''; var g=split[r.team]; if(g){ ['A','B'].forEach(function(sd){ g[sd].forEach(function(m){ if(m.r.id===r.id) side=sd; }); }); }
+    var mySubs=D.subs.filter(function(x){return x.kind==='團體'?x.team===r.team:x.sid===r.id;});
+    var mine={}; mySubs.forEach(function(x){mine[x.attemptId]=1;});
+    var per={n:0,ok:0}, wrong=[], seen={};
+    data.responses.forEach(function(q){
+      if(!mine[q.attemptId]) return; var info=qinfo[q.qid]||{}, man=isManual(info.answer), ok;
+      if(man){ if(q.points==null) return; ok=q.points>=6; } else ok=q.correct;
+      if(q.kind!=='團體'){ per.n++; if(ok) per.ok++; }
+      if(ok||seen[q.qid]) return; seen[q.qid]=1;
+      var sd=sideQ[q.qid], where=!sd?'self':(sd===side?'me':'other');
+      wrong.push({qid:q.qid,label:qLabel(q.qid),team:q.kind==='團體',mine:man?(q.points!=null?q.points+' 分':''):q.answer,correct:showAns(info.answer),key:info.key||'',where:where});
+    });
+    wrong.sort(function(a,b){var o={me:0,other:1,self:2};return o[a.where]-o[b.where]||(a.qid<b.qid?-1:1);});
+    var tp={}, yr={n:0,ok:0}, sp={n:0,sec:0};
+    data.responses.forEach(function(q){
+      if(q.year!==D.y||q.attemptNo!==1||q.kind==='團體'||q.sid!==r.id) return;
+      var t=(qinfo[q.qid]||{}).topic||'未分類', x=tp[t]||(tp[t]={t:t,n:0,ok:0}); x.n++; if(q.correct) x.ok++;
+      yr.n++; if(q.correct) yr.ok++; if(q.kind==='競速'){sp.n++;sp.sec+=q.seconds;}
+    });
+    var topics=Object.keys(tp).map(function(k){var x=tp[k];x.cls=cls[k]&&cls[k].n?cls[k].ok/cls[k].n:0;return x;});
+    var advice=[], weak=topics.filter(function(t){return t.n>=3&&t.ok/t.n-t.cls<=-0.1;}).sort(function(a,b){return (a.ok/a.n-a.cls)-(b.ok/b.n-b.cls);});
+    if(weak.length) advice.push('要補：'+weak.slice(0,2).map(function(t){return t.t+'（你 '+Math.round(t.ok/t.n*100)+'%，全體 '+Math.round(t.cls*100)+'%）';}).join('、')+'。');
+    var strong=topics.filter(function(t){return t.n>=3&&t.ok/t.n-t.cls>=0.1;}).sort(function(a,b){return (b.ok/b.n-b.cls)-(a.ok/a.n-a.cls);});
+    if(strong.length) advice.push('強項：'+strong.slice(0,2).map(function(t){return t.t;}).join('、')+'，可以試著講給隊友聽。');
+    var spd=sp.n?sp.sec/sp.n:null, cspd=clsSp.n?clsSp.sec/clsSp.n:null;
+    if(spd!=null&&cspd!=null&&spd>cspd*1.3) advice.push('競速每題比全體慢不少，先把會的題目寫快。');
+    if(!mySubs.length) advice.push('這段期間沒有交卷，先把這週的卷子補寫。');
+    var self=wrong.filter(function(w){return w.where==='self';}).length;
+    if(self) advice.push('有 '+self+' 題週四不會講，回家打開詳解自己看。');
+    return {name:r.name,team:r.team,side:side,
+      sets:mySubs.map(function(x){return {date:dayOf(x.time),title:titles[x.setId]||x.setId,kind:x.kind,score:x.score,max:x.max||x.total,usedSec:x.usedSec};}).sort(function(a,b){return a.date<b.date?-1:1;}),
+      period:{sets:mySubs.length,n:per.n,ok:per.ok},year:yr,clsRate:clsAll.n?clsAll.ok/clsAll.n:null,
+      speedSec:spd,clsSpeed:cspd,topics:topics,wrong:wrong,advice:advice};
+  }
+  var now=new Date();
+  return {made:ymd(now)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2),from:D.from,to:D.to,year:D.y,names:names,
+    sides:{A:sel.filter(function(x){return sideQ[x.qid]==='A';}).map(qObj),B:sel.filter(function(x){return sideQ[x.qid]==='B';}).map(qObj)},
+    split:Object.keys(split).map(function(t){return {team:t,A:split[t].A.map(function(m){return m.r.name;}),B:split[t].B.map(function(m){return m.r.name;})};}),
+    students:D.roster.map(stuObj)};
+}
+$('btnPack').addEventListener('click',function(){
+  try{ window.__TRML_PACK=buildPack(); }catch(e){ alertMsg('產生失敗：'+e.message); return; }
+  var w=window.open('pack.html','_blank'); if(!w) $('lNote').textContent='瀏覽器擋了新視窗，請允許這個網站開新視窗後再按一次。';
+});
+function alertMsg(t){ $('lNote').textContent=t; }
+
 ['lFrom','lTo','lN','lK競速','lK個人','lK團體'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='講解') renderLec(); });});
 
 /* ---------- 學生檔案（跨卷子、跨年度） ---------- */
