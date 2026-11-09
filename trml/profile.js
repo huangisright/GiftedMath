@@ -33,6 +33,7 @@ var CSS='.pf{display:flex;flex-direction:column;gap:16px}'+
 '.pf th,.pf td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}'+
 '.pf th{font-weight:500;color:var(--muted);font-size:.76rem}'+
 '.pf td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}'+
+'.pf th.n{text-align:right}'+
 '.pf details.sol{border-top:1px solid var(--line);padding-top:6px}.pf details.sol summary{cursor:pointer;color:var(--indigo);font-size:.88rem}'+
 '.pf details.sol img{display:block;max-width:100%;height:auto;margin-top:6px;background:#fff}';
 function injectCss(){ if(document.getElementById('pf-css')) return; var s=document.createElement('style'); s.id='pf-css'; s.textContent=CSS; document.head.appendChild(s); }
@@ -85,6 +86,27 @@ function compute(data){
     wrong:wrong,trend:trend,years:years,subs:subs,nQ:R.length};
 }
 
+
+/* 各屆試卷累計：同一屆的競速（26）＋個人（12）＝個人小計 38；團體賽 48 是全隊的。
+ * 正式比賽總分 200＝四人的（競速＋個人）加總 152＋團體 48。每份卷子只算第一次作答。 */
+function paperTotals(subs){
+  var first={};
+  (subs||[]).forEach(function(s){ if(!/^\d{4}$/.test(String(s.year))) return; var k=s.year+'|'+s.setId; if(s.attemptNo===1||!first[k]) if(!first[k]||s.attemptNo<first[k].attemptNo) first[k]=s; });
+  var P={};
+  Object.keys(first).forEach(function(k){ var s=first[k], m=String(s.setId).match(/^(\d{4})(.*)$/); if(!m) return;
+    var key=s.year+'|'+m[1], x=P[key]||(P[key]={train:s.year,paper:m[1],a:null,b:null,full:null,ind:null,team:null});
+    var t=m[2]; if(t==='a') x.a=s; else if(t==='b') x.b=s; else if(t==='full') x.full=s; else if(t==='ind') x.ind=s; else if(t==='team') x.team=s; });
+  return Object.keys(P).map(function(k){ var x=P[k], sp=null, spNote='';
+    var halves=x.a&&x.b?{score:Number(x.a.score)+Number(x.b.score),t:Math.max(tnum(x.a.time),tnum(x.b.time))}:null;
+    if(x.full&&(!halves||tnum(x.full.time)<=halves.t)){ sp=Number(x.full.score); spNote='全卷'; }
+    else if(halves){ sp=halves.score; spNote='前半 '+x.a.score+'＋後半 '+x.b.score; }
+    else if(x.a||x.b){ var h=x.a||x.b; spNote=(x.a?'只寫了前半 ':'只寫了後半 ')+h.score+'/13'; }
+    var ind=x.ind?Number(x.ind.score):null, team=x.team?Number(x.team.score):null;
+    var done=(sp!=null)+(ind!=null)+(team!=null);
+    return {train:x.train,paper:x.paper,sp:sp,spNote:spNote,ind:ind,team:team,teamPending:x.team?Number(x.team.pending)||0:0,teamName:x.team?x.team.team:'',
+      mine:(sp!=null&&ind!=null)?sp+ind:null,done:done};
+  }).sort(function(a,b){return (b.train-a.train)||(b.paper-a.paper);});
+}
 function trendSvg(tr){
   if(tr.length<2) return '';
   var W=640,H=150,pl=34,pr=10,pt=12,pb=24, n=tr.length;
@@ -110,6 +132,23 @@ function render(el,data,opts){
     '<div><b>'+(isFinite(P.speedSec)?fmt(P.speedSec):'–')+'</b><span>競速每題平均用時'+(data.cls&&data.cls.speedSec?'，同年度平均 '+fmt(data.cls.speedSec):'')+'</span></div>'+
     '<div><b>'+(P.indN?P.indAvg.toFixed(1)+'<small style="font-size:1rem;color:var(--muted)"> / '+P.indMax+'</small>':'–')+'</b><span>個人賽平均得分'+(P.indN?'（'+P.indN+' 份）':'')+'</span></div>'+
   '</div>';
+
+  var PT=paperTotals(data.subs);
+  if(PT.length){
+    var multi=PT.some(function(r){return r.train!==PT[0].train;});
+    h+='<div class="sheet stack"><h2>各屆試卷累計</h2>'+
+      '<div class="muted" style="font-size:.85rem">同一屆的三種卷子都寫完，就能看到那一屆的總成績。正式比賽：每人「競速 26＋個人 12＝38 分」，四人加起來 152 分，再加團體賽 48 分，全隊滿分 200。每份卷子只算第一次作答。</div>'+
+      '<div class="tbl-wrap"><table><tr><th>試卷</th><th class="n">競速 /26</th><th class="n">個人 /12</th><th class="n">'+esc(opts.teacher?'個人小計':'我的小計')+' /38</th><th class="n">團體（全隊）/48</th><th>完成</th></tr>'+
+      PT.map(function(r){
+        var cell=function(v,mx){return v==null?'<span class="muted">–</span>':'<b>'+v+'</b>';};
+        return '<tr><td>'+esc(r.paper)+' 年'+(multi?'<span class="muted">（'+esc(r.train)+' 練習）</span>':'')+'</td>'+
+          '<td class="n">'+cell(r.sp)+(r.spNote&&r.spNote!=='全卷'?'<div class="muted" style="font-size:.75rem">'+esc(r.spNote)+'</div>':'')+'</td>'+
+          '<td class="n">'+cell(r.ind)+'</td>'+
+          '<td class="n">'+(r.mine==null?'<span class="muted">–</span>':'<b style="color:var(--indigo)">'+r.mine+'</b> <span class="muted">（'+pct(r.mine/38)+'）</span>')+'</td>'+
+          '<td class="n">'+cell(r.team)+(r.teamPending?'<div class="muted" style="font-size:.75rem">證明題待批改 '+r.teamPending+'</div>':'')+'</td>'+
+          '<td>'+(r.done===3?'<span style="color:var(--moss);font-weight:700">三份都寫完</span>':'<span class="muted">'+r.done+'/3'+(r.sp==null?'・缺競速':'')+(r.ind==null?'・缺個人':'')+(r.team==null?'・缺團體':'')+'</span>')+'</td></tr>';
+      }).join('')+'</table></div></div>';
+  }
 
   if(P.nQ){
     var li=function(x){ return '<li><b>'+esc(x.t)+'</b>　'+x.ok+'/'+x.n+'（'+pct(x.rate)+'）'+(isFinite(x.crate)?'，同年度平均 '+pct(x.crate):'')+'</li>'; };
