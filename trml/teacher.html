@@ -201,6 +201,7 @@ button.ghost{background:transparent;color:var(--indigo)}
         </div>
         <div class="sub" id="lNote"></div>
         <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub" id="packNote"></span></div>
+        <div class="row" style="align-items:center" id="solRow"><button type="button" id="btnSolOpen" class="ghost">開放詳解給學生</button><span class="sub" id="solNote"></span></div>
       </div>
       <div class="sheet">
         <h2>分組：每一隊分兩邊</h2>
@@ -513,6 +514,7 @@ function renderLec(){
   lecDefaults(); lecSets();
   var setMode=$('lMode').value==='set';
   $('wlSet').hidden=!setMode; $('wlN').hidden=setMode; $('wlK').hidden=setMode;
+  $('solRow').hidden=!setMode; renderSolBtn();
   $('packNote').textContent=setMode?'一次做好：學生題本、兩位老師的簡報（一題一題秀：題目 → 先想一下（可計時）→ 錯在哪 → 核心關鍵 → 詳解；可下載 PowerPoint）、老師講義、學生帶回家的詳解、分組名單、每位學生一頁的個人分析。':'兩位老師各自的簡報（可播放、可下載 PowerPoint）、講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。';
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
   var sel=D.top.filter(function(x){return !off[x.qid];});
@@ -554,6 +556,26 @@ function renderLec(){
   }
 }
 
+
+/* ---------- 開放詳解：學生到「看詳解」頁登入就能讀 ---------- */
+function curSet(){ return data.sets.filter(function(x){return x.id===$('lSet').value;})[0]; }
+function renderSolBtn(){
+  var st=curSet(); if(!st) return;
+  var on=!!st.solOpen, url=new URL('sol.html#'+st.id,location.href).href;
+  $('btnSolOpen').textContent=on?'關閉詳解':'開放詳解給學生';
+  $('btnSolOpen').className=on?'ghost':'';
+  $('solNote').innerHTML=on?('〈'+esc(st.title)+'〉的詳解<b>已開放</b>：學生到首頁「看詳解」，用隊伍代碼登入就能看（不必作答）。網址：<a href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(url)+'</a>')
+    :('〈'+esc(st.title)+'〉的詳解目前<b>沒有開放</b>。講解完按這個鈕，學生就能在網頁上看整份詳解，不用印。');
+}
+$('btnSolOpen').addEventListener('click',function(){
+  var st=curSet(); if(!st) return; var want=!st.solOpen, b=$('btnSolOpen');
+  b.disabled=true; $('solNote').textContent=want?'開放中…':'關閉中…';
+  postJ(API,{action:'solOpen',key:lget('trml-key'),setId:st.id,open:want}).then(function(d){
+    b.disabled=false;
+    if(!d||!d.ok){ $('solNote').textContent='沒有成功：'+((d&&d.error)||'請稍後再試'); return; }
+    st.solOpen=d.solOpen; renderSolBtn();
+  }).catch(function(){ b.disabled=false; $('solNote').textContent='連不上後端，請確認網路後再試。'; });
+});
 /* ---------- 一鍵產生講解包（pack.html） ---------- */
 function buildPack(){
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});

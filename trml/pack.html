@@ -338,7 +338,7 @@ if(P.all){
     '<div class="sheet"><div class="bk-head"><h2>'+esc(T)+'　題本</h2><span class="fill">第＿＿隊　姓名＿＿＿＿＿＿</span></div>'+
     P.all.map(function(q){return '<div class="bk-q"><img src="'+esc(q.img)+'" alt="'+esc(q.label)+'">'+(q.text?'<div>'+esc(q.text)+'</div>':'')+
       (q.manual?'<div class="space"></div>':'<div class="ansline">答：＿＿＿＿＿＿＿＿＿＿</div>')+'</div>';}).join('')+'</div>';
-  $('vSol').innerHTML='<div class="sheet noprint"><div class="bar"><button type="button" class="b" data-print="Sol">列印學生詳解</button><span class="sub">下課發，讓學生回家對照自己的作答。每題有答案、核心關鍵和完整詳解'+(/^2025/.test(P.set.id)?'（2025 附官方詳解）':'')+'。</span></div></div>'+
+  $('vSol').innerHTML='<div class="sheet noprint"><div class="bar"><button type="button" class="b" data-print="Sol">列印學生詳解</button><span class="sub">下課發，讓學生回家對照自己的作答。不想印的話，在老師頁「講解」按「開放詳解給學生」，學生到首頁「看詳解」就能在網頁上看。每題有答案、核心關鍵和完整詳解'+(/^2025/.test(P.set.id)?'（2025 附官方詳解）':'')+'。</span></div></div>'+
     '<div class="sheet"><div class="bk-head"><h2>'+esc(T)+'　詳解</h2><span class="sub">回家對照：先看答案，錯的題目先看核心關鍵自己再算一次，還是不行再看詳解。</span></div>'+
     '<div class="tbl"><table><tr><th>題</th><th>答案</th><th>核心關鍵</th></tr>'+P.all.map(function(q){return '<tr><td>'+q.num+'</td><td><b>'+esc(q.answer)+'</b></td><td>'+esc(q.key||'')+'</td></tr>';}).join('')+'</table></div>'+
     P.all.map(function(q){return '<div class="bk-q"><div><b style="font-family:var(--f-display)">'+esc(q.label)+'</b>　答案：<b>'+esc(q.answer)+'</b></div>'+(q.key?'<div class="key">核心關鍵：'+esc(q.key)+'</div>':'')+(q.sol?'<img src="'+esc(q.sol)+'" alt="'+esc(q.label)+' 詳解">':'<div class="sub">（這題還沒有詳解圖）</div>')+'</div>';}).join('')+'</div>';

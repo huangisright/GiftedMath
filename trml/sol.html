@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRML 看詳解</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.sq{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.sq img{max-width:100%;height:auto;background:#fff;border-radius:2px;display:block}
+.sq .ans{font-size:1.05rem}
+.sq .ans b{font-family:var(--f-mono,ui-monospace,monospace)}
+.sq .keyline{border-left:4px solid var(--indigo,#2f3f8f);padding:6px 10px;border-radius:3px;background:var(--indigo-soft,#e4e7f5)}
+.sq details summary{cursor:pointer;color:var(--indigo,#2f3f8f);font-weight:700}
+.anstbl{border-collapse:collapse;width:100%}
+.anstbl th,.anstbl td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.anstbl th{font-weight:500;font-size:.85rem}
+.anstbl td.n{white-space:nowrap}
+.hideans .ans b,.hideans .anstbl .a{filter:blur(6px)}
+@media print{
+  .noprint,.back{display:none!important}
+  .sq details>*{display:block!important}
+  .sq details summary{display:none}
+  .sq{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap stack">
+  <a class="back" href="./">← 回首頁</a>
+  <div class="stack" style="gap:6px">
+    <div class="eyebrow">TRML 國中數學競賽・詳解</div>
+    <h1>看詳解</h1>
+    <div class="muted">老師開放的卷子，不用作答就能看整份詳解，回家對照自己寫的答案。用隊伍代碼登入（和作答時一樣）。</div>
+  </div>
+  <div class="sheet stack noprint">
+    <div class="row">
+      <label class="f" for="set">卷子<select id="set"></select></label>
+    </div>
+    <div class="row">
+      <label class="f" for="team">隊伍<select id="team"></select></label>
+      <label class="f" for="name">姓名<select id="name"></select></label>
+      <label class="f" for="pin">代碼<input type="password" id="pin" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="隊伍代碼"></label>
+    </div>
+    <div class="row"><button class="primary" id="go">看詳解</button><span id="msg" class="muted"></span></div>
+  </div>
+  <div id="out" class="stack"></div>
+</div>
+<script src="config.js"></script>
+<script src="note.js"></script>
+<script>
+(function(){
+'use strict';
+var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'', IMG=(window.TRML_CONFIG&&window.TRML_CONFIG.imgBase)||'img/', ROOT=IMG.replace(/img\/$/,'');
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function src(f){ return /^(https?:|data:|\/)/.test(f)?f:IMG+f; }
+var teams=[];
+function fillNames(sel){ var t=teams.filter(function(x){return x.team===$('team').value;})[0];
+  $('name').innerHTML='<option value="">選姓名</option>'+(t?t.members.map(function(n){return '<option>'+esc(n)+'</option>';}).join(''):''); if(sel) $('name').value=sel; }
+if(!API){ $('msg').textContent='還沒接上題庫。'; return; }
+fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
+  if(!d.ok) throw new Error(d.error);
+  teams=d.teams; var who=load('trml-who')||{}, sols=d.sols||[];
+  if(!sols.length){ $('set').innerHTML='<option value="">（目前沒有開放的詳解）</option>'; $('go').disabled=true; $('msg').textContent='老師還沒開放任何一份詳解。'; }
+  else $('set').innerHTML=sols.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.title)+'（'+s.count+' 題）</option>';}).join('');
+  var want=(location.hash||'').slice(1); if(want&&sols.some(function(s){return s.id===want;})) $('set').value=want;
+  $('team').innerHTML='<option value="">選隊伍</option>'+teams.map(function(t){return '<option>'+esc(t.team)+'</option>';}).join('');
+  if(who.team) $('team').value=who.team; fillNames(who.name);
+  $('team').onchange=function(){ fillNames(); $('pin').value=''; };
+}).catch(function(e){ $('msg').innerHTML='<span class="err">讀不到名單：'+esc(e.message)+'</span>'; });
+
+function render(d){
+  $('out').innerHTML=
+    '<div class="sheet stack"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="margin:0">'+esc(d.title)+'　詳解</h2>'+
+      '<span class="row noprint"><label class="muted"><input type="checkbox" id="hide"> 先遮住答案</label><button type="button" id="print">列印</button></span></div>'+
+    '<div class="muted">先對答案；錯的題目先看「核心關鍵」自己再算一次，還是卡住再展開完整詳解。</div>'+
+    '<table class="anstbl"><tr><th>題</th><th>答案</th><th>核心關鍵</th></tr>'+d.items.map(function(q){return '<tr><td class="n">第 '+q.num+' 題</td><td class="a"><b>'+esc(q.answer)+'</b>'+(q.manual?'（證明題）':'')+'</td><td>'+esc(q.key||'')+'</td></tr>';}).join('')+'</table></div>'+
+    '<div class="sheet stack">'+d.items.map(function(q){
+      return '<div class="sq" id="q'+q.num+'"><b>第 '+q.num+' 題</b>'+(q.text?'<div>'+esc(q.text)+'</div>':'')+
+        '<img loading="lazy" src="'+esc(src(q.img||(q.qid+'.png')))+'" alt="第 '+q.num+' 題題目">'+
+        '<div class="ans">答案：<b>'+esc(q.answer)+'</b>'+(q.manual?'（證明題，看詳解的寫法）':'')+'</div>'+
+        (q.key?'<div class="keyline">核心關鍵：'+esc(q.key)+'</div>':'')+
+        '<details><summary>展開完整詳解</summary><img loading="lazy" src="'+esc(ROOT+q.sol)+'" alt="第 '+q.num+' 題詳解"></details></div>';
+    }).join('')+'</div>';
+  $('hide').onchange=function(){ $('out').classList.toggle('hideans',this.checked); };
+  $('print').onclick=function(){ var ds=document.querySelectorAll('.sq details'); Array.prototype.forEach.call(ds,function(x){x.open=true;}); setTimeout(function(){window.print();},300); };
+}
+function go(){
+  var b={action:'solutions',setId:$('set').value,team:$('team').value,name:$('name').value,pin:$('pin').value.trim()};
+  if(!b.setId){ $('msg').textContent='目前沒有開放的詳解。'; return; }
+  if(!b.team||!b.name){ $('msg').textContent='先選隊伍和姓名。'; return; }
+  $('msg').textContent='讀取中…'; $('go').disabled=true;
+  postJ(API,b).then(function(d){
+    $('go').disabled=false;
+    if(!d.ok){ $('msg').innerHTML='<span class="err">'+esc(d.error||'讀取失敗')+'</span>'; return; }
+    save('trml-who',{team:b.team,name:b.name}); $('msg').textContent=''; render(d);
+  }).catch(function(){ $('go').disabled=false; $('msg').innerHTML='<span class="err">連不上題庫，請確認網路後再試。</span>'; });
+}
+$('go').onclick=go;
+$('pin').addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.isComposing) go(); });
+})();
+</script>
+</body>
+</html>
