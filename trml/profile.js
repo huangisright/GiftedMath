@@ -146,7 +146,7 @@ function render(el,data,opts){
           '<td class="n">'+cell(r.ind)+'</td>'+
           '<td class="n">'+(r.mine==null?'<span class="muted">–</span>':'<b style="color:var(--indigo)">'+r.mine+'</b> <span class="muted">（'+pct(r.mine/38)+'）</span>')+'</td>'+
           '<td class="n">'+cell(r.team)+(r.teamPending?'<div class="muted" style="font-size:.75rem">證明題待批改 '+r.teamPending+'</div>':'')+'</td>'+
-          '<td>'+(r.done===3?'<span style="color:var(--moss);font-weight:700">三份都寫完</span>':'<span class="muted">'+r.done+'/3'+(r.sp==null?'・缺競速':'')+(r.ind==null?'・缺個人':'')+(r.team==null?'・缺團體':'')+'</span>')+'</td></tr>';
+          '<td>'+(r.done===3?'<span style="color:var(--moss);font-weight:700">三份都寫完</span>':'<span class="muted">'+r.done+'/3'+(r.sp==null?(/前半/.test(r.spNote)?'・競速缺後半':/後半/.test(r.spNote)?'・競速缺前半':'・缺競速'):'')+(r.ind==null?'・缺個人':'')+(r.team==null?'・缺團體':'')+'</span>')+'</td></tr>';
       }).join('')+'</table></div></div>';
   }
 
