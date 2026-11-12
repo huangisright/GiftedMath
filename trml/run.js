@@ -104,8 +104,12 @@ function renderSets(){
 function unlock(i, pass, silent){
   var s=cfg.sets[i]; if(!pass) return;
   var err=$('perr-'+i); if(err&&!silent) err.textContent='確認中…';
-  return post({action:'unlock',setId:s.id,pass:pass}).then(function(d){
-    if(!d.ok){ if(!silent&&$('perr-'+i)) $('perr-'+i).textContent=d.error||'通關密碼不對'; return; }
+  return post({action:'unlock',setId:s.id,pass:pass,team:$('team').value,name:$('name').value}).then(function(d){
+    if(!d.ok){
+      // 記住的密碼不對了（老師換過密碼）：丟掉，不要每次開頁面都再送一次舊密碼
+      if(silent){ var mm=load(PASS_KEY)||{}; if(mm[s.id]===pass){ delete mm[s.id]; save(PASS_KEY,mm); } }
+      else if($('perr-'+i)) $('perr-'+i).textContent=d.error||'通關密碼不對';
+      return; }
     s.questions=d.questions; s.setPass=pass;
     var m=load(PASS_KEY)||{}; m[s.id]=pass; save(PASS_KEY,m);
     renderSets();

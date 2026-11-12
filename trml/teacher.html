@@ -246,8 +246,8 @@ button.ghost{background:transparent;color:var(--indigo)}
 </div>
 
 <script src="config.js"></script>
-<script src="note.js?v=20261109b"></script>
-<script src="profile.js?v=20261109b"></script>
+<script src="note.js?v=20261112a"></script>
+<script src="profile.js?v=20261112a"></script>
 <script>
 (function(){
 'use strict';
@@ -258,6 +258,7 @@ function fmt(sec){sec=Math.max(0,Math.round(sec||0));var m=Math.floor(sec/60),s=
 function pct(x){return isFinite(x)?Math.round(x*100)+'%':'–';}
 function lget(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lset(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function ldel(k){try{localStorage.removeItem(k);}catch(e){}}
 function mean(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:NaN;}
 function uniq(a){var o=[];a.forEach(function(x){if(o.indexOf(x)<0)o.push(x);});return o;}
 function kpi(v,l){return '<div class="kpi"><b>'+v+'</b><span>'+l+'</span></div>';}
@@ -277,7 +278,10 @@ function fetchReport(){
   fetch(API+'?action=report&key='+encodeURIComponent(key)).then(function(r){return r.json();}).then(function(d){
     if(!d.ok) throw new Error(d.error||'讀取失敗');
     lset('trml-key',key); data=d; $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; afterLoad();
-  }).catch(function(e){$('status').innerHTML='<span class="err">'+esc(e.message)+'</span>';});
+  }).catch(function(e){
+    // 記住的密碼錯了（換過密碼）就忘掉，下次開頁面不會再自動送錯的密碼、把自己鎖住
+    if(/密碼不對/.test(e.message)&&lget('trml-key')===key){ ldel('trml-key'); }
+    $('status').innerHTML='<span class="err">'+esc(e.message)+'</span>';});
 }
 function afterLoad(){
   $('app').hidden=false;

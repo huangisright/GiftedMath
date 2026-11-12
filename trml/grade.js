@@ -8,6 +8,7 @@
  *   set:1,3,5           不計順序的多個答案
  *   甲|A                用 | 分隔多個可接受的寫法
  * 學生答案尾端的單位（度、°、公分、cm、個、種……）會先去掉再比。
+ * 帶分數 1 1/2、1又1/2 當成 3/2；答案沒有逗號時，1,000 當成 1000。
  */
 (function (root) {
   'use strict';
@@ -22,6 +23,8 @@
   function normalize(s) {
     s = toHalfWidth(s).trim().toLowerCase();
     s = s.replace(/根號/g, '√').replace(/或|及|和|；|;/g, ',');
+    // 帶分數：「1 1/2」「1又1/2」→ (1+1/2)；要在拿掉空白之前處理，否則會變成 11/2
+    s = s.replace(/(^|[^0-9.\/])(\d+)(?:[\s　]+|又)(\d+)\s*\/\s*(\d+)/g, '$1($2+$3/$4)');
     s = s.replace(/[\s　]+/g, '')
       .replace(/[×＊·⋅]/g, '*')
       .replace(/÷/g, '/')
@@ -144,6 +147,8 @@
     if (/^set:/i.test(spec)) { unordered = true; spec = spec.slice(4); }
     var a = normalize(input), b = normalize(spec);
     if (!a) return false;
+    // 千分位：答案本身沒有逗號，而學生寫成 1,000 或 12,345,678
+    if (b.indexOf(',') === -1 && /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(a)) a = a.replace(/,/g, '');
     if (b.indexOf(',') === -1) return sameScalar(a, b);
     var pa = splitParts(a), pb = splitParts(b);
     if (pa.length !== pb.length) return false;
