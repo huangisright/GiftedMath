@@ -199,6 +199,10 @@ button.ghost{background:transparent;color:var(--indigo)}
         <div class="row"><button type="button" id="btnSlips">列印成小紙條</button></div>
         <div class="tbl-wrap"><table id="tApin"></table></div>
       </details>
+      <details class="sheet" id="slBox">
+        <summary style="cursor:pointer"><b>全班停損點一覽</b><span class="sub">　每個人競速「寫多久就該放下」，以及超過之後白花的時間</span></summary>
+        <div class="tbl-wrap"><table id="tSl"></table></div>
+      </details>
       <div class="sheet" id="stuHead"></div>
       <div id="stuOut"></div>
     </div>
@@ -260,7 +264,7 @@ button.ghost{background:transparent;color:var(--indigo)}
 
 <script src="config.js"></script>
 <script src="note.js?v=20261112a"></script>
-<script src="profile.js?v=20261112a"></script>
+<script src="profile.js?v=20261112b"></script>
 <script>
 (function(){
 'use strict';
@@ -931,8 +935,24 @@ function renderApins(){
     w.document.close(); w.focus(); w.print();
   };
 }
+function renderSlAll(){
+  var y=$('fYear').value, list=data.roster.filter(function(r){return r.year===y&&r.team!=='測試';});
+  var rows=list.map(function(r){
+    var subs=data.submissions.filter(function(s){return s.year===y&&s.sid===r.id&&s.kind!=='團體';});
+    var ids={}; subs.forEach(function(s){ids[s.attemptId]=1;});
+    var S=TRMLProfile.stopLoss({subs:subs,resps:data.responses.filter(function(x){return ids[x.attemptId];})});
+    return {r:r,S:S};
+  }).sort(function(a,b){ var o={found:0,persist:1,few:2}; return o[a.S.status]-o[b.S.status]||b.S.sunk-a.S.sunk; });
+  $('tSl').innerHTML='<tr><th>學生</th><th>停損點</th><th class="n">競速題數</th><th>超過之後答對</th><th class="n">白花的時間</th><th class="n">空白</th><th>個人賽卡住的回合</th></tr>'+rows.map(function(x){
+    var S=x.S, st=S.status==='found'?'<b>'+fmt(S.T)+'</b>':S.status==='persist'?'<span class="muted">看不出來（寫久也常寫得出來）</span>':'<span class="muted">題數不夠，先用 2:00</span>';
+    return '<tr><td>'+esc(x.r.team)+'・'+esc(x.r.name)+'</td><td>'+st+'</td><td class="n">'+S.nSp+'</td>'+
+      '<td>'+(S.status==='found'?S.tailOk+'/'+S.tailN+'（'+pct(S.found.tr)+'）':'<span class="muted">–</span>')+'</td>'+
+      '<td class="n">'+(S.status==='found'&&S.sunk?fmt(S.sunk):'–')+'</td><td class="n">'+(S.nSp?S.blank:'–')+'</td>'+
+      '<td>'+(S.rounds.n?S.rounds.hog+' / '+S.rounds.n+' 回合':'<span class="muted">–</span>')+'</td></tr>';
+  }).join('');
+}
 function renderStudent(){
-  renderApins();
+  renderApins(); renderSlAll();
   var sid=$('fStu').value, y=$('fYear').value;
   if(!sid){ $('stuHead').innerHTML='<span class="muted">這個年度的名單是空的。</span>'; $('stuOut').innerHTML=''; return; }
   var me=data.roster.filter(function(r){return r.id===sid&&r.year===y;})[0]||{};

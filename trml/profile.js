@@ -2,6 +2,7 @@
  * TRMLProfile.render(el, data, opts)
  *   data = { me:{name,team,year,id}, subs:[…], resps:[…], qinfo:{qid:{topic,img}}, cls:{year,topics:{題型:{n,ok,sec}},speedSec} }
  *   opts = { imgBase:'img/', teacher:false }
+ * 停損點：TRMLProfile.stopLoss(data) 回傳競速的停損時間與個人賽回合統計（老師頁全班一覽也用它）。
  * 只用每份卷子的第一次作答來算題型（重寫的分數會偏高）；團體賽是全隊的成績，只列在紀錄裡，不算進個人題型。 */
 (function(root){
 'use strict';
@@ -34,6 +35,18 @@ var CSS='.pf{display:flex;flex-direction:column;gap:16px}'+
 '.pf th{font-weight:500;color:var(--muted);font-size:.76rem}'+
 '.pf td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}'+
 '.pf th.n{text-align:right}'+
+'.pf .sl .rule{background:var(--indigo-soft);border-left:4px solid var(--indigo);border-radius:3px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}'+
+'.pf .sl .sub-h{font-weight:700;font-size:.92rem;margin-top:4px}'+
+'.pf .sl .bins{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(40px,.35fr);gap:6px 12px;align-items:center;font-size:.9rem}'+
+'.pf .sl .bins .lab{white-space:nowrap} .pf .sl .bins .lab.past{color:var(--ochre);font-weight:700}'+
+'.pf .sl .cnt{height:6px;border-radius:3px;background:var(--blank,var(--line))} .pf .sl .cnt i{display:block;height:100%;border-radius:3px;background:var(--muted);opacity:.55}'+
+'.pf .sl .legend .past{color:var(--ochre)}'+
+'.pf .sl .strip-h{font-size:.88rem}'+
+'.pf .sl .strip{display:flex;gap:2px;height:26px;border-radius:3px;overflow:hidden}'+
+'.pf .sl .strip span{min-width:3px;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:.7rem;overflow:hidden;box-sizing:border-box}'+
+'.pf .sl .ok{background:var(--moss-soft);color:var(--moss)} .pf .sl .no{background:var(--ochre-soft);color:var(--ochre);font-weight:700} .pf .sl .bl{background:var(--line);color:var(--muted)}'+
+'.pf .sl .over{box-shadow:inset 0 0 0 2px var(--ochre)}'+
+'.pf .sl .sw{display:inline-block;width:16px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}'+
 '.pf details.sol{border-top:1px solid var(--line);padding-top:6px}.pf details.sol summary{cursor:pointer;color:var(--indigo);font-size:.88rem}'+
 '.pf details.sol img{display:block;max-width:100%;height:auto;margin-top:6px;background:#fff}';
 function injectCss(){ if(document.getElementById('pf-css')) return; var s=document.createElement('style'); s.id='pf-css'; s.textContent=CSS; document.head.appendChild(s); }
@@ -84,6 +97,102 @@ function compute(data){
   subs.sort(function(a,b){return tnum(b.time)-tnum(a.time);});
   return {topics:tl,strong:strong,weak:weak,slow:slow,speedSec:speedSec,spN:sp.length,spOk:spOk,indAvg:indAvg,indMax:indMax,indN:indSubs.length,
     wrong:wrong,trend:trend,years:years,subs:subs,nQ:R.length};
+}
+
+/* ---------- 停損點：一題寫多久還沒出來，就該先放下 ----------
+ * 只看各卷第一次作答。競速：找「寫超過 T 秒的題目，大多寫不出來」的最小 T。
+ * 個人賽：兩題一回合（全對 3、對一題 1），看「一題用掉大半回合、兩題都沒拿到」的回合。 */
+var SL_CAND=[90,120,150,180,240], SL_BINS=[[0,60,'1 分內'],[60,90,'1～1.5 分'],[90,120,'1.5～2 分'],[120,180,'2～3 分'],[180,Infinity,'3 分以上']];
+var SL_DEFAULT=120, SL_ROUND_HOG=240;
+function firstResps(data){
+  var firstOf={};
+  (data.subs||[]).forEach(function(s){ var k=s.year+'|'+s.setId; if(!firstOf[k]||s.attemptNo<firstOf[k].attemptNo) firstOf[k]=s; });
+  var ids={}; Object.keys(firstOf).forEach(function(k){ ids[firstOf[k].attemptId]=firstOf[k]; });
+  return {subOf:ids,R:(data.resps||[]).filter(function(r){ return ids[r.attemptId]&&r.kind!=='團體'; })};
+}
+function rate(a){ return a.length?a.filter(function(r){return r.correct;}).length/a.length:NaN; }
+function stopLoss(data){
+  var F=firstResps(data), sp=F.R.filter(function(r){return r.kind==='競速';});
+  var timed=sp.filter(function(r){return (r.seconds||0)>0;});
+  var bins=SL_BINS.map(function(b){ var a=timed.filter(function(r){return r.seconds>=b[0]&&r.seconds<b[1];}); return {lo:b[0],hi:b[1],label:b[2],n:a.length,ok:a.filter(function(r){return r.correct;}).length}; });
+  var found=null;
+  SL_CAND.some(function(T){
+    var tail=timed.filter(function(r){return r.seconds>=T;}), head=timed.filter(function(r){return r.seconds<T;});
+    if(tail.length<3||head.length<3) return false;
+    var tr=rate(tail), hr=rate(head);
+    if(tr<=0.35&&hr-tr>=0.25){ found={T:T,tail:tail,head:head,tr:tr,hr:hr}; return true; }
+    return false;
+  });
+  var longN=timed.filter(function(r){return r.seconds>=120;}).length;
+  var status=found?'found':(timed.length>=15&&longN>=3?'persist':'few');
+  var T=found?found.T:(status==='persist'?180:SL_DEFAULT);
+  var tail=timed.filter(function(r){return r.seconds>=T;}), tailWrong=tail.filter(function(r){return !r.correct;});
+  var sunk=tailWrong.reduce(function(a,r){return a+(r.seconds-T);},0);
+  var quickOk=timed.filter(function(r){return r.correct&&r.seconds<T;});
+  var okAvg=quickOk.length?quickOk.reduce(function(a,r){return a+r.seconds;},0)/quickOk.length:NaN;
+  var blank=sp.filter(function(r){return !String(r.answer||'').trim();}).length;
+  // 每份競速卷（第一次）一條：依題號排，寬度＝用時
+  var papers={};
+  sp.forEach(function(r){ (papers[r.attemptId]||(papers[r.attemptId]={sub:F.subOf[r.attemptId],qs:[]})).qs.push(r); });
+  var strips=Object.keys(papers).map(function(k){ var p=papers[k]; p.qs.sort(function(a,b){return a.qid<b.qid?-1:1;}); return p; })
+    .sort(function(a,b){return tnum(b.sub.time)-tnum(a.sub.time);});
+  // 個人賽：每份卷依題號兩題一回合
+  var rounds={n:0,full:0,one:0,zero:0,hog:0,hogList:[]};
+  var ind={};
+  F.R.forEach(function(r){ if(r.kind==='個人') (ind[r.attemptId]||(ind[r.attemptId]=[])).push(r); });
+  Object.keys(ind).forEach(function(k){
+    var qs=ind[k].sort(function(a,b){return a.qid<b.qid?-1:1;});
+    for(var i=0;i+1<qs.length;i+=2){
+      var a=qs[i], b=qs[i+1], c=(a.correct?1:0)+(b.correct?1:0);
+      rounds.n++; if(c===2) rounds.full++; else if(c===1) rounds.one++; else rounds.zero++;
+      var big=(a.seconds||0)>=(b.seconds||0)?a:b;
+      if(c===0&&(big.seconds||0)>=SL_ROUND_HOG){ rounds.hog++; rounds.hogList.push({sub:F.subOf[k],q:big,round:i/2+1}); }
+    }
+  });
+  return {status:status,T:T,found:found,bins:bins,nTimed:timed.length,nSp:sp.length,tailN:tail.length,tailOk:tail.length-tailWrong.length,
+    tailWrong:tailWrong.length,sunk:sunk,okAvg:okAvg,extra:isFinite(okAvg)&&okAvg>0?Math.floor(sunk/okAvg):0,blank:blank,strips:strips,rounds:rounds};
+}
+function slMin(T){ return T%60?(T/60).toFixed(1).replace(/\.0$/,'')+' 分鐘':(T/60)+' 分鐘'; }
+function stopLossHtml(S,opts){
+  var who=opts.teacher?'他':'我', h='<div class="sheet stack sl"><h2>停損點</h2>';
+  if(!S.nSp&&!S.rounds.n) return h+'<div class="muted">還沒有競速或個人賽的紀錄。</div></div>';
+  if(S.nSp){
+    var rule;
+    if(S.status==='found') rule='<b>競速一題寫到 '+slMin(S.T)+'還沒有方向，就先標記、往下寫。</b>'+
+      '<div>'+who+'寫超過 '+fmt(S.T)+' 的題目共 '+S.tailN+' 題，答對 '+S.tailOk+' 題（'+pct(S.found.tr)+'）；'+fmt(S.T)+' 內寫完的題目答對 '+pct(S.found.hr)+'。</div>'+
+      (S.sunk>=30?'<div>超過 '+fmt(S.T)+' 之後還繼續寫、最後仍然錯的題，'+(S.strips.length>1?S.strips.length+' 份卷子合計':'一共')+'多花了 <b>'+fmt(S.sunk)+'</b>'+(S.extra>=1?'，大約夠再寫 <b>'+S.extra+'</b> 題（以'+who+'答對的題平均 '+fmt(S.okAvg)+' 一題算）':'')+'。</div>':'')+
+      (S.blank?'<div>同一批卷子空白 '+S.blank+' 題。</div>':'');
+    else if(S.status==='persist') rule='<b>目前看不出停損點：'+who+'寫得久的題目，多半還是寫得出來。</b>'+
+      '<div>寫超過 2 分鐘的題目答對 '+pct(rate([].concat.apply([],S.strips.map(function(p){return p.qs;})).filter(function(r){return r.seconds>=120;})))+'。可以先用 3 分鐘當上限，避免一題拖垮後面。</div>'+
+      (S.blank?'<div>空白 '+S.blank+' 題。</div>':'');
+    else rule='<b>題目還不夠多，先用 2 分鐘當停損點。</b><div>正式比賽 40 分鐘 26 題，一題平均不到 1.5 分鐘；一題超過 2 分鐘，等於拿兩題的時間去換一題。競速寫滿 15 題以上，這裡會換成'+who+'自己的停損點。</div>';
+    h+='<div class="rule">'+rule+'</div>';
+    var mx=Math.max.apply(null,S.bins.map(function(b){return b.n;}).concat([1]));
+    h+='<div class="sub-h">競速：寫多久，答對多少</div><div class="bins">'+S.bins.map(function(b){
+      var past=b.lo>=S.T;
+      return '<div class="lab'+(past?' past':'')+'">'+b.label+'</div><div class="track"><div class="fill'+(b.n&&b.ok/b.n<0.4?' lo':b.n&&b.ok/b.n>=0.7?' hi':'')+'" style="width:'+(b.n?b.ok/b.n*100:0).toFixed(1)+'%"></div></div>'+
+        '<div class="num">'+(b.n?b.ok+'/'+b.n+'（'+pct(b.ok/b.n)+'）':'沒有')+'</div><div class="cnt"><i style="width:'+(b.n/mx*100).toFixed(1)+'%"></i></div>';
+    }).join('')+'</div><div class="legend"><span>長條：答對率</span><span>右邊細條：題數</span><span class="past">標色的時段在停損點之後</span></div>';
+    var show=S.strips.slice(0,opts.teacher?8:4);
+    if(show.length){
+      h+='<div class="sub-h">最近的競速卷：每一格是一題，寬度是用時</div>'+show.map(function(p){
+        var tot=p.qs.reduce(function(a,r){return a+(r.seconds||0);},0)||1, over=p.qs.filter(function(r){return r.seconds>=S.T;}), overW=over.filter(function(r){return !r.correct;}).length;
+        var none=p.qs.filter(function(r){return !(r.seconds>0);}).length, s=p.sub||{};
+        return '<div class="strip-h"><b>'+esc(s.title||s.setId||'')+'</b><span class="muted">　'+(s.score!=null?s.score+'/'+s.max+'・':'')+fmt(tot)+(over.length?'・超過停損點 '+over.length+' 題（錯 '+overW+' 題）':'')+(none?'・沒寫到 '+none+' 題':'')+'</span></div>'+
+          '<div class="strip">'+p.qs.filter(function(r){return r.seconds>0;}).map(function(r){
+            var st=r.correct?'ok':String(r.answer||'').trim()?'no':'bl', n=Number((String(r.qid).match(/(\d+)$/)||[])[1]);
+            return '<span class="'+st+(r.seconds>=S.T?' over':'')+'" style="flex:'+r.seconds+' 0 0" title="第 '+n+' 題・'+fmt(r.seconds)+'・'+(st==='ok'?'對':st==='no'?'錯':'空白')+'">'+(r.seconds/tot>0.045?n:'')+'</span>';
+          }).join('')+'</div>';
+      }).join('')+'<div class="legend"><span><i class="sw ok"></i>對</span><span><i class="sw no"></i>錯</span><span><i class="sw bl"></i>空白</span><span><i class="sw over"></i>寫超過 '+fmt(S.T)+'</span></div>';
+    }
+  }
+  var R=S.rounds;
+  if(R.n){
+    h+='<div class="sub-h">個人賽：一回合兩題（全對 3 分、對一題 1 分）</div>'+
+      '<div>'+R.n+' 個回合：全對 '+R.full+'、對一題 '+R.one+'、全錯 '+R.zero+'。'+
+      (R.hog?'其中 <b>'+R.hog+'</b> 回合是一題用掉 '+fmt(SL_ROUND_HOG)+' 以上、兩題都沒拿到：'+R.hogList.slice(0,4).map(function(x){return esc((x.sub&&(x.sub.title||x.sub.setId))||'')+' 第 '+x.round+' 回合';}).join('、')+(R.hog>4?' 等':'')+'。先把比較有把握的那題寫完，至少先拿 1 分，再回頭啃另一題。':'沒有「一題卡住、兩題都沒拿到」的回合。')+'</div>';
+  }
+  return h+'</div>';
 }
 
 
@@ -170,6 +279,8 @@ function render(el,data,opts){
     '</div>';
   }
 
+  h+=stopLossHtml(stopLoss(data),opts);
+
   if(P.trend.length>=2) h+='<div class="sheet stack"><h2>得分率的變化</h2><div class="legend"><span><i style="width:10px;height:10px;border-radius:50%;background:var(--indigo)"></i>競速</span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--ochre)"></i>個人賽</span><span>每份卷子只畫第一次</span></div>'+trendSvg(P.trend)+'</div>';
 
   if(P.wrong.length){
@@ -198,5 +309,5 @@ function render(el,data,opts){
     });
   });
 }
-root.TRMLProfile={render:render,compute:compute,paperTotals:paperTotals};
+root.TRMLProfile={render:render,compute:compute,paperTotals:paperTotals,stopLoss:stopLoss};
 })(typeof window!=='undefined'?window:this);
