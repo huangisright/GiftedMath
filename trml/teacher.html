@@ -208,6 +208,19 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div class="sheet"><h2>每一題的感受</h2><div class="tbl-wrap"><table id="tNoteQ"></table></div></div>
       <div id="noteList" style="display:flex;flex-direction:column;gap:12px"></div>
     </div>
+    <div id="vWeek" hidden style="display:flex;flex-direction:column;gap:16px">
+      <div class="sheet">
+        <div class="row">
+          <label class="f" for="wkFrom">從<input type="date" id="wkFrom"></label>
+          <label class="f" for="wkTo">到<input type="date" id="wkTo"></label>
+          <button type="button" id="btnWkCopy" class="ghost">複製文字摘要</button>
+          <button type="button" id="btnWkPrint" class="ghost">列印</button>
+          <span class="sub" id="wkMsg" style="padding-bottom:8px"></span>
+        </div>
+        <div class="sub" id="wkNote"></div>
+      </div>
+      <div id="wkOut" style="display:flex;flex-direction:column;gap:16px"></div>
+    </div>
     <div id="vLec" hidden style="display:flex;flex-direction:column;gap:16px">
       <div class="sheet">
         <div class="row">
@@ -267,7 +280,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
+var TABS=[['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -301,7 +314,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('vStats').hidden=!kindTab; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
+  $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
     var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
@@ -336,6 +349,7 @@ $('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport()
 
 function render(){
   if(!data) return;
+  if(tab==='週報') return renderWeek();
   if(tab==='講解') return renderLec();
   if(tab==='學生') return renderStudent();
   if(tab==='總表') return renderTotal();
@@ -585,6 +599,173 @@ function renderLec(){
   }
 }
 
+
+/* ---------- 週報：這段期間的三個決定（講什麼、怎麼分兩邊、誰要加練） ----------
+ * 全部用老師頁已經讀到的資料在瀏覽器裡算，不動試算表、不用重新部署。 */
+var WK_HOLD=['2024'];        // 留給最後模擬測驗的年份，不拿來派加練
+var WK_EXTRA_BEFORE=2021;    // 這一年以前的卷子優先當加練卷
+function wkDefaults(){ if($('wkFrom').value) return; var now=new Date(), f=new Date(now); f.setDate(now.getDate()-6); $('wkFrom').value=ymd(f); $('wkTo').value=ymd(now); }
+function wkYearOf(s){ return (String((s.qids||[])[0]||s.id||'').match(/^(\d{4})/)||[])[1]||''; }
+function wkSetName(id){ var s=data.sets.filter(function(x){return x.id===id;})[0]; return s?(s.title||id):id; }
+// 幫一位學生挑加練卷：他還沒寫過、目前開放、不是模擬測驗年份，裡面同題型的題目比例最高的那一份
+function wkPick(sid,topic,done){
+  var best=null;
+  data.sets.forEach(function(s){
+    if(s.kind==='團體'||s.status!=='open'||done[sid+'|'+s.id]||!s.qids.length) return;
+    var yr=wkYearOf(s); if(WK_HOLD.indexOf(yr)>=0) return;
+    var nums=[]; s.qids.forEach(function(q,i){ if((qinfo[q]||{}).topic===topic) nums.push(i+1); });
+    if(!nums.length) return;
+    var sc=(Number(yr)<WK_EXTRA_BEFORE?1000:0)+nums.length/s.qids.length*100+nums.length;
+    if(!best||sc>best.sc) best={sc:sc,set:s,nums:nums};
+  });
+  return best;
+}
+function wkCompute(){
+  var y=$('fYear').value, from=$('wkFrom').value, to=$('wkTo').value;
+  var roster=data.roster.filter(function(r){return r.year===y&&r.team!=='測試';});
+  var size={}; roster.forEach(function(r){size[r.team]=(size[r.team]||0)+1;});
+  var teams=Object.keys(size);
+  var yearSubs=data.submissions.filter(function(s){return s.year===y&&s.team!=='測試';});
+  var first={}, sub={}, done={}, cnt={};
+  yearSubs.forEach(function(s){
+    done[(s.kind==='團體'?'T|'+s.team:s.sid)+'|'+s.setId]=1;
+    if(s.attemptNo!==1) return;
+    first[s.attemptId]=s;
+    var d=dayOf(s.time); if(d&&d>=from&&d<=to){ sub[s.attemptId]=s; cnt[s.setId]=(cnt[s.setId]||0)+1; }
+  });
+  var subs=Object.keys(sub).map(function(k){return sub[k];});
+  var Q={}, P={}, YT={}, PK={}, pend=0;
+  roster.forEach(function(r){ P[r.id]={}; YT[r.id]={}; PK[r.id]={'競速':{n:0,ok:0},'個人':{n:0,ok:0}}; });
+  data.responses.forEach(function(r){
+    var s0=first[r.attemptId]; if(!s0) return;
+    var info=qinfo[r.qid]||{}, man=isManual(info.answer), topic=info.topic||'未分類', s=sub[r.attemptId], ok;
+    if(man){ if(r.points==null){ if(s) pend++; return; } ok=r.points>=6; } else ok=r.correct;
+    if(s0.kind!=='團體'&&YT[s0.sid]){ var t=YT[s0.sid][topic]||(YT[s0.sid][topic]={n:0,ok:0}); t.n++; if(ok) t.ok++; }
+    if(!s) return;
+    if(s.kind!=='團體'&&P[s.sid]){
+      var p=P[s.sid][topic]||(P[s.sid][topic]={n:0,ok:0}); p.n++; if(ok) p.ok++;
+      var k=PK[s.sid][s.kind]; if(k){ k.n++; if(ok) k.ok++; }
+    }
+    var x=Q[r.qid]||(Q[r.qid]={qid:r.qid,kind:s.kind,n:0,no:0,nop:0,who:[]});
+    x.n++;
+    if(!ok){ x.no++; x.nop+=s.kind==='團體'?(size[s.team]||1):1;
+      x.who.push({label:s.kind==='團體'?('第 '+s.team+' 隊'):s.name,team:s.team,sid:s.sid,isTeam:s.kind==='團體'}); }
+  });
+  // 決定一：兩邊各取錯最多的 4 題（「講解」分頁設成不講的題目不列）
+  var off=jget('trml-lec-off',{});
+  var list=Object.keys(Q).map(function(k){return Q[k];}).filter(function(x){return x.no>0&&!off[x.qid];})
+    .sort(function(a,b){return b.nop-a.nop||(b.no/b.n)-(a.no/a.n)||(a.qid<b.qid?-1:1);});
+  var sides={A:{qs:[],topics:{}},B:{qs:[],topics:{}}};
+  list.forEach(function(x){ var sd=sides[sideOf(x.qid)], t=(qinfo[x.qid]||{}).topic||'未分類'; sd.topics[t]=(sd.topics[t]||0)+x.nop; if(sd.qs.length<4) sd.qs.push(x); });
+  // 決定二：分邊用這段期間全部的錯題來算（手動換過邊的照手動）
+  var split=lecSplit({roster:roster,y:y},list);
+  // 決定三：這段期間夠多人寫的卷子當成「這次的作業」，看誰還沒交；再看每個人錯最多的題型，配一份加練卷
+  var setBy={}; data.sets.forEach(function(s){setBy[s.id]=s;});
+  var kindOfSet=function(id){return (setBy[id]||{}).kind||'競速';};
+  var needN=Math.max(3,Math.ceil(roster.length/4));
+  var assigned=Object.keys(cnt).filter(function(id){ return kindOfSet(id)==='團體'?cnt[id]>=Math.min(2,teams.length):cnt[id]>=needN; }).sort();
+  var home=assigned.filter(function(id){return kindOfSet(id)!=='團體';}), teamSets=assigned.filter(function(id){return kindOfSet(id)==='團體';});
+  var pairs=0, got=0;
+  var people=roster.map(function(r){
+    var miss=home.filter(function(id){return !done[r.id+'|'+id];});
+    pairs+=home.length; got+=home.length-miss.length;
+    var weak=Object.keys(P[r.id]).map(function(t){ var p=P[r.id][t], yt=YT[r.id][t]||p; return {topic:t,wrong:p.n-p.ok,n:p.n,acc:yt.n?yt.ok/yt.n:NaN,ytN:yt.n}; })
+      .filter(function(w){return w.wrong>=2&&w.wrong*2>=w.n;}).sort(function(a,b){return b.wrong-a.wrong||a.acc-b.acc||(a.topic<b.topic?-1:1);})[0]||null;
+    var k=PK[r.id], tot=k['競速'].n+k['個人'].n, okN=k['競速'].ok+k['個人'].ok;
+    return {r:r,miss:miss,weak:weak,rec:weak?wkPick(r.id,weak.topic,done):null,k:k,acc:tot?okN/tot:NaN,any:tot>0};
+  });
+  var rank=function(p){return isFinite(p.acc)?p.acc:2;};
+  people.sort(function(a,b){return b.miss.length-a.miss.length||rank(a)-rank(b)||(a.r.team<b.r.team?-1:a.r.team>b.r.team?1:0);});
+  var teamRows=teams.map(function(t){
+    return {team:t,subs:subs.filter(function(s){return s.kind==='團體'&&s.team===t;}),miss:teamSets.filter(function(id){return !done['T|'+t+'|'+id];})};
+  });
+  var agg=function(kind){ var n=0,ok=0; roster.forEach(function(r){n+=PK[r.id][kind].n; ok+=PK[r.id][kind].ok;}); return n?ok/n:NaN; };
+  return {y:y,from:from,to:to,roster:roster,subs:subs,pend:pend,sides:sides,split:split,home:home,teamSets:teamSets,needN:needN,
+    pairs:pairs,got:got,people:people,teamRows:teamRows,accS:agg('競速'),accI:agg('個人')};
+}
+function wkScore(k){ return ['競速','個人'].filter(function(n){return k[n].n;}).map(function(n){return n+' '+k[n].ok+'/'+k[n].n;}).join('・'); }
+function wkNums(a){ return '第 '+a.join('、')+' 題'; }
+function wkHtml(W,names){
+  if(!W.roster.length) return '<div class="sheet"><span class="muted">這個年度的名單是空的。</span></div>';
+  if(!W.subs.length) return '<div class="sheet"><span class="muted">'+esc(W.from)+' ～ '+esc(W.to)+' 沒有第一次交卷的紀錄。換一段日期，或確認年度有沒有選對。</span></div>';
+  var h='<div class="sheet"><div class="kpis">'+kpi(W.subs.length,'份第一次交卷')+kpi(W.pairs?pct(W.got/W.pairs):'–','回家練習完成率')+kpi(pct(W.accS),'競速答對率')+kpi(pct(W.accI),'個人賽答對率')+(W.pend?kpi(W.pend,'題證明題待批改'):'')+'</div>'+
+    (W.home.length?'<div class="sub">完成率看的是：'+esc(W.home.map(wkSetName).join('、'))+'。這段期間至少 '+W.needN+' 人交過的回家卷，當成這次的作業；以前就交過的也算完成。</div>':'<div class="sub">這段期間沒有夠多人寫的回家卷（至少 '+W.needN+' 人），完成率先不算。</div>')+
+    (W.pend?'<div class="sub low">還有 '+W.pend+' 題證明題沒批改，批完之後這幾題才會算進錯題。</div>':'')+'</div>';
+  // 決定一
+  h+='<div class="sheet"><h2>決定一｜這次講解講什麼</h2><div class="sub">依「錯的人數」排（團體賽一隊錯算全隊人數），兩邊各列前 4 題。平面幾何、圓放 B，其他放 A；在「講解」分頁移過邊或設成不講的題目，這裡會跟著變。</div><div class="lec-cols">'+
+    ['A','B'].map(function(sd){
+      var S=W.sides[sd], ts=Object.keys(S.topics).sort(function(a,b){return S.topics[b]-S.topics[a];}).slice(0,3);
+      return '<div style="min-width:0;display:flex;flex-direction:column;gap:6px"><b>'+esc(names[sd])+'</b>'+
+        (ts.length?'<div class="sub">錯最多的題型：'+ts.map(function(t){return '<span class="tag">'+esc(t)+' '+S.topics[t]+' 人次</span>';}).join('')+'</div>':'')+
+        (S.qs.length?'<div class="tbl-wrap"><table class="split"><tr><th>題目</th><th>題型</th><th class="n">錯</th><th>核心關鍵</th></tr>'+S.qs.map(function(x){ var i=qinfo[x.qid]||{};
+          return '<tr><td style="white-space:nowrap">'+esc(qLabel(x.qid))+'</td><td style="white-space:nowrap">'+esc(i.topic||'未分類')+'</td><td class="n">'+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'</td><td>'+(i.key?esc(i.key):'<span class="muted">還沒寫</span>')+'</td></tr>'; }).join('')+'</table></div>'
+          :'<div class="sub">這邊這段期間沒有錯題。</div>')+'</div>';
+    }).join('')+'</div><div class="row noprint"><button type="button" data-go="講解">到「講解」分頁排題、產生講解包</button></div></div>';
+  // 決定二
+  var cell=function(g,sd){return g[sd].map(function(m){return '<span class="tag">'+esc(m.r.name)+' <small>A'+m.need.A+'・B'+m.need.B+'</small></span>';}).join(' ');};
+  h+='<div class="sheet"><h2>決定二｜學生怎麼分兩邊</h2><div class="sub">每隊對半分：錯在 A 邊題目比較多的去 A，錯在 B 邊比較多的去 B。只看競速與個人賽（團體賽是全隊一起錯，分不出誰）。名字後面是這段期間兩邊各錯幾題；要手動換邊，到「講解」分頁點名字。</div><div class="tbl-wrap"><table class="split"><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
+    Object.keys(W.split).map(function(t){ var g=W.split[t]; return '<tr><td style="white-space:nowrap">第 '+esc(t)+' 隊</td><td>'+cell(g,'A')+'</td><td>'+cell(g,'B')+'</td></tr>'; }).join('')+
+    '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(W.split).reduce(function(a,t){return a+W.split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr></table></div></div>';
+  // 決定三
+  h+='<div class="sheet"><h2>決定三｜誰要加練、練什麼</h2><div class="sub">排在前面的先處理：還沒交的在最上面，接著是答對率低的。「最弱題型」是這段期間錯 2 題以上、而且錯了一半以上的題型裡，錯最多的那一類；加練卷是他還沒寫過、同題型題目比例最高的一份（優先挑 '+(WK_EXTRA_BEFORE-1)+' 年以前的，'+esc(WK_HOLD.join('、'))+' 年留給模擬測驗不派）。</div><div class="tbl-wrap"><table class="split"><tr><th>學生</th><th></th><th>這段期間答對</th><th>還沒交</th><th>最弱題型</th><th>建議加練卷</th></tr>'+
+    W.people.map(function(p){
+      var st=p.miss.length?'<span class="pill b">先補交</span>':p.weak?'<span class="pill m">加練</span>':p.any?'<span class="pill g">照進度</span>':'<span class="muted">沒有紀錄</span>';
+      return '<tr><td style="white-space:nowrap">'+esc(p.r.team)+'・'+esc(p.r.name)+'</td><td style="white-space:nowrap">'+st+'</td><td style="white-space:nowrap">'+(p.any?esc(wkScore(p.k)):'<span class="muted">–</span>')+'</td>'+
+        '<td>'+(p.miss.length?p.miss.map(function(id){return '<span class="tag">'+esc(wkSetName(id))+'</span>';}).join(' '):(W.home.length?'<span class="muted">都交了</span>':'<span class="muted">–</span>'))+'</td>'+
+        '<td>'+(p.weak?esc(p.weak.topic)+'<br><small class="muted">錯 '+p.weak.wrong+'/'+p.weak.n+' 題・今年累計答對 '+pct(p.weak.acc)+'</small>':'<span class="muted">–</span>')+'</td>'+
+        '<td>'+(p.rec?esc(p.rec.set.title||p.rec.set.id)+'<br><small class="muted">'+esc(p.weak.topic)+' '+p.rec.nums.length+' 題：'+esc(wkNums(p.rec.nums))+'</small>':(p.weak?'<span class="muted">同題型的開放卷子都寫過了</span>':'<span class="muted">–</span>'))+'</td></tr>';
+    }).join('')+'</table></div>'+
+    '<h2 style="margin-top:6px">團體賽</h2><div class="tbl-wrap"><table class="split"><tr><th>隊伍</th><th>這段期間的團體賽</th><th>還沒寫</th></tr>'+
+    W.teamRows.map(function(t){
+      return '<tr><td style="white-space:nowrap">第 '+esc(t.team)+' 隊</td><td>'+(t.subs.length?t.subs.map(function(s){return esc(wkSetName(s.setId))+'　<b>'+s.score+'</b>/'+s.max+(s.pending?'（'+s.pending+' 題待批）':'');}).join('<br>'):'<span class="muted">沒有交卷</span>')+'</td>'+
+        '<td>'+(t.miss.length?t.miss.map(function(id){return '<span class="tag">'+esc(wkSetName(id))+'</span>';}).join(' '):'<span class="muted">–</span>')+'</td></tr>';
+    }).join('')+'</table></div></div>';
+  return h;
+}
+// 給另一位老師的純文字版（貼到 LINE 用）
+function wkText(W,names){
+  var md=function(d){var m=String(d).match(/\d{4}-(\d\d)-(\d\d)/);return m?Number(m[1])+'/'+Number(m[2]):d;}, L=[];
+  L.push('TRML 週報　'+md(W.from)+'～'+md(W.to));
+  L.push('第一次交卷 '+W.subs.length+' 份｜回家練習完成率 '+(W.pairs?pct(W.got/W.pairs):'–')+'｜競速答對率 '+pct(W.accS)+'｜個人賽答對率 '+pct(W.accI)+(W.pend?'｜證明題待批改 '+W.pend+' 題':''));
+  L.push(''); L.push('【一、講什麼】');
+  ['A','B'].forEach(function(sd){
+    var S=W.sides[sd], ts=Object.keys(S.topics).sort(function(a,b){return S.topics[b]-S.topics[a];}).slice(0,3);
+    L.push(names[sd]+'：'+(ts.length?ts.join('、'):'這段期間沒有錯題'));
+    S.qs.forEach(function(x){ var i=qinfo[x.qid]||{}; L.push('　'+qLabel(x.qid)+'（錯 '+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'）'+(i.key?'　'+i.key:'')); });
+  });
+  L.push(''); L.push('【二、怎麼分】');
+  Object.keys(W.split).forEach(function(t){ var g=W.split[t], nm=function(sd){return g[sd].map(function(m){return m.r.name;}).join('、')||'–';}; L.push('第 '+t+' 隊　A：'+nm('A')+'｜B：'+nm('B')); });
+  L.push(''); L.push('【三、誰加練】');
+  var late=W.people.filter(function(p){return p.miss.length;}), more=W.people.filter(function(p){return p.weak;});
+  L.push('先補交：'+(late.length?late.map(function(p){return p.r.name+'（'+p.miss.map(wkSetName).join('、')+'）';}).join('；'):'沒有'));
+  if(more.length){ L.push('加練：'); more.forEach(function(p){ L.push('　'+p.r.name+'｜'+p.weak.topic+'（錯 '+p.weak.wrong+' 題）'+(p.rec?'｜'+(p.rec.set.title||p.rec.set.id)+' '+wkNums(p.rec.nums):'')); }); }
+  else L.push('加練：沒有人在單一題型錯到一半以上');
+  var tm=W.teamRows.filter(function(t){return t.miss.length;});
+  if(tm.length) L.push('團體賽還沒寫：'+tm.map(function(t){return '第 '+t.team+' 隊（'+t.miss.map(wkSetName).join('、')+'）';}).join('；'));
+  return L.join('\n');
+}
+function renderWeek(){
+  wkDefaults();
+  var W=wkCompute(), names=lecNames();
+  $('wkNote').textContent='只算第一次作答、不含測試組。這一頁只是把資料排成三個決定，最後要講哪幾題、誰去哪一邊，仍然在「講解」分頁定案。';
+  $('wkOut').innerHTML=wkHtml(W,names); $('wkMsg').textContent='';
+  Array.prototype.forEach.call($('wkOut').querySelectorAll('[data-go]'),function(b){ b.onclick=function(){
+    $('lFrom').value=W.from; $('lTo').value=W.to; $('lMode').value='top';
+    tab=b.getAttribute('data-go'); lset('trml-tab',tab); renderTabs(); refill(); render(); window.scrollTo(0,0); }; });
+  $('btnWkCopy').onclick=function(){
+    var t=wkText(W,names), okMsg=function(){ $('wkMsg').textContent='已複製，可以直接貼到 LINE。'; }, fallback=function(){
+      var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); okMsg(); }catch(e){ $('wkMsg').textContent='複製失敗，請改用列印。'; } document.body.removeChild(ta); };
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(okMsg,fallback); else fallback();
+  };
+  $('btnWkPrint').onclick=function(){
+    var w=window.open('','_blank'); if(!w) return;
+    w.document.write('<!doctype html><meta charset="utf-8"><title>TRML 週報 '+esc(W.from)+'～'+esc(W.to)+'</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:12.5px;line-height:1.5}h1{font-size:20px;margin:0 0 8px}h2{font-size:15px;margin:14px 0 4px}.sheet{margin-bottom:6px}.sub,.muted,small{color:#555}.kpis{display:flex;gap:26px;flex-wrap:wrap}.kpi b{display:block;font-size:20px}.kpi span{font-size:11px;color:#555}table{border-collapse:collapse;width:100%;margin-top:4px}th,td{border:1px solid #aaa;padding:4px 7px;text-align:left;vertical-align:top}th{background:#eee;font-weight:500}td.n,th.n{text-align:right}.tag{background:#eee;border-radius:3px;padding:0 5px;margin-right:3px;white-space:nowrap}.pill{border:1px solid #888;border-radius:3px;padding:0 5px;white-space:nowrap}.lec-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}.noprint{display:none}.low{font-weight:700}tr{break-inside:avoid}</style>'+
+      '<h1>TRML 週報　'+esc(W.from)+' ～ '+esc(W.to)+'</h1>'+wkHtml(W,names));
+    w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
+  };
+}
+['wkFrom','wkTo'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='週報') renderWeek(); });});
 
 /* ---------- 開放詳解：學生到「看詳解」頁登入就能讀 ---------- */
 function curSet(){ return data.sets.filter(function(x){return x.id===$('lSet').value;})[0]; }
