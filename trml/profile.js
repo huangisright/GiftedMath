@@ -55,6 +55,9 @@ function pct(x){ return isFinite(x)?Math.round(x*100)+'%':'–'; }
 function fmt(sec){ sec=Math.max(0,Math.round(sec||0)); var m=Math.floor(sec/60),s=sec%60; return m+':'+(s<10?'0':'')+s; }
 function tnum(t){ var d=new Date(String(t).replace(/ 上午 /,' ').replace(/ 下午 (\d+)/,function(_,h){return ' '+(Number(h)%12+12);})); return isNaN(d)?0:d.getTime(); }
 
+var ZT={'一':'一《把長長的一串縮掉》','二':'二《係數記得住根》','三':'三《留下餘數，丟掉商》','四':'四《骨架決定一切》','五上':'五上《四個把手》','五下':'五下《規則不一定是公式》','六':'六《總和不會變》','七':'七《面積會加，也會分》','八':'八《圓上的角只認弧》','九':'九《數出來，不要漏也不要重》','十':'十《翻過去，什麼沒變》'};
+var ZT_SET={'一':'zt01','二':'zt02','三':'zt03','四':'zt04','五上':'zt05a','五下':'zt05b','六':'zt06','七':'zt07','八':'zt08','九':'zt09','十':'zt10'};
+function ztName(z){ return ZT[z]||z||''; }
 function compute(data){
   var subs=data.subs.slice(), resps=data.resps, qinfo=data.qinfo||{};
   // 每份卷子（同一年度）只取第一次
@@ -69,6 +72,14 @@ function compute(data){
     var x=topics[t]||(topics[t]={t:t,n:0,ok:0,sec:0});
     x.n++; if(r.correct) x.ok++; x.sec+=r.seconds||0;
   });
+  var zts={};
+  R.forEach(function(r){
+    var z=(qinfo[r.qid]||{}).zt; if(!z||z==='其他') return;
+    var x=zts[z]||(zts[z]={t:z,n:0,ok:0,sec:0}); x.n++; if(r.correct) x.ok++; x.sec+=r.seconds||0;
+  });
+  var czs=(data.cls&&data.cls.zts)||{};
+  var zl=Object.keys(zts).map(function(k){ var x=zts[k], c=czs[k];
+    x.rate=x.ok/x.n; x.avg=x.sec/x.n; x.crate=c&&c.n?c.ok/c.n:NaN; return x; });
   var cls=(data.cls&&data.cls.topics)||{};
   var tl=Object.keys(topics).map(function(k){ var x=topics[k], c=cls[k];
     x.rate=x.ok/x.n; x.avg=x.sec/x.n; x.crate=c&&c.n?c.ok/c.n:NaN; x.cavg=c&&c.n?c.sec/c.n:NaN; return x; });
@@ -95,7 +106,7 @@ function compute(data){
     .sort(function(a,b){return tnum(a.time)-tnum(b.time);});
   var years={}; R.forEach(function(r){ var y=years[r.year]||(years[r.year]={n:0,ok:0}); y.n++; if(r.correct) y.ok++; });
   subs.sort(function(a,b){return tnum(b.time)-tnum(a.time);});
-  return {topics:tl,strong:strong,weak:weak,slow:slow,speedSec:speedSec,spN:sp.length,spOk:spOk,indAvg:indAvg,indMax:indMax,indN:indSubs.length,
+  return {zts:zl,topics:tl,strong:strong,weak:weak,slow:slow,speedSec:speedSec,spN:sp.length,spOk:spOk,indAvg:indAvg,indMax:indMax,indN:indSubs.length,
     wrong:wrong,trend:trend,years:years,subs:subs,nQ:R.length};
 }
 
@@ -279,6 +290,18 @@ function render(el,data,opts){
     '</div>';
   }
 
+  if(P.zts.length){
+    var zord=Object.keys(ZT);
+    h+='<div class="sheet stack"><h2>各專題答對率</h2>'+
+      '<div class="muted" style="font-size:.85rem">同一個專題的題目用的是同一招。答對率低、題數又夠多的專題，可以去寫「專題練習」卷。</div>'+
+      '<div class="tp">'+P.zts.slice().sort(function(a,b){return zord.indexOf(a.t)-zord.indexOf(b.t);}).map(function(x){
+        var cls=x.n>=3?(x.rate<0.5?' lo':x.rate>=0.7?' hi':''):'';
+        return '<div class="lab">'+esc(ztName(x.t))+'</div><div class="track" title="'+esc(ztName(x.t)+'：'+x.ok+'/'+x.n)+'"><div class="fill'+cls+'" style="width:'+(x.rate*100).toFixed(1)+'%"></div>'+
+          (isFinite(x.crate)?'<div class="mark" style="left:calc('+(x.crate*100).toFixed(1)+'% - 1px)"></div>':'')+'</div>'+
+          '<div class="num">'+x.ok+'/'+x.n+'</div>';
+      }).join('')+'</div></div>';
+  }
+
   h+=stopLossHtml(stopLoss(data),opts);
 
   if(P.trend.length>=2) h+='<div class="sheet stack"><h2>得分率的變化</h2><div class="legend"><span><i style="width:10px;height:10px;border-radius:50%;background:var(--indigo)"></i>競速</span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--ochre)"></i>個人賽</span><span>每份卷子只畫第一次</span></div>'+trendSvg(P.trend)+'</div>';
@@ -288,8 +311,8 @@ function render(el,data,opts){
     h+='<div class="sheet stack"><h2>答錯的題目</h2><div class="muted" style="font-size:.85rem">弱的題型排前面'+(P.wrong.length>shown.length?'，先列 '+shown.length+' 題（共 '+P.wrong.length+' 題）':'')+'。可以挑幾題重算一次，算不出來再問老師。</div><div class="wq">'+
       shown.map(function(r){ var q=data.qinfo[r.qid]||{}, src=q.img?(/^(https?:|\/)/.test(q.img)?q.img:IMG+q.img):IMG+r.qid+'.png';
         return '<figure><img loading="lazy" src="'+esc(src)+'" alt="'+esc(r.qid)+' 題目"><figcaption>'+esc(r.qid)+'・'+esc(q.topic||'')+'・'+(r.kind==='個人'?'個人賽':'競速')+
-          '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+'</figcaption>'+
-          (q.sol?'<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+'</figure>'; }).join('')+'</div></div>';
+          '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+(q.zt&&q.zt!=='其他'?'<br>專題 '+esc(ztName(q.zt)):'')+'</figcaption>'+
+          (q.sol?'<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+(q.mates&&q.mates.length?'<details class="sol mates"><summary>同一招的題（'+q.mates.length+' 題）</summary>'+q.mates.map(function(m){ var s2=m.img?(/^(https?:|\/)/.test(m.img)?m.img:IMG+m.img):IMG+m.qid+'.png'; return '<div class="muted" style="font-size:.8rem;margin-top:6px">'+esc(m.qid)+'</div><img loading="lazy" src="'+esc(s2)+'" alt="'+esc(m.qid)+' 題目">'; }).join('')+'</details>':'')+'</figure>'; }).join('')+'</div></div>';
   }
 
   h+='<div class="sheet stack"><h2>作答紀錄</h2>'+(P.subs.length?'<div class="tbl-wrap"><table><tr><th>交卷時間</th><th>年度</th><th>賽別</th><th>卷子</th><th class="n">第幾次</th><th class="n">得分</th><th class="n">用時</th></tr>'+
@@ -309,5 +332,5 @@ function render(el,data,opts){
     });
   });
 }
-root.TRMLProfile={render:render,compute:compute,paperTotals:paperTotals,stopLoss:stopLoss};
+root.TRMLProfile={render:render,compute:compute,paperTotals:paperTotals,stopLoss:stopLoss,ZT:ZT,ZT_SET:ZT_SET,ztName:ztName};
 })(typeof window!=='undefined'?window:this);

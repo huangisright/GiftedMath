@@ -264,7 +264,7 @@ button.ghost{background:transparent;color:var(--indigo)}
 
 <script src="config.js"></script>
 <script src="note.js?v=20261112a"></script>
-<script src="profile.js?v=20261112b"></script>
+<script src="profile.js?v=20261113a"></script>
 <script>
 (function(){
 'use strict';
@@ -536,7 +536,7 @@ function lecCard(x,D,screen){
   var texts=ns.filter(function(n){return n.text;});
   var unit=x.kind==='團體'?'隊':'人';
   return '<div class="lec-card'+(screen&&jget('trml-lec-off',{})[q]?' off':'')+'" data-q="'+esc(q)+'">'+
-    '<div class="hd"><b>'+esc(qLabel(q))+'</b><span class="tag">'+esc(info.topic||'未分類')+'</span>'+(x.n?'<span class="low">錯 '+x.no+'/'+x.n+' '+unit+'（'+pct(rate)+'）</span>':'<span class="sub">這段期間還沒有人寫</span>')+'</div>'+
+    '<div class="hd"><b>'+esc(qLabel(q))+'</b><span class="tag">'+esc(info.topic||'未分類')+'</span>'+(info.zt&&info.zt!=='其他'?'<span class="tag">專題 '+esc(info.zt)+'</span>':'')+(x.n?'<span class="low">錯 '+x.no+'/'+x.n+' '+unit+'（'+pct(rate)+'）</span>':'<span class="sub">這段期間還沒有人寫</span>')+'</div>'+
     (info.text?'<div>'+esc(info.text)+'</div>':'')+'<img loading="lazy" src="'+esc(imgSrc(q))+'" alt="'+esc(qLabel(q))+' 題目">'+
     '<div>正確答案：<b>'+esc(showAns(info.answer))+'</b></div>'+
     (wrongs?'<div class="sub">常見錯答：'+wrongs+'</div>':'')+
@@ -612,12 +612,18 @@ function wkDefaults(){ if($('wkFrom').value) return; var now=new Date(), f=new D
 function wkYearOf(s){ return (String((s.qids||[])[0]||s.id||'').match(/^(\d{4})/)||[])[1]||''; }
 function wkSetName(id){ var s=data.sets.filter(function(x){return x.id===id;})[0]; return s?(s.title||id):id; }
 // 幫一位學生挑加練卷：他還沒寫過、目前開放、不是模擬測驗年份，裡面同題型的題目比例最高的那一份
+function wkGroup(q){ var i=qinfo[q]||{}; return i.zt&&i.zt!=='其他'?'專題:'+i.zt:(i.topic||'未分類'); }
+function wkGroupName(g){ return /^專題:/.test(g)?'專題'+TRMLProfile.ztName(g.slice(3)):g; }
 function wkPick(sid,topic,done){
   var best=null;
+  if(/^專題:/.test(topic)){
+    var zid=TRMLProfile.ZT_SET[topic.slice(3)], zs=data.sets.filter(function(s){return s.id===zid;})[0];
+    if(zs&&zs.status==='open'&&!done[sid+'|'+zs.id]) return {set:zs,nums:zs.qids.map(function(q,i){return i+1;}),whole:true};
+  }
   data.sets.forEach(function(s){
     if(s.kind==='團體'||s.status!=='open'||done[sid+'|'+s.id]||!s.qids.length) return;
     var yr=wkYearOf(s); if(WK_HOLD.indexOf(yr)>=0) return;
-    var nums=[]; s.qids.forEach(function(q,i){ if((qinfo[q]||{}).topic===topic) nums.push(i+1); });
+    var nums=[]; s.qids.forEach(function(q,i){ if(wkGroup(q)===topic) nums.push(i+1); });
     if(!nums.length) return;
     var sc=(Number(yr)<WK_EXTRA_BEFORE?1000:0)+nums.length/s.qids.length*100+nums.length;
     if(!best||sc>best.sc) best={sc:sc,set:s,nums:nums};
@@ -642,7 +648,7 @@ function wkCompute(){
   roster.forEach(function(r){ P[r.id]={}; YT[r.id]={}; PK[r.id]={'競速':{n:0,ok:0},'個人':{n:0,ok:0}}; });
   data.responses.forEach(function(r){
     var s0=first[r.attemptId]; if(!s0) return;
-    var info=qinfo[r.qid]||{}, man=isManual(info.answer), topic=info.topic||'未分類', s=sub[r.attemptId], ok;
+    var info=qinfo[r.qid]||{}, man=isManual(info.answer), topic=wkGroup(r.qid), s=sub[r.attemptId], ok;
     if(man){ if(r.points==null){ if(s) pend++; return; } ok=r.points>=6; } else ok=r.correct;
     if(s0.kind!=='團體'&&YT[s0.sid]){ var t=YT[s0.sid][topic]||(YT[s0.sid][topic]={n:0,ok:0}); t.n++; if(ok) t.ok++; }
     if(!s) return;
@@ -700,7 +706,7 @@ function wkHtml(W,names){
     ['A','B'].map(function(sd){
       var S=W.sides[sd], ts=Object.keys(S.topics).sort(function(a,b){return S.topics[b]-S.topics[a];}).slice(0,3);
       return '<div style="min-width:0;display:flex;flex-direction:column;gap:6px"><b>'+esc(names[sd])+'</b>'+
-        (ts.length?'<div class="sub">錯最多的題型：'+ts.map(function(t){return '<span class="tag">'+esc(t)+' '+S.topics[t]+' 人次</span>';}).join('')+'</div>':'')+
+        (ts.length?'<div class="sub">錯最多的：'+ts.map(function(t){return '<span class="tag">'+esc(wkGroupName(t))+' '+S.topics[t]+' 人次</span>';}).join('')+'</div>':'')+
         (S.qs.length?'<div class="tbl-wrap"><table class="split"><tr><th>題目</th><th>題型</th><th class="n">錯</th><th>核心關鍵</th></tr>'+S.qs.map(function(x){ var i=qinfo[x.qid]||{};
           return '<tr><td style="white-space:nowrap">'+esc(qLabel(x.qid))+'</td><td style="white-space:nowrap">'+esc(i.topic||'未分類')+'</td><td class="n">'+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'</td><td>'+(i.key?esc(i.key):'<span class="muted">還沒寫</span>')+'</td></tr>'; }).join('')+'</table></div>'
           :'<div class="sub">這邊這段期間沒有錯題。</div>')+'</div>';
@@ -711,13 +717,13 @@ function wkHtml(W,names){
     Object.keys(W.split).map(function(t){ var g=W.split[t]; return '<tr><td style="white-space:nowrap">第 '+esc(t)+' 隊</td><td>'+cell(g,'A')+'</td><td>'+cell(g,'B')+'</td></tr>'; }).join('')+
     '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(W.split).reduce(function(a,t){return a+W.split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr></table></div></div>';
   // 決定三
-  h+='<div class="sheet"><h2>決定三｜誰要加練、練什麼</h2><div class="sub">排在前面的先處理：還沒交的在最上面，接著是答對率低的。「最弱題型」是這段期間錯 2 題以上、而且錯了一半以上的題型裡，錯最多的那一類；加練卷是他還沒寫過、同題型題目比例最高的一份（優先挑 '+(WK_EXTRA_BEFORE-1)+' 年以前的，'+esc(WK_HOLD.join('、'))+' 年留給模擬測驗不派）。</div><div class="tbl-wrap"><table class="split"><tr><th>學生</th><th></th><th>這段期間答對</th><th>還沒交</th><th>最弱題型</th><th>建議加練卷</th></tr>'+
+  h+='<div class="sheet"><h2>決定三｜誰要加練、練什麼</h2><div class="sub">排在前面的先處理：還沒交的在最上面，接著是答對率低的。「最弱」看專題（沒有專題的題才看題型）：這段期間錯 2 題以上、而且錯了一半以上的那一類裡錯最多的；加練卷優先派那個專題的「專題練習」卷，寫過了才挑他還沒寫過、同一類題目比例最高的一份（優先挑 '+(WK_EXTRA_BEFORE-1)+' 年以前的，'+esc(WK_HOLD.join('、'))+' 年留給模擬測驗不派）。</div><div class="tbl-wrap"><table class="split"><tr><th>學生</th><th></th><th>這段期間答對</th><th>還沒交</th><th>最弱的一招</th><th>建議加練卷</th></tr>'+
     W.people.map(function(p){
       var st=p.miss.length?'<span class="pill b">先補交</span>':p.weak?'<span class="pill m">加練</span>':p.any?'<span class="pill g">照進度</span>':'<span class="muted">沒有紀錄</span>';
       return '<tr><td style="white-space:nowrap">'+esc(p.r.team)+'・'+esc(p.r.name)+'</td><td style="white-space:nowrap">'+st+'</td><td style="white-space:nowrap">'+(p.any?esc(wkScore(p.k)):'<span class="muted">–</span>')+'</td>'+
         '<td>'+(p.miss.length?p.miss.map(function(id){return '<span class="tag">'+esc(wkSetName(id))+'</span>';}).join(' '):(W.home.length?'<span class="muted">都交了</span>':'<span class="muted">–</span>'))+'</td>'+
-        '<td>'+(p.weak?esc(p.weak.topic)+'<br><small class="muted">錯 '+p.weak.wrong+'/'+p.weak.n+' 題・今年累計答對 '+pct(p.weak.acc)+'</small>':'<span class="muted">–</span>')+'</td>'+
-        '<td>'+(p.rec?esc(p.rec.set.title||p.rec.set.id)+'<br><small class="muted">'+esc(p.weak.topic)+' '+p.rec.nums.length+' 題：'+esc(wkNums(p.rec.nums))+'</small>':(p.weak?'<span class="muted">同題型的開放卷子都寫過了</span>':'<span class="muted">–</span>'))+'</td></tr>';
+        '<td>'+(p.weak?esc(wkGroupName(p.weak.topic))+'<br><small class="muted">錯 '+p.weak.wrong+'/'+p.weak.n+' 題・今年累計答對 '+pct(p.weak.acc)+'</small>':'<span class="muted">–</span>')+'</td>'+
+        '<td>'+(p.rec?esc(p.rec.set.title||p.rec.set.id)+'<br><small class="muted">'+(p.rec.whole?'整份 '+p.rec.nums.length+' 題都是這一招':esc(wkGroupName(p.weak.topic))+' '+p.rec.nums.length+' 題：'+esc(wkNums(p.rec.nums)))+'</small>':(p.weak?'<span class="muted">同題型的開放卷子都寫過了</span>':'<span class="muted">–</span>'))+'</td></tr>';
     }).join('')+'</table></div>'+
     '<h2 style="margin-top:6px">團體賽</h2><div class="tbl-wrap"><table class="split"><tr><th>隊伍</th><th>這段期間的團體賽</th><th>還沒寫</th></tr>'+
     W.teamRows.map(function(t){
@@ -734,7 +740,7 @@ function wkText(W,names){
   L.push(''); L.push('【一、講什麼】');
   ['A','B'].forEach(function(sd){
     var S=W.sides[sd], ts=Object.keys(S.topics).sort(function(a,b){return S.topics[b]-S.topics[a];}).slice(0,3);
-    L.push(names[sd]+'：'+(ts.length?ts.join('、'):'這段期間沒有錯題'));
+    L.push(names[sd]+'：'+(ts.length?ts.map(wkGroupName).join('、'):'這段期間沒有錯題'));
     S.qs.forEach(function(x){ var i=qinfo[x.qid]||{}; L.push('　'+qLabel(x.qid)+'（錯 '+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'）'+(i.key?'　'+i.key:'')); });
   });
   L.push(''); L.push('【二、怎麼分】');
@@ -742,7 +748,7 @@ function wkText(W,names){
   L.push(''); L.push('【三、誰加練】');
   var late=W.people.filter(function(p){return p.miss.length;}), more=W.people.filter(function(p){return p.weak;});
   L.push('先補交：'+(late.length?late.map(function(p){return p.r.name+'（'+p.miss.map(wkSetName).join('、')+'）';}).join('；'):'沒有'));
-  if(more.length){ L.push('加練：'); more.forEach(function(p){ L.push('　'+p.r.name+'｜'+p.weak.topic+'（錯 '+p.weak.wrong+' 題）'+(p.rec?'｜'+(p.rec.set.title||p.rec.set.id)+' '+wkNums(p.rec.nums):'')); }); }
+  if(more.length){ L.push('加練：'); more.forEach(function(p){ L.push('　'+p.r.name+'｜'+wkGroupName(p.weak.topic)+'（錯 '+p.weak.wrong+' 題）'+(p.rec?'｜'+(p.rec.set.title||p.rec.set.id)+(p.rec.whole?'':' '+wkNums(p.rec.nums)):'')); }); }
   else L.push('加練：沒有人在單一題型錯到一半以上');
   var tm=W.teamRows.filter(function(t){return t.miss.length;});
   if(tm.length) L.push('團體賽還沒寫：'+tm.map(function(t){return '第 '+t.team+' 隊（'+t.miss.map(wkSetName).join('、')+'）';}).join('；'));
@@ -963,17 +969,21 @@ function renderStudent(){
     .map(function(s){ var o={}; for(var k in s) o[k]=s[k]; o.title=titles[s.setId]||s.setId; return o; });
   var ids={}; subs.forEach(function(s){ids[s.attemptId]=1;});
   var resps=data.responses.filter(function(r){return ids[r.attemptId];});
-  var qi={}; resps.forEach(function(r){ var q=qinfo[r.qid]||{}; qi[r.qid]={topic:q.topic||'',img:q.img||'',sol:q.sol||''}; });
-  var topics={}, sp={n:0,sec:0};
+  var fam={}; data.questions.forEach(function(q){ if(q.fam) (fam[q.fam]=fam[q.fam]||[]).push(q.qid); });
+  var qi={}; resps.forEach(function(r){ var q=qinfo[r.qid]||{};
+    var m=q.fam?fam[q.fam].filter(function(x){return x!==r.qid&&WK_HOLD.indexOf(x.slice(0,4))<0;}).sort().map(function(x){return {qid:x,img:(qinfo[x]||{}).img||''};}):[];
+    qi[r.qid]={topic:q.topic||'',img:q.img||'',sol:q.sol||'',zt:q.zt||'',mates:m.length?m:undefined}; });
+  var topics={}, zts={}, sp={n:0,sec:0};
   data.responses.forEach(function(r){
     if(r.year!==me.year||r.attemptNo!==1||r.kind==='團體') return;
     var t=(qinfo[r.qid]||{}).topic||'未分類', x=topics[t]||(topics[t]={n:0,ok:0,sec:0});
     x.n++; if(r.correct) x.ok++; x.sec+=r.seconds;
+    var z=(qinfo[r.qid]||{}).zt; if(z){ var w=zts[z]||(zts[z]={n:0,ok:0,sec:0}); w.n++; if(r.correct) w.ok++; w.sec+=r.seconds; }
     if(r.kind==='競速'){sp.n++;sp.sec+=r.seconds;}
   });
   $('stuHead').innerHTML='<h2>'+esc(me.name||sid)+'</h2><div class="sub">學生編號 '+esc(sid)+'・'+esc(uniq(yearsIn).join('、'))+'。題型比較的是 '+esc(me.year)+' 年度所有人的第一次作答。</div>';
   var myN={}; (data.notes||[]).forEach(function(n){ if(n.sid===sid) myN[n.qid]={diff:n.diff,stuck:n.stuck,text:n.text,nphotos:n.photos.length,time:n.time}; });
-  TRMLProfile.render($('stuOut'),{me:me,subs:subs,resps:resps,qinfo:qi,notes:myN,cls:{year:me.year,topics:topics,speedSec:sp.n?sp.sec/sp.n:null}},{imgBase:IMG,teacher:true});
+  TRMLProfile.render($('stuOut'),{me:me,subs:subs,resps:resps,qinfo:qi,notes:myN,cls:{year:me.year,topics:topics,zts:zts,speedSec:sp.n?sp.sec/sp.n:null}},{imgBase:IMG,teacher:true});
 }
 
 /* ---------- 學生回饋 ---------- */
