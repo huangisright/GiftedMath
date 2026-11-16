@@ -259,6 +259,19 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div class="sub">團體賽的證明題（questions 表答案寫「人工」的題目）在這裡給分，每題 0～8 分。存檔後會寫回試算表，那一隊的總分跟著更新。</div>
       <div id="gradeList" style="display:flex;flex-direction:column;gap:14px"></div>
     </div>
+    <div id="vPaper" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="sheet stack">
+        <div class="sub">選年份和賽別，會開一個列印頁：直接印，或在列印視窗的「目的地」選「另存為 PDF」就是下載。題目圖和正式考卷一樣是黑白。</div>
+        <div class="row">
+          <label class="chk"><input type="checkbox" id="ppSheet" checked> 附空白答案卷</label>
+          <label class="chk"><input type="checkbox" id="ppRound" checked> 個人賽每回合換頁</label>
+          <label class="chk"><input type="checkbox" id="ppSpace" checked> 團體賽證明題留作答空間</label>
+          <label class="chk"><input type="checkbox" id="ppKey"> 最後附答案（老師用，另起一頁）</label>
+        </div>
+        <div class="sub" id="ppMsg"></div>
+      </div>
+      <div class="sheet"><div class="tbl-wrap"><table id="tPapers"></table></div></div>
+    </div>
   </div>
 </div>
 
@@ -284,7 +297,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改']];
+var TABS=[['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改'],['試題','試題下載']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -318,7 +331,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋';
+  $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋'; $('vPaper').hidden=tab!=='試題'; $('filters').hidden=tab==='試題';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
     var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
@@ -359,6 +372,7 @@ function render(){
   if(tab==='總表') return renderTotal();
   if(tab==='批改') return renderGrade();
   if(tab==='回饋') return renderNotes();
+  if(tab==='試題') return renderPaper();
   renderStats(tab);
 }
 
@@ -928,6 +942,54 @@ function alertMsg(t){ $('lNote').textContent=t; }
 
 $('lSet').addEventListener('change',function(){window.__lecSetManual=1;lset('trml-lec-set',this.value);});
 ['lMode','lSet','lFrom','lTo','lN','lK競速','lK個人','lK團體'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='講解') renderLec(); });});
+
+/* ---------- 試題下載：某一年的競速／個人／團體整份題本 ---------- */
+var PK={S:'競速賽',I:'個人賽',T:'團體賽'};
+function paperQids(y,k){ var re=new RegExp('^'+y+'-'+k+'(\\d+)$');
+  return Object.keys(qinfo).filter(function(q){return re.test(q);}).sort(function(a,b){return Number(a.match(re)[1])-Number(b.match(re)[1]);}); }
+function renderPaper(){
+  var yrs=uniq(Object.keys(qinfo).map(function(q){var m=q.match(/^(\d{4})-[SIT]\d+$/);return m?m[1]:'';}).filter(Boolean)).sort().reverse();
+  $('tPapers').innerHTML='<tr><th>年份</th>'+['S','I','T'].map(function(k){return '<th>'+PK[k]+'</th>';}).join('')+'</tr>'+yrs.map(function(y){
+    return '<tr><td class="n"><b>'+y+'</b>'+(y==='2024'?'<br><span class="muted" style="font-size:.78rem">留作模擬測驗</span>':'')+'</td>'+['S','I','T'].map(function(k){ var n=paperQids(y,k).length;
+      return '<td>'+(n?'<button type="button" class="ghost" data-pp="'+y+'|'+k+'">'+n+' 題・列印／存 PDF</button>':'<span class="muted">沒有題目</span>')+'</td>'; }).join('')+'</tr>';
+  }).join('');
+  Array.prototype.forEach.call($('tPapers').querySelectorAll('[data-pp]'),function(b){ b.onclick=function(){ var p=b.getAttribute('data-pp').split('|'); printPaper(p[0],p[1]); }; });
+}
+function printPaper(y,k){
+  var qs=paperQids(y,k), name=y+' TRML '+PK[k], opt={sheet:$('ppSheet').checked,round:$('ppRound').checked,space:$('ppSpace').checked,key:$('ppKey').checked};
+  var w=window.open('','_blank'); if(!w){ $('ppMsg').textContent='瀏覽器擋了新視窗，請允許這個網站開新視窗後再按一次。'; return; }
+  var head='<div class="hd"><h1>'+esc(name)+'　試題</h1><span>第＿＿＿隊　姓名＿＿＿＿＿＿＿＿</span></div><p class="m">共 '+qs.length+' 題'+
+    (k==='I'?'，每回合 2 題、共 '+Math.ceil(qs.length/2)+' 回合':'')+'。所有圖形均為示意圖。</p>';
+  var card=function(q,i){ var man=isManual((qinfo[q]||{}).answer);
+    return '<div class="q"><div class="qb"><img src="'+esc(imgSrc(q))+'" alt="第 '+(i+1)+' 題">'+
+      ((qinfo[q]||{}).text?'<div class="tx">'+esc(qinfo[q].text)+'</div>':'')+(man&&opt.space?'<div class="space"></div>':'')+'</div></div>'; };
+  var body='';
+  if(k==='I'){ for(var r=0;r*2<qs.length;r++){
+      body+='<section class="rd'+(opt.round&&r>0?' pb':'')+'">'+(opt.round&&r>0?head.replace('<p class="m">','<p class="m" hidden>'):'')+
+        '<h2>第 '+(r+1)+' 回合</h2>'+qs.slice(r*2,r*2+2).map(function(q,j){return card(q,r*2+j);}).join('')+'</section>'; } }
+  else body=qs.map(card).join('');
+  var cells=qs.map(function(q,i){return '<td class="c"><span>'+(i+1)+'</span></td>';});
+  var cols=k==='S'?2:1, per=Math.ceil(qs.length/cols), rows=[];
+  for(var i=0;i<per;i++){ var tr=''; for(var c=0;c<cols;c++){ var j=c*per+i; tr+=j<qs.length?'<td class="nn">'+(j+1)+'</td><td class="aa'+(isManual((qinfo[qs[j]]||{}).answer)?' pf':'')+'">'+(isManual((qinfo[qs[j]]||{}).answer)?'<span class="muted">寫在題本上</span>':'')+'</td>':'<td></td><td></td>'; } rows.push('<tr>'+tr+'</tr>'); }
+  var sheet=opt.sheet?'<section class="pb"><div class="hd"><h1>'+esc(name)+'　答案卷</h1><span>第＿＿＿隊　姓名＿＿＿＿＿＿＿＿</span></div><table class="as">'+rows.join('')+'</table></section>':'';
+  var key=opt.key?'<section class="pb"><h1>'+esc(name)+'　答案（老師用）</h1><table class="ky"><tr><th>題</th><th>答案</th><th>核心關鍵</th></tr>'+qs.map(function(q,i){var x=qinfo[q]||{};
+    return '<tr><td class="nn">'+(i+1)+'</td><td>'+esc(showAns(x.answer))+'</td><td>'+esc(x.key||'')+'</td></tr>';}).join('')+'</table></section>':'';
+  w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(y+'_TRML_'+PK[k]+'_試題')+'</title><style>'+
+    '@page{size:A4;margin:14mm 14mm 16mm}body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#000;margin:0;font-size:13px}'+
+    '.hd{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:4px}h1{font-size:19px;margin:0}h2{font-size:15px;margin:10px 0 6px}'+
+    '.m{color:#333;margin:0 0 10px}.q{display:flex;gap:6px;margin:0 0 14px;break-inside:avoid}.no{font-weight:700;min-width:2.2em;text-align:right}.qb{flex:1;min-width:0}'+
+    '.qb img{display:block;max-width:100%;height:auto;filter:grayscale(1)}.tx{white-space:pre-wrap}.space{height:120mm;border:1px solid #bbb;margin-top:6px}'+
+    '.pb{break-before:page}.as{width:100%;border-collapse:collapse;margin-top:10px}.as td{border:1px solid #000;height:'+(k==='S'?'9':'14')+'mm}.as .nn{width:10mm;text-align:center;font-weight:700}'+
+    '.as .pf{height:9mm;color:#666;font-size:12px;padding-left:6px}.muted{color:#666}.ky{width:100%;border-collapse:collapse;margin-top:10px}.ky th,.ky td{border:1px solid #888;padding:5px 8px;text-align:left;vertical-align:top}.ky .nn{width:9mm;text-align:center}'+
+    '.bar{position:sticky;top:0;background:#fff8d6;border:1px solid #e0c000;padding:8px 12px;margin-bottom:12px;font-size:14px}@media print{.bar{display:none}}'+
+    '</style><div class="bar">圖片載入後會自動跳出列印。要存成檔案：列印視窗的「目的地」選「另存為 PDF」。</div>'+head+body+sheet+key);
+  w.document.close(); w.focus();
+  // 題目圖依原始寬度等比例縮放，讓每題字的大小一致（1600 像素 ≈ 整行寬）
+  var imgs=w.document.querySelectorAll('.qb img'), left=imgs.length, done=function(){ if(--left<=0) setTimeout(function(){w.print();},300); };
+  if(!left) done(); else Array.prototype.forEach.call(imgs,function(im){ var fit=function(){ if(im.naturalWidth) im.style.width=Math.min(100,im.naturalWidth/16)+'%'; done(); };
+    if(im.complete) fit(); else { im.onload=fit; im.onerror=done; } });
+  $('ppMsg').textContent='已開啟〈'+name+'〉列印頁。';
+}
 
 /* ---------- 學生檔案（跨卷子、跨年度） ---------- */
 function renderApins(){
