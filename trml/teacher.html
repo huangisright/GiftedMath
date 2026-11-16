@@ -212,6 +212,19 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div class="sheet"><h2>每一題的感受</h2><div class="tbl-wrap"><table id="tNoteQ"></table></div></div>
       <div id="noteList" style="display:flex;flex-direction:column;gap:12px"></div>
     </div>
+    <div id="vSets" hidden style="display:flex;flex-direction:column;gap:16px">
+      <div class="sheet">
+        <div class="row" style="align-items:flex-end">
+          <label class="f" for="sKind">賽別<select id="sKind"><option value="團體">團體賽</option><option value="個人">個人賽</option><option value="競速">競速</option><option value="">全部</option></select></label>
+          <label class="chk"><input type="checkbox" id="sHidden" checked> 也列出學生看不到的卷子</label>
+          <button id="btnSetsReload" type="button" class="ghost">重新讀取</button>
+        </div>
+        <div class="sub">按了就直接寫進試算表的 sets 工作表，學生重新整理網頁就看得到，不必重新部署。
+          <b>直接開放</b>：學生點了就能寫。<b>通關密碼</b>：學生看得到卡片，但要輸入密碼才能寫，適合上課時才唸出來。<b>開放日期</b>：到那天 0 點自動開放（同時有密碼的話還要輸入密碼）。<b>收起來</b>：學生頁完全看不到。</div>
+        <div id="setsMsg" class="muted" style="margin-top:6px"></div>
+      </div>
+      <div class="sheet"><div class="tbl-wrap"><table id="tSets"></table></div></div>
+    </div>
     <div id="vWeek" hidden style="display:flex;flex-direction:column;gap:16px">
       <div class="sheet">
         <div class="row">
@@ -297,7 +310,7 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改'],['試題','試題下載']];
+var TABS=[['卷子','卷子開關'],['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改'],['試題','試題下載']];
 
 /* ---------- 讀資料 ---------- */
 function fetchReport(){
@@ -331,6 +344,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
+  $('filters').hidden=tab==='卷子'; $('vSets').hidden=tab!=='卷子';
   $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋'; $('vPaper').hidden=tab!=='試題'; $('filters').hidden=tab==='試題';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
@@ -366,6 +380,7 @@ $('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport()
 
 function render(){
   if(!data) return;
+  if(tab==='卷子') return renderSets();
   if(tab==='週報') return renderWeek();
   if(tab==='講解') return renderLec();
   if(tab==='學生') return renderStudent();
@@ -375,6 +390,64 @@ function render(){
   if(tab==='試題') return renderPaper();
   renderStats(tab);
 }
+
+/* ---------- 卷子開關（2026-11-16）：不用進試算表就能開放、上通關密碼、排日期、收起來 ---------- */
+function setNow(s){
+  var g='color:var(--moss);font-weight:700';
+  if(s.status==='open') return '<span style="'+g+'">開放中</span>'+(s.open?'':'<div class="muted" style="font-size:.8rem">開放日期已到</div>');
+  if(s.status==='locked') return '<span class="low">要輸入通關密碼</span>';
+  if(s.status==='scheduled') return '<span class="low">'+esc(s.openDate.slice(5))+' 才開放</span>'+(s.pass?'<div class="muted" style="font-size:.8rem">到時還要密碼</div>':'');
+  return '<span class="muted">看不到</span>';
+}
+function renderSets(){
+  var k=$('sKind').value, all=$('sHidden').checked;
+  var list=data.sets.filter(function(s){return (!k||s.kind===k)&&(all||s.status!=='hidden');});
+  $('tSets').innerHTML='<tr><th>卷子</th><th>學生頁現在</th><th>開放</th><th>通關密碼</th><th>開放日期</th><th>交卷後顯示答案</th></tr>'+
+    (list.map(function(s){ var id=esc(s.id);
+      return '<tr data-id="'+id+'"><td><b>'+esc(s.title||s.id)+'</b><div class="muted" style="font-size:.8rem">'+id+'・'+s.minutes+' 分'+(s.note?'・'+esc(s.note):'')+'</div></td>'+
+        '<td>'+setNow(s)+'</td>'+
+        '<td style="white-space:nowrap">'+(s.open?'<button type="button" data-act="close" class="ghost">取消直接開放</button>':'<button type="button" data-act="open">直接開放</button>')+
+          (s.status!=='hidden'?' <button type="button" data-act="hide" class="ghost">收起來</button>':'')+'</td>'+
+        '<td style="white-space:nowrap"><input data-f="pass" value="'+esc(s.pass||'')+'" size="9" placeholder="不用密碼" autocomplete="off"> <button type="button" data-act="pass" class="ghost">存</button></td>'+
+        '<td style="white-space:nowrap"><input type="date" data-f="date" value="'+esc((s.openDate||'').replace(/\//g,'-'))+'"> <button type="button" data-act="date" class="ghost">存</button></td>'+
+        '<td><label class="chk" style="padding:0"><input type="checkbox" data-act="ans"'+(s.showAnswers?' checked':'')+'> 顯示</label></td></tr>';
+    }).join('')||'<tr><td class="muted">這個賽別沒有卷子。</td></tr>');
+}
+function saveSet(id,patch,el){
+  var s=data.sets.filter(function(x){return x.id===id;})[0]; if(!s) return;
+  patch.action='setOpen'; patch.key=lget('trml-key'); patch.setId=id;
+  if(el) el.disabled=true; $('setsMsg').textContent='寫入中…';
+  postJ(API,patch).then(function(d){
+    if(!d||!d.ok) throw new Error((d&&d.error)||'寫入失敗');
+    for(var f in d.set) s[f]=d.set[f];
+    renderSets();
+    var w={open:'開放中',locked:'要輸入通關密碼',scheduled:'等日期到',hidden:'學生看不到'}[s.status];
+    $('setsMsg').innerHTML='已存：<b>'+esc(s.title||s.id)+'</b> → '+w+(s.status==='locked'?'（密碼 '+esc(s.pass)+'）':'')+'。學生重新整理網頁就會更新。';
+  }).catch(function(e){ if(el) el.disabled=false; $('setsMsg').innerHTML='<span class="err">'+esc(e.message)+'</span>'; });
+}
+$('tSets').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-act]'); if(!b) return;
+  var tr=b.closest('tr'), id=tr.getAttribute('data-id'), act=b.getAttribute('data-act');
+  var s=data.sets.filter(function(x){return x.id===id;})[0];
+  if(act==='open') saveSet(id,{open:true},b);
+  else if(act==='close') saveSet(id,{open:false},b);
+  else if(act==='hide'){
+    if((s.pass||s.openDate)&&!confirm('收起來會一起清掉'+(s.pass?'通關密碼「'+s.pass+'」':'')+(s.pass&&s.openDate?'和':'')+(s.openDate?'開放日期 '+s.openDate:'')+'，確定嗎？')) return;
+    saveSet(id,{open:false,pass:'',openDate:''},b);
+  }
+  else if(act==='pass') saveSet(id,{pass:tr.querySelector('[data-f=pass]').value.trim()},b);
+  else if(act==='date') saveSet(id,{openDate:tr.querySelector('[data-f=date]').value},b);
+});
+$('tSets').addEventListener('change',function(e){
+  var c=e.target; if(c.getAttribute('data-act')!=='ans') return;
+  saveSet(c.closest('tr').getAttribute('data-id'),{showAnswers:c.checked},c);
+});
+$('tSets').addEventListener('keydown',function(e){
+  if(e.key!=='Enter'||e.target.getAttribute('data-f')!=='pass') return;
+  e.target.closest('tr').querySelector('[data-act=pass]').click();
+});
+['sKind','sHidden'].forEach(function(id){$(id).addEventListener('change',renderSets);});
+$('btnSetsReload').onclick=fetchReport;
 
 /* ---------- 各賽別統計 ---------- */
 function renderStats(kind){
