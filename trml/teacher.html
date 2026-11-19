@@ -251,6 +251,7 @@ button.ghost{background:transparent;color:var(--indigo)}
           <label class="chk"><input type="checkbox" id="lK團體" checked> 團體</label></span>
         </div>
         <div class="sub" id="lNote"></div>
+        <div class="row" style="align-items:center"><b>講解老師</b><label class="f" for="lT0">第一位<input type="text" id="lT0" placeholder="輸入名字"></label><label class="f" for="lT1">第二位<input type="text" id="lT1" placeholder="輸入名字"></label><span class="sub" id="lTNote">填一次就會記住（存在這台電腦的瀏覽器）。每週在下面左右兩邊選誰講、填主題。</span></div>
         <div class="row" style="align-items:center"><button type="button" id="btnPack">一鍵產生講解包</button><span class="sub" id="packNote"></span></div>
         <div id="solRow" style="display:flex;flex-direction:column;gap:6px">
           <div class="row" style="align-items:center"><b>學生看詳解</b><span id="solState" class="tag"></span><button type="button" id="btnSolOn">開放</button><button type="button" id="btnSolOff" class="ghost">關閉</button><span class="sub" id="solNote"></span></div>
@@ -259,7 +260,7 @@ button.ghost{background:transparent;color:var(--indigo)}
       </div>
       <div class="sheet">
         <h2>分組：每一隊分兩邊</h2>
-        <div class="sub">每隊兩人去 A、兩人去 B，依競速、個人賽「誰在哪一邊的題目錯得多」自動排（名字旁是他在 A、B 兩邊各錯幾題）；點名字可以換到另一邊。</div>
+        <div class="sub">每隊兩人去左邊、兩人去右邊，依競速、個人賽「誰在哪一邊的題目錯得多」自動排（名字旁是他在左、右兩邊各錯幾題）；點名字可以換到另一邊。</div>
         <div class="tbl-wrap"><table class="split" id="tSplit"></table></div>
         <div class="row"><button type="button" id="btnSplitPrint" class="ghost">列印分組名單</button><button type="button" id="btnSplitReset" class="ghost">分組恢復自動</button></div>
       </div>
@@ -602,7 +603,11 @@ function lecData(){
   return {y:y,roster:roster,subs:subs,list:list,notes:notes,top:top,from:from,to:to,mode:mode,set:theSet};
 }
 function sideOf(q){var o=jget('trml-lec-side',{});return o[q]||(GEO.indexOf((qinfo[q]||{}).topic)>=0?'B':'A');}
-function lecNames(){return jget('trml-lec-names',{A:'老師 A・代數',B:'老師 B・幾何'});}
+// 講解老師：兩個名字填一次；每週左右兩邊各選一位老師、填主題
+function lecTeachers(){ var t=jget('trml-lec-teachers',['','']); return [String(t[0]||'').trim(),String(t[1]||'').trim()]; }
+function lecCfg(){ var c=jget('trml-lec-cfg',null); return c&&c.A&&c.B?c:{A:{t:0,topic:'代數'},B:{t:1,topic:'幾何'}}; }
+function lecTName(i){ var t=lecTeachers()[i]; return t||(i?'第二位老師':'第一位老師'); }
+function lecNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var tp=String(c[sd].topic||'').trim(); o[sd]=lecTName(c[sd].t)+(tp?'・'+tp:''); }); return o; }
 function lecSplit(D,sel){
   var over=jget('trml-lec-who',{}), teams=uniq(D.roster.map(function(r){return r.team;})), out={};
   var need={}; D.roster.forEach(function(r){need[r.id]={A:0,B:0};});
@@ -646,25 +651,31 @@ function lecSets(){
 }
 function renderLec(){
   lecDefaults(); lecSets();
+  var TT=lecTeachers(); $('lT0').value=TT[0]; $('lT1').value=TT[1];
+  $('lT0').onchange=$('lT1').onchange=function(){ jset('trml-lec-teachers',[$('lT0').value.trim(),$('lT1').value.trim()]); renderLec(); };
+  $('lTNote').innerHTML=TT[0]&&TT[1]?'填一次就會記住（存在這台電腦的瀏覽器）。每週在下面左右兩邊選誰講、填主題。':'<b style="color:var(--ochre,#b85a1f)">還沒填兩位老師的名字</b>：填好後，簡報、學生講義、分組名單都會用這兩個名字。';
   var setMode=$('lMode').value==='set';
   $('wlSet').hidden=!setMode; $('wlN').hidden=setMode; $('wlK').hidden=setMode;
   $('solRow').hidden=!setMode; renderSolBtn();
   $('packNote').textContent=setMode?'一次做好：學生題本、兩位老師的簡報（一題一題秀：題目 → 先想一下（可計時）→ 錯在哪 → 核心關鍵 → 詳解；可下載 PowerPoint）、學生講義（跟著講解動手寫）、學生帶回家的詳解、分組名單、每位學生一頁的個人分析。':'兩位老師各自的簡報（可播放、可下載 PowerPoint）、學生講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。';
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
   var sel=D.top.filter(function(x){return !off[x.qid];});
-  $('lNote').textContent=setMode&&D.set?('整份講〈'+D.set.title+'〉，共 '+D.top.length+' 題，依題號順序。錯誤率用這段期間的第一次作答（不含測試組）；平面幾何、圓預設放 B，其他放 A，可以「移到另一邊」或「這題不講」（不講的題目仍在題本和學生詳解裡）。'):('這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放 B，其他放 A。只算第一次作答，證明題要批改完才算（6 分以上算會）。');
+  $('lNote').textContent=setMode&&D.set?('整份講〈'+D.set.title+'〉，共 '+D.top.length+' 題，依題號順序。錯誤率用這段期間的第一次作答（不含測試組）；平面幾何、圓預設放右邊，其他放左邊，可以「移到另一邊」或「這題不講」（不講的題目仍在題本和學生詳解裡）。'):('這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放右邊，其他放左邊。只算第一次作答，證明題要批改完才算（6 分以上算會）。');
   var split=lecSplit(D,sel);
   $('tSplit').innerHTML='<tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+Object.keys(split).map(function(t){
-    var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'">'+esc(m.r.name)+' <small>錯 A'+m.need.A+'・B'+m.need.B+'</small></span>';}).join('');};
+    var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'">'+esc(m.r.name)+' <small>錯 左'+m.need.A+'・右'+m.need.B+'</small></span>';}).join('');};
     return '<tr><td>第 '+esc(t)+' 隊</td><td>'+cell('A')+'</td><td>'+cell('B')+'</td></tr>';}).join('')+
     '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(split).reduce(function(a,t){return a+split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr>';
   Array.prototype.forEach.call($('tSplit').querySelectorAll('.who'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
   ['A','B'].forEach(function(sd){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd;});
-    $('side'+sd).innerHTML='<header><input type="text" value="'+esc(names[sd])+'" aria-label="'+sd+' 邊老師與主題"><button type="button" data-print="'+sd+'">列印學生講義</button></header>'+
+    var cfg=lecCfg();
+    $('side'+sd).innerHTML='<header><select data-tsel aria-label="這一邊由哪位老師講">'+[0,1].map(function(i){return '<option value="'+i+'"'+(cfg[sd].t===i?' selected':'')+'>'+esc(lecTName(i))+'</option>';}).join('')+'</select>'+
+      '<input type="text" data-topic value="'+esc(cfg[sd].topic||'')+'" placeholder="主題，例如代數" aria-label="這一邊的主題" style="max-width:9em"><button type="button" data-print="'+sd+'">列印學生講義</button></header>'+
       '<div class="sub">'+mine.filter(function(x){return !off[x.qid];}).length+' 題'+(mine.length?'':'。這邊目前沒有題目，可以從另一邊「移到另一邊」。')+'</div>'+
       mine.map(function(x){return lecCard(x,D,true);}).join('');
-    $('side'+sd).querySelector('input').onchange=function(e){ var n=lecNames(); n[sd]=e.target.value.trim()||sd; jset('trml-lec-names',n); renderLec(); };
+    $('side'+sd).querySelector('[data-tsel]').onchange=function(e){ var c=lecCfg(), v=Number(e.target.value); c[sd].t=v; c[sd==='A'?'B':'A'].t=1-v; jset('trml-lec-cfg',c); renderLec(); };
+    $('side'+sd).querySelector('[data-topic]').onchange=function(e){ var c=lecCfg(); c[sd].topic=e.target.value.trim(); jset('trml-lec-cfg',c); renderLec(); };
     $('side'+sd).querySelector('[data-print]').onclick=function(){ lecPrint(sd); };
   });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); renderLec(); }; });
@@ -804,7 +815,7 @@ function wkHtml(W,names){
     }).join('')+'</div><div class="row noprint"><button type="button" data-go="講解">到「講解」分頁排題、產生講解包</button></div></div>';
   // 決定二
   var cell=function(g,sd){return g[sd].map(function(m){return '<span class="tag">'+esc(m.r.name)+' <small>A'+m.need.A+'・B'+m.need.B+'</small></span>';}).join(' ');};
-  h+='<div class="sheet"><h2>決定二｜學生怎麼分兩邊</h2><div class="sub">每隊對半分：錯在 A 邊題目比較多的去 A，錯在 B 邊比較多的去 B。只看競速與個人賽（團體賽是全隊一起錯，分不出誰）。名字後面是這段期間兩邊各錯幾題；要手動換邊，到「講解」分頁點名字。</div><div class="tbl-wrap"><table class="split"><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
+  h+='<div class="sheet"><h2>決定二｜學生怎麼分兩邊</h2><div class="sub">每隊對半分：哪一邊的題目錯得比較多就去哪一邊。只看競速與個人賽（團體賽是全隊一起錯，分不出誰）。名字後面是這段期間兩邊各錯幾題；要手動換邊，到「講解」分頁點名字。</div><div class="tbl-wrap"><table class="split"><tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+
     Object.keys(W.split).map(function(t){ var g=W.split[t]; return '<tr><td style="white-space:nowrap">第 '+esc(t)+' 隊</td><td>'+cell(g,'A')+'</td><td>'+cell(g,'B')+'</td></tr>'; }).join('')+
     '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(W.split).reduce(function(a,t){return a+W.split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr></table></div></div>';
   // 決定三
