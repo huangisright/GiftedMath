@@ -607,6 +607,8 @@ function sideOf(q){var o=jget('trml-lec-side',{});return o[q]||(GEO.indexOf((qin
 function lecTeachers(){ var t=jget('trml-lec-teachers',['','']); return [String(t[0]||'').trim(),String(t[1]||'').trim()]; }
 function lecCfg(){ var c=jget('trml-lec-cfg',null); return c&&c.A&&c.B?c:{A:{t:0,topic:'代數'},B:{t:1,topic:'幾何'}}; }
 function lecTName(i){ var t=lecTeachers()[i]; return t||(i?'第二位老師':'第一位老師'); }
+// 學生講義用：名字後面直接加「老師」
+function lecHandNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var n=lecTName(c[sd].t), tp=String(c[sd].topic||'').trim(); o[sd]=n+(/老師$/.test(n)?'':'老師')+(tp?'・'+tp:''); }); return o; }
 function lecNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var tp=String(c[sd].topic||'').trim(); o[sd]=lecTName(c[sd].t)+(tp?'・'+tp:''); }); return o; }
 function lecSplit(D,sel){
   var over=jget('trml-lec-who',{}), teams=uniq(D.roster.map(function(r){return r.team;})), out={};
@@ -693,8 +695,8 @@ function renderLec(){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd&&!off[x.qid];});
     var when=D.set?D.set.title:(D.from+' ～ '+D.to+' 的練習');
     var w=window.open('','_blank'); if(!w) return;
-    w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(names[sd])+' 講解　學生講義</title><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:0;color:#111;font-size:13px;line-height:1.5}.hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:8px}h1{font-size:19px;margin:0}.fill{font-size:14px;white-space:nowrap}p.m{color:#444;margin:0 0 8px}.q{break-inside:avoid;padding:8px 0 10px;border-bottom:1px dashed #999}.q b.n{font-size:15px}.q img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.space{border:1px solid #999;border-radius:4px;height:62mm;margin-top:6px}.space.big{height:110mm}.ln{margin-top:8px}.ln span{display:inline-block;border-bottom:1px solid #111;min-width:60%}</style>'+
-      '<div class="hd"><h1>'+esc(names[sd])+'　講解</h1><span class="fill">第＿＿隊　姓名＿＿＿＿＿＿</span></div><p class="m">'+esc(when)+'，共 '+mine.length+' 題。題目先自己想，聽講解時把想法和算式寫在格子裡。</p>'+
+    w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(lecHandNames()[sd])+' 講解　學生講義</title><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:0;color:#111;font-size:13px;line-height:1.5}.hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:8px}h1{font-size:19px;margin:0}.fill{font-size:14px;white-space:nowrap}p.m{color:#444;margin:0 0 8px}.q{break-inside:avoid;padding:8px 0 10px;border-bottom:1px dashed #999}.q b.n{font-size:15px}.q img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.space{border:1px solid #999;border-radius:4px;height:62mm;margin-top:6px}.space.big{height:110mm}.ln{margin-top:8px}.ln span{display:inline-block;border-bottom:1px solid #111;min-width:60%}</style>'+
+      '<div class="hd"><h1>'+esc(lecHandNames()[sd])+'　講解</h1><span class="fill">第＿＿隊　姓名＿＿＿＿＿＿</span></div><p class="m">'+esc(when)+'，共 '+mine.length+' 題。題目先自己想，聽講解時把想法和算式寫在格子裡。</p>'+
       mine.map(function(x,i){ var q=x.qid, info=qinfo[q]||{}, man=isManual(info.answer);
         return '<div class="q"><b class="n">'+(i+1)+'.　'+esc(qLabel(q))+'</b>'+(info.text?'<div>'+esc(info.text)+'</div>':'')+'<img src="'+esc(imgSrc(q))+'" alt="'+esc(qLabel(q))+' 題目">'+
           '<div class="space'+(man?' big':'')+'"></div>'+
@@ -1016,7 +1018,7 @@ function buildPack(){
   }
   var now=new Date();
   var setInfo=D.set?{id:D.set.id,title:D.set.title,kind:D.set.kind||'競速'}:null;
-  return {mode:D.mode,set:setInfo,all:D.set?D.top.map(qObj):null,made:ymd(now)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2),from:D.from,to:D.to,year:D.y,names:names,
+  return {mode:D.mode,set:setInfo,all:D.set?D.top.map(qObj):null,made:ymd(now)+' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2),from:D.from,to:D.to,year:D.y,names:names,hand:lecHandNames(),
     sides:{A:sel.filter(function(x){return sideQ[x.qid]==='A';}).map(qObj),B:sel.filter(function(x){return sideQ[x.qid]==='B';}).map(qObj)},
     split:Object.keys(split).map(function(t){return {team:t,A:split[t].A.map(function(m){return m.r.name;}),B:split[t].B.map(function(m){return m.r.name;})};}),
     students:D.roster.map(stuObj)};

@@ -164,7 +164,7 @@ function who(sd){ return P.split.map(function(g){return '第 '+g.team+' 隊：'+
 /* ---- 學生講義（列印用）：跟著講解動手寫，不放名單、答案、詳解 ---- */
 function handout(sd){
   var L=P.sides[sd];
-  return '<div class="hand"><div class="hd"><h2>'+esc(P.names[sd])+'　講解</h2><span style="white-space:nowrap">第＿＿隊　姓名＿＿＿＿＿＿</span></div>'+
+  return '<div class="hand"><div class="hd"><h2>'+esc((P.hand||P.names)[sd])+'　講解</h2><span style="white-space:nowrap">第＿＿隊　姓名＿＿＿＿＿＿</span></div>'+
     '<div style="color:#444;margin-bottom:6px">'+esc(P.set?P.set.title:(P.from+' ～ '+P.to+' 的練習'))+'，共 '+L.length+' 題。題目先自己想，聽講解時把想法和算式寫在格子裡。</div>'+
     L.map(function(q,i){return '<div class="hq"><b style="font-size:1.05em">'+(i+1)+'.　'+esc(q.label)+'</b>'+(q.text?'<div>'+esc(q.text)+'</div>':'')+'<img src="'+esc(q.img)+'" alt="'+esc(q.label)+' 題目">'+
       '<div class="space'+(q.manual?' big':'')+'"></div><div class="ln">核心關鍵：<span>&nbsp;</span></div>'+(q.manual?'':'<div class="ln">答：<span style="min-width:30%">&nbsp;</span></div>')+'</div>';}).join('')+'</div>';
