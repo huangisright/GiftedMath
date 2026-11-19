@@ -649,7 +649,7 @@ function renderLec(){
   var setMode=$('lMode').value==='set';
   $('wlSet').hidden=!setMode; $('wlN').hidden=setMode; $('wlK').hidden=setMode;
   $('solRow').hidden=!setMode; renderSolBtn();
-  $('packNote').textContent=setMode?'一次做好：學生題本、兩位老師的簡報（一題一題秀：題目 → 先想一下（可計時）→ 錯在哪 → 核心關鍵 → 詳解；可下載 PowerPoint）、老師講義、學生帶回家的詳解、分組名單、每位學生一頁的個人分析。':'兩位老師各自的簡報（可播放、可下載 PowerPoint）、講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。';
+  $('packNote').textContent=setMode?'一次做好：學生題本、兩位老師的簡報（一題一題秀：題目 → 先想一下（可計時）→ 錯在哪 → 核心關鍵 → 詳解；可下載 PowerPoint）、學生講義（跟著講解動手寫）、學生帶回家的詳解、分組名單、每位學生一頁的個人分析。':'兩位老師各自的簡報（可播放、可下載 PowerPoint）、學生講義、分組名單，以及每位學生一頁的個人分析，一次做好。題目與分組照下面目前的安排。';
   var D=lecData(), names=lecNames(), off=jget('trml-lec-off',{});
   var sel=D.top.filter(function(x){return !off[x.qid];});
   $('lNote').textContent=setMode&&D.set?('整份講〈'+D.set.title+'〉，共 '+D.top.length+' 題，依題號順序。錯誤率用這段期間的第一次作答（不含測試組）；平面幾何、圓預設放 B，其他放 A，可以「移到另一邊」或「這題不講」（不講的題目仍在題本和學生詳解裡）。'):('這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放 B，其他放 A。只算第一次作答，證明題要批改完才算（6 分以上算會）。');
@@ -661,7 +661,7 @@ function renderLec(){
   Array.prototype.forEach.call($('tSplit').querySelectorAll('.who'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
   ['A','B'].forEach(function(sd){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd;});
-    $('side'+sd).innerHTML='<header><input type="text" value="'+esc(names[sd])+'" aria-label="'+sd+' 邊老師與主題"><button type="button" data-print="'+sd+'">列印講義</button></header>'+
+    $('side'+sd).innerHTML='<header><input type="text" value="'+esc(names[sd])+'" aria-label="'+sd+' 邊老師與主題"><button type="button" data-print="'+sd+'">列印學生講義</button></header>'+
       '<div class="sub">'+mine.filter(function(x){return !off[x.qid];}).length+' 題'+(mine.length?'':'。這邊目前沒有題目，可以從另一邊「移到另一邊」。')+'</div>'+
       mine.map(function(x){return lecCard(x,D,true);}).join('');
     $('side'+sd).querySelector('input').onchange=function(e){ var n=lecNames(); n[sd]=e.target.value.trim()||sd; jset('trml-lec-names',n); renderLec(); };
@@ -677,13 +677,17 @@ function renderLec(){
       Object.keys(split).map(function(t){return '<tr><td>第 '+esc(t)+' 隊</td><td>'+split[t].A.map(function(m){return esc(m.r.name);}).join('、')+'</td><td>'+split[t].B.map(function(m){return esc(m.r.name);}).join('、')+'</td></tr>';}).join('')+'</table>');
     w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
   };
+  // 學生講義：講解課發給學生，跟著講解動手寫。不印名單（分組會變，前一天另發）、不印答案與詳解（詳解在系統上看）。
   function lecPrint(sd){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd&&!off[x.qid];});
-    var who=Object.keys(split).map(function(t){return '第 '+t+' 隊：'+split[t][sd].map(function(m){return m.r.name;}).join('、');}).join('　');
+    var when=D.set?D.set.title:(D.from+' ～ '+D.to+' 的練習');
     var w=window.open('','_blank'); if(!w) return;
-    w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(names[sd])+' 講解</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:13px;line-height:1.5}h1{font-size:20px;margin:0}p.m{color:#555;margin:2px 0 10px}.lec-card{border:1px solid #bbb;border-radius:4px;padding:10px 12px;margin-bottom:10px;break-inside:avoid}.lec-card img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.lec-card .sol img{width:68%}.hd b{font-size:15px}.tag{background:#eee;border-radius:3px;padding:0 5px;margin-right:4px}.low{font-weight:700}.sub{color:#444}.key{border-left:4px solid #2f3f8f;background:#eef0f8;padding:5px 9px;margin:4px 0}.key.none{border-left-color:#bbb;background:#f3f3f3;color:#777}</style>'+
-      '<h1>'+esc(names[sd])+'　講解</h1><p class="m">'+esc(D.from)+' ～ '+esc(D.to)+' 錯最多的題目，共 '+mine.length+' 題。<br>來聽的同學　'+esc(who)+'</p>'+
-      mine.map(function(x){return lecCard(x,D,false);}).join(''));
+    w.document.write('<!doctype html><meta charset="utf-8"><title>'+esc(names[sd])+' 講解　學生講義</title><style>@page{size:A4;margin:12mm}body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:0;color:#111;font-size:13px;line-height:1.5}.hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:8px}h1{font-size:19px;margin:0}.fill{font-size:14px;white-space:nowrap}p.m{color:#444;margin:0 0 8px}.q{break-inside:avoid;padding:8px 0 10px;border-bottom:1px dashed #999}.q b.n{font-size:15px}.q img{width:82%;max-width:100%;height:auto;display:block;margin:4px 0}.space{border:1px solid #999;border-radius:4px;height:62mm;margin-top:6px}.space.big{height:110mm}.ln{margin-top:8px}.ln span{display:inline-block;border-bottom:1px solid #111;min-width:60%}</style>'+
+      '<div class="hd"><h1>'+esc(names[sd])+'　講解</h1><span class="fill">第＿＿隊　姓名＿＿＿＿＿＿</span></div><p class="m">'+esc(when)+'，共 '+mine.length+' 題。題目先自己想，聽講解時把想法和算式寫在格子裡。</p>'+
+      mine.map(function(x,i){ var q=x.qid, info=qinfo[q]||{}, man=isManual(info.answer);
+        return '<div class="q"><b class="n">'+(i+1)+'.　'+esc(qLabel(q))+'</b>'+(info.text?'<div>'+esc(info.text)+'</div>':'')+'<img src="'+esc(imgSrc(q))+'" alt="'+esc(qLabel(q))+' 題目">'+
+          '<div class="space'+(man?' big':'')+'"></div>'+
+          '<div class="ln">核心關鍵：<span>&nbsp;</span></div>'+(man?'':'<div class="ln">答：<span style="min-width:30%">&nbsp;</span></div>')+'</div>'; }).join(''));
     w.document.close(); w.focus();
     var imgs=w.document.images, left=imgs.length, go=function(){ if(--left<=0) setTimeout(function(){w.print();},200); };
     if(!left) go(); else Array.prototype.forEach.call(imgs,function(im){ if(im.complete) go(); else { im.onload=go; im.onerror=go; } });

@@ -90,6 +90,13 @@ td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
 .bk-q img{max-width:100%;height:auto;background:#fff;display:block}
 .bk-q .space{border:1px solid var(--line);border-radius:4px;min-height:220px}
 .bk-q .ansline{font-size:1rem}
+.hand{display:none}
+.hand .hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:6px}
+.hand .hq{break-inside:avoid;padding:8px 0 10px;border-bottom:1px dashed #999}
+.hand .hq img{max-width:82%;height:auto;display:block;margin:4px 0;background:#fff}
+.hand .space{border:1px solid #999;border-radius:4px;height:62mm;margin-top:6px}
+.hand .space.big{height:110mm}
+.hand .ln{margin-top:8px}.hand .ln span{display:inline-block;border-bottom:1px solid #111;min-width:60%}
 .ctl{position:fixed;bottom:12px;right:16px;z-index:51;display:flex;gap:8px}
 .ctl button{font:inherit;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:4px;padding:6px 12px;cursor:pointer}
 @media print{
@@ -111,6 +118,8 @@ td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
   .bk-q .space{min-height:300px}
   #vBook .bk-head,#vSol .bk-head{border-bottom-color:#111}
   .track i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .teach,.teachhead{display:none!important}
+  .hand{display:block}
   .where,.key,.adv,.tag{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -152,7 +161,15 @@ Array.prototype.forEach.call($('tabs').children,function(b){ b.onclick=function(
 
 function who(sd){ return P.split.map(function(g){return '第 '+g.team+' 隊：'+g[sd].join('、');}).join('　'); }
 
-/* ---- 老師講義 ---- */
+/* ---- 學生講義（列印用）：跟著講解動手寫，不放名單、答案、詳解 ---- */
+function handout(sd){
+  var L=P.sides[sd];
+  return '<div class="hand"><div class="hd"><h2>'+esc(P.names[sd])+'　講解</h2><span style="white-space:nowrap">第＿＿隊　姓名＿＿＿＿＿＿</span></div>'+
+    '<div style="color:#444;margin-bottom:6px">'+esc(P.set?P.set.title:(P.from+' ～ '+P.to+' 的練習'))+'，共 '+L.length+' 題。題目先自己想，聽講解時把想法和算式寫在格子裡。</div>'+
+    L.map(function(q,i){return '<div class="hq"><b style="font-size:1.05em">'+(i+1)+'.　'+esc(q.label)+'</b>'+(q.text?'<div>'+esc(q.text)+'</div>':'')+'<img src="'+esc(q.img)+'" alt="'+esc(q.label)+' 題目">'+
+      '<div class="space'+(q.manual?' big':'')+'"></div><div class="ln">核心關鍵：<span>&nbsp;</span></div>'+(q.manual?'':'<div class="ln">答：<span style="min-width:30%">&nbsp;</span></div>')+'</div>';}).join('')+'</div>';
+}
+/* ---- 老師畫面 ---- */
 function qCard(q,withNames){
   return '<div class="q"><div><b style="font-family:var(--f-display);font-size:1.05rem">'+esc(q.label)+'</b> <span class="tag">'+esc(q.topic)+'</span>'+(q.n?'<span class="low">錯 '+q.no+'/'+q.n+' '+q.unit+'（'+pct(q.no/q.n)+'）</span>':'<span class="sub">這段期間還沒有人寫</span>')+'</div>'+
     (q.text?'<div>'+esc(q.text)+'</div>':'')+'<img src="'+esc(q.img)+'" alt="'+esc(q.label)+' 題目">'+
@@ -167,10 +184,11 @@ function qCard(q,withNames){
 }
 ['A','B'].forEach(function(sd){
   var L=P.sides[sd];
-  $('v'+sd).innerHTML='<div class="sheet"><div class="bar"><button type="button" class="b" data-play="'+sd+'">播放簡報</button><button type="button" class="b ghost" data-pptx="'+sd+'">下載 PowerPoint</button><button type="button" class="b ghost" data-print="'+sd+'">列印講義</button><span class="sub" id="pp'+sd+'"></span></div>'+
+  $('v'+sd).innerHTML='<div class="sheet teachhead"><div class="bar"><button type="button" class="b" data-play="'+sd+'">播放簡報</button><button type="button" class="b ghost" data-pptx="'+sd+'">下載 PowerPoint</button><button type="button" class="b ghost" data-print="'+sd+'">列印學生講義</button><span class="sub" id="pp'+sd+'"></span></div>'+
     '<h2>'+esc(P.names[sd])+'　講解</h2><div class="sub">'+esc(P.from)+' ～ '+esc(P.to)+' 錯最多的題目，共 '+L.length+' 題。簡報 '+(L.length*4+3)+' 張：每題「題目 → 大家錯在哪 → 核心關鍵 → 詳解」。</div>'+
-    '<div class="sub"><b>來聽的同學</b>　'+esc(who(sd))+'</div></div>'+
-    (L.length?L.map(function(q){return qCard(q,true);}).join(''):'<div class="sheet sub">這邊沒有題目。回老師頁把題目「移到另一邊」再產生一次。</div>');
+    '<div class="sub">「列印學生講義」印出的是給學生跟著講解動手寫的版本：只有題目和作答格，不印名單、答案與詳解（下面這些是給老師看的）。</div></div>'+
+    '<div class="teach" style="display:flex;flex-direction:column;gap:16px;margin-top:16px">'+(L.length?L.map(function(q){return qCard(q,true);}).join(''):'<div class="sheet sub">這邊沒有題目。回老師頁把題目「移到另一邊」再產生一次。</div>')+'</div>'+
+    handout(sd);
 });
 document.addEventListener('click',function(e){
   var t=e.target.closest('button'); if(!t) return;
@@ -226,7 +244,7 @@ $('stuPick').onchange=function(){ var v=this.value; Array.prototype.forEach.call
 /* ---- 簡報內容（播放與 PowerPoint 共用） ---- */
 function slidesOf(sd){
   var L=P.sides[sd], S=[];
-  S.push({t:'title',h:(P.set?P.set.title+'　':'')+P.names[sd],sub:(P.set?'講解　':'')+P.from+' ～ '+P.to+'　共 '+L.length+' 題',who:who(sd)});
+  S.push({t:'title',h:(P.set?P.set.title+'　':'')+P.names[sd],sub:(P.set?'講解　':'')+P.from+' ～ '+P.to+'　共 '+L.length+' 題'});
   S.push({t:'list',h:'今天講這幾題',rows:L.map(function(q,i){return [String(i+1),q.label,q.topic,'錯 '+q.no+'/'+q.n+' '+q.unit];})});
   L.forEach(function(q,i){
     var tag=(i+1)+'/'+L.length+'　'+q.label;
@@ -240,7 +258,7 @@ function slidesOf(sd){
 }
 function slideHTML(s,i,n){
   var foot='<div class="foot"><span>'+esc(s.tag||'')+'</span><span>'+(i+1)+' / '+n+'</span></div>';
-  if(s.t==='title') return '<div class="sl" style="justify-content:center"><div class="lab">TRML 練習・講解</div><h2 style="font-size:60px">'+esc(s.h)+'</h2><div class="big">'+esc(s.sub)+'</div><div style="font-size:24px;color:#5b6272;margin-top:24px;line-height:1.7">'+esc(s.who).replace(/　/g,'<br>')+'</div>'+foot+'</div>';
+  if(s.t==='title') return '<div class="sl" style="justify-content:center"><div class="lab">TRML 練習・講解</div><h2 style="font-size:60px">'+esc(s.h)+'</h2><div class="big">'+esc(s.sub)+'</div>'+foot+'</div>';
   if(s.t==='list') return '<div class="sl"><h2>'+esc(s.h)+'</h2><table>'+s.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';}).join('')+'</table>'+foot+'</div>';
   if(s.t==='q') return '<div class="sl"><div class="timer"><button type="button" data-tm="60">1 分</button><button type="button" data-tm="120">2 分</button><button type="button" data-tm="180">3 分</button><b id="tmv"></b></div><div class="lab">'+esc(s.lab)+'</div><h2>'+esc(s.h)+'</h2>'+(s.text?'<div class="big">'+esc(s.text)+'</div>':'')+'<div class="imgbox"><img src="'+esc(s.img)+'" alt=""></div>'+foot+'</div>';
   if(s.t==='why') return '<div class="sl"><h2>'+esc(s.h)+'</h2><div class="big" style="color:#b85a1f;font-weight:700">'+esc(s.rate)+'</div>'+
@@ -295,7 +313,7 @@ function pptx(sd,btn){
       if(s.t==='title'){ sl.addText('TRML 練習・講解',{x:0.8,y:1.3,w:11.7,h:0.5,fontFace:F,fontSize:16,color:MUT});
         sl.addText(s.h,{x:0.8,y:1.9,w:11.7,h:1.2,fontFace:F,fontSize:40,bold:true,color:IND});
         sl.addText(s.sub,{x:0.8,y:3.1,w:11.7,h:0.6,fontFace:F,fontSize:22,color:INK});
-        sl.addText(s.who.split('　').join('\n'),{x:0.8,y:3.9,w:11.7,h:2.8,fontFace:F,fontSize:16,color:MUT,valign:'top'}); }
+}
       else if(s.t==='list'){ sl.addText(s.h,{x:0.6,y:0.4,w:12,h:0.8,fontFace:F,fontSize:30,bold:true,color:IND});
         sl.addTable(s.rows.map(function(r){return r.map(function(c){return {text:c,options:{fontFace:F,fontSize:16,color:INK}};});}),{x:0.6,y:1.4,w:12.1,colW:[0.6,4.6,3.4,3.5],border:{type:'solid',pt:0.5,color:'D6D9CC'}}); }
       else if(s.t==='q'||s.t==='sol'){
