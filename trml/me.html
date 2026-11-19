@@ -82,7 +82,7 @@ function boardHtml(B,meId){
   var md=function(x){return String(x).slice(5).replace('-','/');}, mine=B.ppl.filter(function(p){return p.id===meId;})[0];
   var row=function(c){return '<tr>'+c.join('')+'</tr>';};
   return '<div class="sheet stack"><div><h2 style="margin:0">本週投入榜　'+md(B.from)+'～'+md(B.to)+'</h2>'+
-    '<div class="muted">排的是練習量，不是分數。每週二晚上截止、週三重新開始。有效卷（第一次作答、至少一半題目有寫）+5，有練習的那一天 +1，詳解下面的回饋勾了「卡在哪裡」每題 +1，小複習答對每題 +2。✓＝這週競速和個人都至少交一份；★＝全隊都 ✓。</div></div>'+
+    '<div class="muted">排的是練習量，不是分數。每週二晚上截止、週三重新開始。有效卷（第一次作答、至少一半題目有寫）+5，詳解下面的回饋勾了「卡在哪裡」每題 +1，小複習答對每題 +2。✓＝這週競速和個人都至少交一份；★＝全隊都 ✓。</div></div>'+
     '<div><b>你這週：'+(mine?mine.pts+' 點'+(mine.base?' ✓':'，還差'+'競速和個人各一份才 ✓'):'還沒有點數，交一份就有 5 點')+'</b></div>'+
     '<div class="row" style="align-items:flex-start;gap:24px;flex-wrap:wrap">'+
     '<div><b>隊伍（平均點數）</b><table>'+B.teams.map(function(t,i){return row(['<td>'+(i+1)+'</td>','<td>'+esc(t.team)+(t.star?' ★':'')+'</td>','<td style="text-align:right">'+t.avg+'</td>']);}).join('')+'</table></div>'+

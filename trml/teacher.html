@@ -761,7 +761,7 @@ var WK_EXTRA_BEFORE=2021;    // 這一年以前的卷子優先當加練卷
 function wkDefaults(){ if($('wkFrom').value) return; var now=new Date(), d=now.getDay(), back=(d-3+7)%7; if(d===3||d===4) back+=7;
   var f=new Date(now); f.setDate(now.getDate()-back); var t=new Date(f); t.setDate(f.getDate()+6); $('wkFrom').value=ymd(f); $('wkTo').value=ymd(t); }
 /* ---------- 投入榜：排努力不排分數 ----------
- * 有效卷（第一次作答、至少一半題目有作答）+5；有交有效卷的天數每天 +1。
+ * 有效卷（第一次作答、至少一半題目有作答）+5。（練習天數已拿掉：卷子計時一次寫完，分幾天寫練習量一樣）
  * 本週基本量＝競速和個人各至少一份有效卷。隊伍用平均點數排，全隊都完成基本量打★。 */
 function wkBoard(W){
   var y=$('fYear').value, ok={}, ans={}, tot={};
@@ -776,21 +776,21 @@ function wkBoard(W){
   });
   (data.notes||[]).forEach(function(n){ var p=P[n.sid]; if(!p||(n.year&&n.year!==y)||!(n.stuck||[]).length) return; var d=dayOf(n.time); if(!d||d<W.from||d>W.to) return; p.pts+=1; p.fb=(p.fb||0)+1; });
   (data.reviews||[]).forEach(function(r){ var p=P[r.sid]; if(!p||r.year!==y||r.week!==W.from||!r.correct) return; p.pts+=2; p.rv=(p.rv||0)+1; });
-  var L=Object.keys(P).map(function(k){ var p=P[k]; p.nd=Object.keys(p.days).length; p.pts+=p.nd; p.base=p.sp>0&&p.ind>0; return p; });
+  var L=Object.keys(P).map(function(k){ var p=P[k]; p.nd=Object.keys(p.days).length; p.ns=p.sp+p.ind; p.base=p.sp>0&&p.ind>0; return p; });
   var T={}; L.forEach(function(p){ var t=T[p.r.team]||(T[p.r.team]={team:p.r.team,sum:0,n:0,all:true}); t.sum+=p.pts; t.n++; if(!p.base) t.all=false; });
   var teams=Object.keys(T).map(function(k){ var t=T[k]; t.avg=t.n?t.sum/t.n:0; return t; }).sort(function(a,b){return b.avg-a.avg;});
-  var ppl=L.filter(function(p){return p.pts>0;}).sort(function(a,b){return b.pts-a.pts||b.nd-a.nd;});
+  var ppl=L.filter(function(p){return p.pts>0;}).sort(function(a,b){return b.pts-a.pts||b.ns-a.ns;});
   var miss=[]; (data.reviews||[]).forEach(function(r){ if(P[r.sid]&&r.year===y&&r.week===W.from&&!r.correct) miss.push({p:P[r.sid].r,qid:r.qid}); });
   return {teams:teams,ppl:ppl,miss:miss};
 }
 function wkBoardHtml(W){
   var B=wkBoard(W);
   var h='<div class="sheet"><h2 style="margin:0 0 4px">投入榜　'+esc(W.from.slice(5))+' ～ '+esc(W.to.slice(5))+'</h2>'+
-    '<div class="sub">排的是練習量，不是分數。有效卷（第一次作答、至少一半題目有作答）+5，有練習的天數每天 +1，回饋勾「卡在哪裡」每題 +1，小複習答對每題 +2。✓＝本週競速和個人都至少交一份；★＝全隊都 ✓。</div>'+
+    '<div class="sub">排的是練習量，不是分數。有效卷（第一次作答、至少一半題目有作答）+5，回饋勾「卡在哪裡」每題 +1，小複習答對每題 +2。✓＝本週競速和個人都至少交一份；★＝全隊都 ✓。</div>'+
     '<div class="lec-cols" style="margin-top:8px"><div><b>隊伍（平均點數）</b><table><tr><th>#</th><th>隊伍</th><th class="n">平均</th></tr>'+
     B.teams.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(t.team)+(t.all?' ★':'')+'</td><td class="n">'+t.avg.toFixed(1)+'</td></tr>';}).join('')+'</table></div>'+
-    '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">天數</th><th class="n">回饋</th><th class="n">複習</th></tr>'+
-    B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.nd+'</td><td class="n">'+(p.fb||0)+'</td><td class="n">'+(p.rv||0)+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
+    '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">卷數</th><th class="n">回饋</th><th class="n">複習</th></tr>'+
+    B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.ns+'</td><td class="n">'+(p.fb||0)+'</td><td class="n">'+(p.rv||0)+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
     '</div></div>'+
     (B.miss.length?'<div style="margin-top:8px"><b>小複習又答錯（講過仍不會，可能要個別處理）</b><div>'+B.miss.map(function(m){return esc(m.p.team+'・'+m.p.name)+'：'+esc(m.qid)+(jget('trml-lec-brief',{})[m.qid]?'（講解只點到）':'');}).join('<br>')+'</div></div>':'')+
     '</div>';
