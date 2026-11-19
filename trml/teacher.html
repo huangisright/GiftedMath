@@ -117,6 +117,10 @@ button.ghost{background:transparent;color:var(--indigo)}
 .tag{font-size:.8rem;background:var(--blank);border-radius:3px;padding:1px 6px;margin-right:4px;white-space:nowrap}
 .split td{white-space:normal}
 .split .who{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:2px 9px;margin:2px;display:inline-block;font-size:.88rem;background:var(--card)}
+.split .who.lock{cursor:default;border-color:var(--ochre,#b85a1f)}
+.split .who .lk{color:var(--ochre,#b85a1f);font-size:.8rem;margin-left:3px}
+.lock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 14px}
+.lock-grid label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.92rem}
 .split .who small{color:var(--muted);font-family:var(--f-mono)}
 </style>
 </head>
@@ -262,6 +266,10 @@ button.ghost{background:transparent;color:var(--indigo)}
         <h2>分組：每一隊分兩邊</h2>
         <div class="sub">每隊兩人去左邊、兩人去右邊，依競速、個人賽「誰在哪一邊的題目錯得多」自動排（名字旁是他在左、右兩邊各錯幾題）；點名字可以換到另一邊。</div>
         <div class="tbl-wrap"><table class="split" id="tSplit"></table></div>
+        <details id="lockBox"><summary><b>鎖定學生</b>　<span class="sub" id="lockSum"></span></summary>
+          <div class="sub" style="margin:6px 0">某主題落差很大的學生，可以鎖定在那個主題：每次講解都分到講這個主題的那一邊（照下面左右兩邊填的主題比對），不管當週哪位老師講。當週沒有這個主題時照自動分組。</div>
+          <div class="lock-grid" id="lockGrid"></div>
+        </details>
         <div class="row"><button type="button" id="btnSplitPrint" class="ghost">列印分組名單</button><button type="button" id="btnSplitReset" class="ghost">分組恢復自動</button></div>
       </div>
       <div class="lec-cols">
@@ -610,6 +618,10 @@ function lecTName(i){ var t=lecTeachers()[i]; return t||(i?'第二位老師':'�
 // 學生講義用：名字後面直接加「老師」
 function lecHandNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var n=lecTName(c[sd].t), tp=String(c[sd].topic||'').trim(); o[sd]=n+(/老師$/.test(n)?'':'老師')+(tp?'・'+tp:''); }); return o; }
 function lecNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var tp=String(c[sd].topic||'').trim(); o[sd]=lecTName(c[sd].t)+(tp?'・'+tp:''); }); return o; }
+// 鎖定學生：某些學生講解時固定去講某主題的那一邊（例如每次都去幾何），不管當週哪位老師講、自動分組怎麼排
+function lecLocks(){ return jget('trml-lec-lock',{}); }
+function lecTopicSide(tp){ var c=lecCfg(), t=String(tp||'').trim(), hit=['A','B'].filter(function(sd){return String(c[sd].topic||'').trim()===t;}); return t&&hit.length===1?hit[0]:''; }
+function lecLockSide(y,sid){ return lecTopicSide(lecLocks()[y+'|'+sid]); }
 function lecSplit(D,sel){
   var over=jget('trml-lec-who',{}), teams=uniq(D.roster.map(function(r){return r.team;})), out={};
   var need={}; D.roster.forEach(function(r){need[r.id]={A:0,B:0};});
@@ -617,8 +629,10 @@ function lecSplit(D,sel){
     if(!w.isTeam&&need[w.sid]) need[w.sid][sd]+=1; }); }); // 團體賽是全隊一起錯，不影響怎麼分
   teams.forEach(function(t){
     var ms=D.roster.filter(function(r){return r.team===t;}).slice().sort(function(a,b){return (need[b.id].A-need[b.id].B)-(need[a.id].A-need[a.id].B);});
-    var half=Math.ceil(ms.length/2), g={A:[],B:[]};
-    ms.forEach(function(r,i){ var sd=over[D.y+'|'+r.id]||(i<half?'A':'B'); g[sd].push({r:r,need:need[r.id]}); });
+    var half=Math.ceil(ms.length/2), g={A:[],B:[]}, free=[];
+    ms.forEach(function(r){ var lk=lecLockSide(D.y,r.id); if(lk) g[lk].push({r:r,need:need[r.id],lock:lecLocks()[D.y+'|'+r.id]}); else free.push(r); });
+    var slotA=Math.max(0,half-g.A.length);
+    free.forEach(function(r,i){ var sd=over[D.y+'|'+r.id]||(i<slotA?'A':'B'); g[sd].push({r:r,need:need[r.id]}); });
     out[t]=g;
   });
   return out;
@@ -665,10 +679,20 @@ function renderLec(){
   $('lNote').textContent=setMode&&D.set?('整份講〈'+D.set.title+'〉，共 '+D.top.length+' 題，依題號順序。錯誤率用這段期間的第一次作答（不含測試組）；平面幾何、圓預設放右邊，其他放左邊，可以「移到另一邊」或「這題不講」（不講的題目仍在題本和學生詳解裡）。'):('這段期間有 '+D.subs.length+' 份第一次交卷（不含測試組）。依「錯的人數」排序（團體賽一隊錯＝全隊的人都算），取前 '+$('lN').value+' 題；平面幾何、圓預設放右邊，其他放左邊。只算第一次作答，證明題要批改完才算（6 分以上算會）。');
   var split=lecSplit(D,sel);
   $('tSplit').innerHTML='<tr><th>隊伍</th><th>'+esc(names.A)+'</th><th>'+esc(names.B)+'</th></tr>'+Object.keys(split).map(function(t){
-    var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'">'+esc(m.r.name)+' <small>錯 左'+m.need.A+'・右'+m.need.B+'</small></span>';}).join('');};
+    var g=split[t], cell=function(sd){return g[sd].map(function(m){return '<span class="who'+(m.lock?' lock':'')+'" data-sid="'+esc(m.r.id)+'" data-sd="'+sd+'"'+(m.lock?' title="已鎖定在'+esc(m.lock)+'，到下面「鎖定學生」改"':'')+'>'+esc(m.r.name)+(m.lock?'<span class="lk">鎖・'+esc(m.lock)+'</span>':'')+' <small>錯 左'+m.need.A+'・右'+m.need.B+'</small></span>';}).join('');};
     return '<tr><td>第 '+esc(t)+' 隊</td><td>'+cell('A')+'</td><td>'+cell('B')+'</td></tr>';}).join('')+
     '<tr><td class="muted">人數</td>'+['A','B'].map(function(sd){return '<td class="muted">'+Object.keys(split).reduce(function(a,t){return a+split[t][sd].length;},0)+' 人</td>';}).join('')+'</tr>';
-  Array.prototype.forEach.call($('tSplit').querySelectorAll('.who'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
+  (function(){
+    var L=lecLocks(), cfg=lecCfg(), tops=uniq(['A','B'].map(function(sd){return String(cfg[sd].topic||'').trim();}).filter(Boolean).concat(Object.keys(L).filter(function(k){return k.indexOf(D.y+'|')===0;}).map(function(k){return L[k];})));
+    var n=0, miss=0;
+    $('lockGrid').innerHTML=D.roster.slice().sort(function(a,b){return String(a.team).localeCompare(String(b.team))||String(a.name).localeCompare(String(b.name));}).map(function(r){
+      var v=L[D.y+'|'+r.id]||''; if(v){ n++; if(!lecTopicSide(v)) miss++; }
+      return '<label>第 '+esc(r.team)+' 隊 '+esc(r.name)+'<select data-lock="'+esc(r.id)+'"><option value="">不鎖定</option>'+tops.map(function(t){return '<option'+(t===v?' selected':'')+'>'+esc(t)+'</option>';}).join('')+'</select></label>';
+    }).join('');
+    $('lockSum').textContent=n?('目前鎖定 '+n+' 人'+(miss?'；其中 '+miss+' 人鎖定的主題這週沒有人講，先照自動分組':'')):'目前沒有人鎖定';
+    Array.prototype.forEach.call($('lockGrid').querySelectorAll('[data-lock]'),function(el){ el.onchange=function(){ var o=lecLocks(), k=D.y+'|'+el.getAttribute('data-lock'); if(el.value) o[k]=el.value; else delete o[k]; jset('trml-lec-lock',o); $('lockBox').open=true; renderLec(); }; });
+  })();
+  Array.prototype.forEach.call($('tSplit').querySelectorAll('.who:not(.lock)'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
   ['A','B'].forEach(function(sd){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd;});
     var cfg=lecCfg();
