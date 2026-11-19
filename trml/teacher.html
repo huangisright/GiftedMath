@@ -755,7 +755,40 @@ function renderLec(){
  * 全部用老師頁已經讀到的資料在瀏覽器裡算，不動試算表、不用重新部署。 */
 var WK_HOLD=['2024'];        // 留給最後模擬測驗的年份，不拿來派加練
 var WK_EXTRA_BEFORE=2021;    // 這一年以前的卷子優先當加練卷
-function wkDefaults(){ if($('wkFrom').value) return; var now=new Date(), f=new Date(now); f.setDate(now.getDate()-6); $('wkFrom').value=ymd(f); $('wkTo').value=ymd(now); }
+// 一週＝週三～週二（週二截止）。週三、週四預設看剛結束的那一週，其他天看進行中的這一週。
+function wkDefaults(){ if($('wkFrom').value) return; var now=new Date(), d=now.getDay(), back=(d-3+7)%7; if(d===3||d===4) back+=7;
+  var f=new Date(now); f.setDate(now.getDate()-back); var t=new Date(f); t.setDate(f.getDate()+6); $('wkFrom').value=ymd(f); $('wkTo').value=ymd(t); }
+/* ---------- 投入榜：排努力不排分數 ----------
+ * 有效卷（第一次作答、至少一半題目有作答）+5；有交有效卷的天數每天 +1。
+ * 本週基本量＝競速和個人各至少一份有效卷。隊伍用平均點數排，全隊都完成基本量打★。 */
+function wkBoard(W){
+  var y=$('fYear').value, ok={}, ans={}, tot={};
+  data.responses.forEach(function(r){ tot[r.attemptId]=(tot[r.attemptId]||0)+1;
+    if(String(r.answer||'').trim()||r.points!=null||/待批改/.test(r.graded||'')) ans[r.attemptId]=(ans[r.attemptId]||0)+1; });
+  var P={}; W.roster.forEach(function(r){ P[r.id]={r:r,pts:0,days:{},sp:0,ind:0}; });
+  data.submissions.forEach(function(s){
+    if(s.year!==y||s.attemptNo!==1||(s.kind!=='競速'&&s.kind!=='個人')||!P[s.sid]) return;
+    var d=dayOf(s.time); if(!d||d<W.from||d>W.to) return;
+    if((ans[s.attemptId]||0)*2<(tot[s.attemptId]||1)) return;
+    var p=P[s.sid]; p.pts+=5; p.days[d]=1; if(s.kind==='競速') p.sp++; else p.ind++;
+  });
+  var L=Object.keys(P).map(function(k){ var p=P[k]; p.nd=Object.keys(p.days).length; p.pts+=p.nd; p.base=p.sp>0&&p.ind>0; return p; });
+  var T={}; L.forEach(function(p){ var t=T[p.r.team]||(T[p.r.team]={team:p.r.team,sum:0,n:0,all:true}); t.sum+=p.pts; t.n++; if(!p.base) t.all=false; });
+  var teams=Object.keys(T).map(function(k){ var t=T[k]; t.avg=t.n?t.sum/t.n:0; return t; }).sort(function(a,b){return b.avg-a.avg;});
+  var ppl=L.filter(function(p){return p.pts>0;}).sort(function(a,b){return b.pts-a.pts||b.nd-a.nd;});
+  return {teams:teams,ppl:ppl};
+}
+function wkBoardHtml(W){
+  var B=wkBoard(W);
+  var h='<div class="sheet"><h2 style="margin:0 0 4px">投入榜　'+esc(W.from.slice(5))+' ～ '+esc(W.to.slice(5))+'</h2>'+
+    '<div class="sub">排的是練習量，不是分數。有效卷（第一次作答、至少一半題目有作答）+5，有練習的天數每天 +1。✓＝本週競速和個人都至少交一份；★＝全隊都 ✓。</div>'+
+    '<div class="lec-cols" style="margin-top:8px"><div><b>隊伍（平均點數）</b><table><tr><th>#</th><th>隊伍</th><th class="n">平均</th></tr>'+
+    B.teams.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(t.team)+(t.all?' ★':'')+'</td><td class="n">'+t.avg.toFixed(1)+'</td></tr>';}).join('')+'</table></div>'+
+    '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">天數</th></tr>'+
+    B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.nd+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
+    '</div></div></div>';
+  return h;
+}
 function wkYearOf(s){ return (String((s.qids||[])[0]||s.id||'').match(/^(\d{4})/)||[])[1]||''; }
 function wkSetName(id){ var s=data.sets.filter(function(x){return x.id===id;})[0]; return s?(s.title||id):id; }
 // 幫一位學生挑加練卷：他還沒寫過、目前開放、不是模擬測驗年份，裡面同題型的題目比例最高的那一份
@@ -905,7 +938,7 @@ function renderWeek(){
   wkDefaults();
   var W=wkCompute(), names=lecNames();
   $('wkNote').textContent='只算第一次作答、不含測試組。這一頁只是把資料排成三個決定，最後要講哪幾題、誰去哪一邊，仍然在「講解」分頁定案。';
-  $('wkOut').innerHTML=wkHtml(W,names); $('wkMsg').textContent='';
+  $('wkOut').innerHTML=wkHtml(W,names)+wkBoardHtml(W); $('wkMsg').textContent='';
   Array.prototype.forEach.call($('wkOut').querySelectorAll('[data-go]'),function(b){ b.onclick=function(){
     $('lFrom').value=W.from; $('lTo').value=W.to; $('lMode').value='top';
     tab=b.getAttribute('data-go'); lset('trml-tab',tab); renderTabs(); refill(); render(); window.scrollTo(0,0); }; });
@@ -918,7 +951,7 @@ function renderWeek(){
   $('btnWkPrint').onclick=function(){
     var w=window.open('','_blank'); if(!w) return;
     w.document.write('<!doctype html><meta charset="utf-8"><title>TRML 週報 '+esc(W.from)+'～'+esc(W.to)+'</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:12mm;color:#111;font-size:12.5px;line-height:1.5}h1{font-size:20px;margin:0 0 8px}h2{font-size:15px;margin:14px 0 4px}.sheet{margin-bottom:6px}.sub,.muted,small{color:#555}.kpis{display:flex;gap:26px;flex-wrap:wrap}.kpi b{display:block;font-size:20px}.kpi span{font-size:11px;color:#555}table{border-collapse:collapse;width:100%;margin-top:4px}th,td{border:1px solid #aaa;padding:4px 7px;text-align:left;vertical-align:top}th{background:#eee;font-weight:500}td.n,th.n{text-align:right}.tag{background:#eee;border-radius:3px;padding:0 5px;margin-right:3px;white-space:nowrap}.pill{border:1px solid #888;border-radius:3px;padding:0 5px;white-space:nowrap}.lec-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}.noprint{display:none}.low{font-weight:700}tr{break-inside:avoid}</style>'+
-      '<h1>TRML 週報　'+esc(W.from)+' ～ '+esc(W.to)+'</h1>'+wkHtml(W,names));
+      '<h1>TRML 週報　'+esc(W.from)+' ～ '+esc(W.to)+'</h1>'+wkHtml(W,names)+wkBoardHtml(W));
     w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
   };
 }
