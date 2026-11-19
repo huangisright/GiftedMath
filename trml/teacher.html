@@ -849,11 +849,16 @@ function wkCompute(){
       x.who.push({label:s.kind==='團體'?('第 '+s.team+' 隊'):s.name,team:s.team,sid:s.sid,isTeam:s.kind==='團體'}); }
   });
   // 決定一：兩邊各取錯最多的 4 題（「講解」分頁設成不講的題目不列）
-  var off=jget('trml-lec-off',{});
-  var list=Object.keys(Q).map(function(k){return Q[k];}).filter(function(x){return x.no>0&&!off[x.qid];})
-    .sort(function(a,b){return b.nop-a.nop||(b.no/b.n)-(a.no/a.n)||(a.qid<b.qid?-1:1);});
+  var off=jget('trml-lec-off',{}), lost={};
+  // 回饋勾「看完詳解還是不懂」的人數：這才是講解課最該講的；答錯但看詳解就懂的題不必占時間
+  (data.notes||[]).forEach(function(n){ if((!n.year||n.year===y)&&(n.stuck||[]).indexOf('看完詳解還是不懂')>=0) lost[n.qid]=(lost[n.qid]||0)+1; });
+  var list=Object.keys(Q).map(function(k){ Q[k].lost=lost[k]||0; return Q[k];}).filter(function(x){return x.no>0&&!off[x.qid];})
+    .sort(function(a,b){return b.lost-a.lost||b.nop-a.nop||(b.no/b.n)-(a.no/a.n)||(a.qid<b.qid?-1:1);});
   var sides={A:{qs:[],topics:{}},B:{qs:[],topics:{}}};
   list.forEach(function(x){ var sd=sides[sideOf(x.qid)], t=(qinfo[x.qid]||{}).topic||'未分類'; sd.topics[t]=(sd.topics[t]||0)+x.nop; if(sd.qs.length<4) sd.qs.push(x); });
+  // 同一個核心關鍵的其他錯題：講一題、其他題點出「也是同一招」
+  ['A','B'].forEach(function(k){ var S=sides[k], inQ={}; S.qs.forEach(function(x){inQ[x.qid]=1;});
+    S.qs.forEach(function(x){ var key=(qinfo[x.qid]||{}).key; x.same=key?list.filter(function(o){return !inQ[o.qid]&&sideOf(o.qid)===k&&(qinfo[o.qid]||{}).key===key;}).map(function(o){return o.qid;}):[]; }); });
   // 決定二：分邊用這段期間全部的錯題來算（手動換過邊的照手動）
   var split=lecSplit({roster:roster,y:y},list);
   // 決定三：這段期間夠多人寫的卷子當成「這次的作業」，看誰還沒交；再看每個人錯最多的題型，配一份加練卷
@@ -889,13 +894,13 @@ function wkHtml(W,names){
     (W.home.length?'<div class="sub">完成率看的是：'+esc(W.home.map(wkSetName).join('、'))+'。這段期間至少 '+W.needN+' 人交過的回家卷，當成這次的作業；以前就交過的也算完成。</div>':'<div class="sub">這段期間沒有夠多人寫的回家卷（至少 '+W.needN+' 人），完成率先不算。</div>')+
     (W.pend?'<div class="sub low">還有 '+W.pend+' 題證明題沒批改，批完之後這幾題才會算進錯題。</div>':'')+'</div>';
   // 決定一
-  h+='<div class="sheet"><h2>決定一｜這次講解講什麼</h2><div class="sub">依「錯的人數」排（團體賽一隊錯算全隊人數），兩邊各列前 4 題。平面幾何、圓放 B，其他放 A；在「講解」分頁移過邊或設成不講的題目，這裡會跟著變。</div><div class="lec-cols">'+
+  h+='<div class="sheet"><h2>決定一｜這次講解講什麼</h2><div class="sub">先依回饋勾「看完詳解還是不懂」的人數（「不懂」欄），再依錯的人數排（團體賽一隊錯算全隊人數）；同一個核心關鍵的其他錯題列在「同一招」，講一題就能帶到。兩邊各列前 4 題。平面幾何、圓放 B，其他放 A；在「講解」分頁移過邊或設成不講的題目，這裡會跟著變。</div><div class="lec-cols">'+
     ['A','B'].map(function(sd){
       var S=W.sides[sd], ts=Object.keys(S.topics).sort(function(a,b){return S.topics[b]-S.topics[a];}).slice(0,3);
       return '<div style="min-width:0;display:flex;flex-direction:column;gap:6px"><b>'+esc(names[sd])+'</b>'+
         (ts.length?'<div class="sub">錯最多的：'+ts.map(function(t){return '<span class="tag">'+esc(wkGroupName(t))+' '+S.topics[t]+' 人次</span>';}).join('')+'</div>':'')+
-        (S.qs.length?'<div class="tbl-wrap"><table class="split"><tr><th>題目</th><th>題型</th><th class="n">錯</th><th>核心關鍵</th></tr>'+S.qs.map(function(x){ var i=qinfo[x.qid]||{};
-          return '<tr><td style="white-space:nowrap">'+esc(qLabel(x.qid))+'</td><td style="white-space:nowrap">'+esc(i.topic||'未分類')+'</td><td class="n">'+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'</td><td>'+(i.key?esc(i.key):'<span class="muted">還沒寫</span>')+'</td></tr>'; }).join('')+'</table></div>'
+        (S.qs.length?'<div class="tbl-wrap"><table class="split"><tr><th>題目</th><th>題型</th><th class="n">錯</th><th class="n">不懂</th><th>核心關鍵</th></tr>'+S.qs.map(function(x){ var i=qinfo[x.qid]||{};
+          return '<tr><td style="white-space:nowrap">'+esc(qLabel(x.qid))+'</td><td style="white-space:nowrap">'+esc(i.topic||'未分類')+'</td><td class="n">'+x.no+'/'+x.n+(x.kind==='團體'?' 隊':'')+'</td><td class="n">'+(x.lost||'')+'</td><td>'+(i.key?esc(i.key):'<span class="muted">還沒寫</span>')+((x.same||[]).length?'<div class="sub">同一招：'+x.same.map(function(q){return esc(qLabel(q));}).join('、')+'</div>':'')+'</td></tr>'; }).join('')+'</table></div>'
           :'<div class="sub">這邊這段期間沒有錯題。</div>')+'</div>';
     }).join('')+'</div><div class="row noprint"><button type="button" data-go="講解">到「講解」分頁排題、產生講解包</button></div></div>';
   // 決定二
