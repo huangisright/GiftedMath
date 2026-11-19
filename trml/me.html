@@ -51,11 +51,37 @@ fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
   $('team').onchange=function(){ fillNames(); $('pin').value=''; $('out').innerHTML=''; };
   $('name').onchange=function(){ $('pin').value=''; $('out').innerHTML=''; };
 }).catch(function(e){ $('msg').innerHTML='<span class="err">讀不到名單：'+esc(e.message)+'</span>'; });
+function loadReview(auth){
+  var box=document.createElement('div'); box.className='sheet stack'; box.id='revBox'; box.innerHTML='<div class="muted">錯題小複習讀取中…</div>';
+  $('out').insertBefore(box,$('out').firstChild);
+  postJ(API,{action:'review',team:auth.team,name:auth.name,apin:auth.apin}).then(function(R){
+    if(!R.ok){ box.innerHTML='<span class="err">'+esc(R.error||'讀不到小複習')+'</span>'; return; }
+    var md=function(x){return String(x).slice(5).replace('-','/');};
+    var head='<div><h2 style="margin:0">錯題小複習　'+md(R.from)+'～'+md(R.to)+'</h2><div class="muted">從你上週以前寫錯的題目挑的，最多 3 題。不計時，每題這週只能答一次，只告訴你對或錯。答對就不會再出現，答錯下週可能再出現。答對一題投入榜 +2。</div></div>';
+    if(!R.items.length){ box.innerHTML=head+'<div>這週沒有要複習的題目。</div>'; return; }
+    box.innerHTML=head+R.items.map(function(it,i){
+      return '<div class="stack" style="gap:6px;border-top:1px solid var(--line,#ddd);padding-top:10px" data-q="'+esc(it.qid)+'"><b>第 '+(i+1)+' 題</b>'+
+        (it.img?'<img src="'+esc(IMG+it.img)+'" alt="第 '+(i+1)+' 題題目" style="max-width:100%">':'')+(it.text?'<div style="white-space:pre-wrap">'+esc(it.text)+'</div>':'')+
+        '<div class="row"><input type="text" class="rv-a" autocomplete="off" spellcheck="false" placeholder="答案" aria-label="第 '+(i+1)+' 題答案"><button class="primary rv-go">送出</button><span class="rv-m"></span></div></div>';
+    }).join('');
+    R.items.forEach(function(it){
+      var el=box.querySelector('[data-q="'+it.qid.replace(/"/g,'\\"')+'"]'), inp=el.querySelector('.rv-a'), bt=el.querySelector('.rv-go'), m=el.querySelector('.rv-m');
+      var mark=function(ok,a){ inp.value=a||''; inp.disabled=true; bt.disabled=true; m.innerHTML=ok?'<span class="mark-ok">○ 答對了</span>':'<span class="mark-no">× 不對</span>，下週可能再出現'; };
+      if(it.done) mark(it.done.correct,it.done.answer);
+      bt.onclick=function(){ var a=inp.value.trim(); if(!a){ m.textContent='先填答案。'; return; }
+        if(!confirm('每題這週只能答一次，確定送出？')) return;
+        bt.disabled=true; m.textContent='送出中…';
+        postJ(API,{action:'reviewAns',team:auth.team,name:auth.name,apin:auth.apin,qid:it.qid,answer:a}).then(function(x){
+          if(!x.ok){ bt.disabled=false; m.innerHTML='<span class="err">'+esc(x.error||'送出失敗')+'</span>'; return; } mark(x.correct,a); })
+        .catch(function(){ bt.disabled=false; m.innerHTML='<span class="err">連不上，請再試一次。</span>'; }); };
+    });
+  }).catch(function(){ box.innerHTML='<span class="err">讀不到小複習，請重新整理。</span>'; });
+}
 function boardHtml(B,meId){
   var md=function(x){return String(x).slice(5).replace('-','/');}, mine=B.ppl.filter(function(p){return p.id===meId;})[0];
   var row=function(c){return '<tr>'+c.join('')+'</tr>';};
   return '<div class="sheet stack"><div><h2 style="margin:0">本週投入榜　'+md(B.from)+'～'+md(B.to)+'</h2>'+
-    '<div class="muted">排的是練習量，不是分數。每週二晚上截止、週三重新開始。有效卷（第一次作答、至少一半題目有寫）+5，有練習的那一天 +1，詳解下面的回饋勾了「卡在哪裡」每題 +1。✓＝這週競速和個人都至少交一份；★＝全隊都 ✓。</div></div>'+
+    '<div class="muted">排的是練習量，不是分數。每週二晚上截止、週三重新開始。有效卷（第一次作答、至少一半題目有寫）+5，有練習的那一天 +1，詳解下面的回饋勾了「卡在哪裡」每題 +1，小複習答對每題 +2。✓＝這週競速和個人都至少交一份；★＝全隊都 ✓。</div></div>'+
     '<div><b>你這週：'+(mine?mine.pts+' 點'+(mine.base?' ✓':'，還差'+'競速和個人各一份才 ✓'):'還沒有點數，交一份就有 5 點')+'</b></div>'+
     '<div class="row" style="align-items:flex-start;gap:24px;flex-wrap:wrap">'+
     '<div><b>隊伍（平均點數）</b><table>'+B.teams.map(function(t,i){return row(['<td>'+(i+1)+'</td>','<td>'+esc(t.team)+(t.star?' ★':'')+'</td>','<td style="text-align:right">'+t.avg+'</td>']);}).join('')+'</table></div>'+
@@ -72,6 +98,7 @@ function go(){
     if(!d.ok){ $('msg').innerHTML='<span class="err">'+esc(d.error||'讀取失敗')+'</span>'; return; }
     $('msg').textContent=d.me.name+'・'+d.me.team+'・'+d.me.year+' 年度';
     TRMLProfile.render($('out'),d,{imgBase:IMG,api:API,auth:{team:b.team,name:b.name,apin:b.apin}});
+    loadReview(b);
     if(d.board){ var bx=document.createElement('div'); bx.innerHTML=boardHtml(d.board,d.me.id); $('out').insertBefore(bx.firstChild,$('out').firstChild); }
   }).catch(function(){ $('go').disabled=false; $('msg').innerHTML='<span class="err">連不上題庫，請確認網路後再試。</span>'; });
 }
