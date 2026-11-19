@@ -1228,7 +1228,7 @@ function renderNotes(){
   var by={}, order=[];
   ns.forEach(function(n){ if(!by[n.qid]){by[n.qid]=[];order.push(n.qid);} by[n.qid].push(n); });
   order.sort();
-  var STK=['看不懂題目','沒有想法','方法對但算錯','粗心','看完詳解還是不懂'];
+  var STK=['看不懂題目','沒有想法','方法對但算錯','粗心','時間不夠','看完詳解還是不懂'];
   $('tNoteQ').innerHTML='<tr><th>題號</th><th>題型</th><th class="n">回饋</th><th class="n">簡單</th><th class="n">剛好</th><th class="n">難</th>'+STK.map(function(s){return '<th class="n">'+s+'</th>';}).join('')+'<th class="n">另解／想法</th></tr>'+
     order.map(function(q){ var L=by[q], c=function(f){return L.filter(f).length;};
       var hard=c(function(n){return n.diff==='難';});
