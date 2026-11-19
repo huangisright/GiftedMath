@@ -621,7 +621,7 @@ function lecHandNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ v
 function lecNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var tp=String(c[sd].topic||'').trim(); o[sd]=lecTName(c[sd].t)+(tp?'・'+tp:''); }); return o; }
 // 鎖定學生：某些學生講解時固定去講某主題的那一邊（例如每次都去幾何），不管當週哪位老師講、自動分組怎麼排
 // 講解設定存在試算表（settings 的「講解設定」），兩位老師共用；這台電腦的瀏覽器只當暫存
-var LEC_SYNC={teachers:'trml-lec-teachers',cfg:'trml-lec-cfg',lock:'trml-lec-lock'}, LEC_SERVER=false;
+var LEC_SYNC={teachers:'trml-lec-teachers',cfg:'trml-lec-cfg',lock:'trml-lec-lock',brief:'trml-lec-brief'}, LEC_SERVER=false;
 function lecFromServer(lec){
   if(!lec||typeof lec!=='object'){ LEC_SERVER=false; return; }   // 舊版後端：只存在這台電腦
   LEC_SERVER=true; var up={};
@@ -673,7 +673,7 @@ function lecCard(x,D,screen){
     (texts.length?'<div class="sub">'+texts.slice(0,4).map(function(n){return '「'+esc(n.text)+'」—'+esc(n.name);}).join('<br>')+'</div>':'')+
     '<div class="key'+(info.key?'':' none')+'">核心關鍵：'+(info.key?esc(info.key):'還沒寫。可以在試算表 questions 工作表的 F 欄「關鍵」補上。')+'</div>'+
     (solSrc(q)?(screen?'<details><summary>看詳解</summary><img loading="lazy" src="'+esc(solSrc(q))+'" alt="詳解"></details>':'<div class="sol"><b>詳解</b><img src="'+esc(solSrc(q))+'" alt="詳解"></div>'):'')+
-    (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button></div>':'')+
+    (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button><button type="button" class="ghost" data-brief="'+esc(q)+'" title="只點到為止的題，選了「沒有想法／看完詳解還是不懂」的學生下週小複習會優先拿到">'+(jget('trml-lec-brief',{})[q]?'✓ 只點到（改回完整講）':'只點到')+'</button></div>':'')+
   '</div>';
 }
 function lecSets(){
@@ -725,6 +725,7 @@ function renderLec(){
     $('side'+sd).querySelector('[data-print]').onclick=function(){ lecPrint(sd); };
   });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); renderLec(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-brief]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-brief'), o=jget('trml-lec-brief',{}), p={}; if(o[q]){ delete o[q]; p[q]=''; } else { o[q]=ymd(new Date()); p[q]=o[q]; } jset('trml-lec-brief',o); lecPush({briefPatch:p}); renderLec(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-off]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-off'), o=jget('trml-lec-off',{}); if(o[q]) delete o[q]; else o[q]=1; jset('trml-lec-off',o); renderLec(); }; });
   $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); renderLec(); };
   $('btnSplitPrint').onclick=function(){
@@ -779,7 +780,8 @@ function wkBoard(W){
   var T={}; L.forEach(function(p){ var t=T[p.r.team]||(T[p.r.team]={team:p.r.team,sum:0,n:0,all:true}); t.sum+=p.pts; t.n++; if(!p.base) t.all=false; });
   var teams=Object.keys(T).map(function(k){ var t=T[k]; t.avg=t.n?t.sum/t.n:0; return t; }).sort(function(a,b){return b.avg-a.avg;});
   var ppl=L.filter(function(p){return p.pts>0;}).sort(function(a,b){return b.pts-a.pts||b.nd-a.nd;});
-  return {teams:teams,ppl:ppl};
+  var miss=[]; (data.reviews||[]).forEach(function(r){ if(P[r.sid]&&r.year===y&&r.week===W.from&&!r.correct) miss.push({p:P[r.sid].r,qid:r.qid}); });
+  return {teams:teams,ppl:ppl,miss:miss};
 }
 function wkBoardHtml(W){
   var B=wkBoard(W);
@@ -789,7 +791,9 @@ function wkBoardHtml(W){
     B.teams.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(t.team)+(t.all?' ★':'')+'</td><td class="n">'+t.avg.toFixed(1)+'</td></tr>';}).join('')+'</table></div>'+
     '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">天數</th><th class="n">回饋</th><th class="n">複習</th></tr>'+
     B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.nd+'</td><td class="n">'+(p.fb||0)+'</td><td class="n">'+(p.rv||0)+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
-    '</div></div></div>';
+    '</div></div>'+
+    (B.miss.length?'<div style="margin-top:8px"><b>小複習又答錯（講過仍不會，可能要個別處理）</b><div>'+B.miss.map(function(m){return esc(m.p.team+'・'+m.p.name)+'：'+esc(m.qid)+(jget('trml-lec-brief',{})[m.qid]?'（講解只點到）':'');}).join('<br>')+'</div></div>':'')+
+    '</div>';
   return h;
 }
 function wkYearOf(s){ return (String((s.qids||[])[0]||s.id||'').match(/^(\d{4})/)||[])[1]||''; }
