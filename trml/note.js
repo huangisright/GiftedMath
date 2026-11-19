@@ -3,7 +3,7 @@
  * 只有自己和老師看得到；老師分享的另解會出現在「同學分享的另解」。 */
 (function(root){
 'use strict';
-var STUCK=['看不懂題目','沒有想法','方法對但算錯','粗心','看完詳解還是不懂'];
+var STUCK=['看不懂題目','沒有想法','方法對但算錯','粗心','時間不夠','看完詳解還是不懂'];
 var CSS='.nt{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}'+
 '.nt .lab{font-size:.8rem;color:var(--muted)}'+
 '.nt .seg{display:flex;gap:6px;flex-wrap:wrap}'+

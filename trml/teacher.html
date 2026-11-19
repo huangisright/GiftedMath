@@ -299,7 +299,7 @@ button.ghost{background:transparent;color:var(--indigo)}
 </div>
 
 <script src="config.js"></script>
-<script src="note.js?v=20261112a"></script>
+<script src="note.js?v=20261119a"></script>
 <script src="profile.js?v=20261116a"></script>
 <script>
 (function(){
@@ -773,6 +773,7 @@ function wkBoard(W){
     if((ans[s.attemptId]||0)*2<(tot[s.attemptId]||1)) return;
     var p=P[s.sid]; p.pts+=5; p.days[d]=1; if(s.kind==='競速') p.sp++; else p.ind++;
   });
+  (data.notes||[]).forEach(function(n){ var p=P[n.sid]; if(!p||(n.year&&n.year!==y)||!(n.stuck||[]).length) return; var d=dayOf(n.time); if(!d||d<W.from||d>W.to) return; p.pts+=1; p.fb=(p.fb||0)+1; });
   var L=Object.keys(P).map(function(k){ var p=P[k]; p.nd=Object.keys(p.days).length; p.pts+=p.nd; p.base=p.sp>0&&p.ind>0; return p; });
   var T={}; L.forEach(function(p){ var t=T[p.r.team]||(T[p.r.team]={team:p.r.team,sum:0,n:0,all:true}); t.sum+=p.pts; t.n++; if(!p.base) t.all=false; });
   var teams=Object.keys(T).map(function(k){ var t=T[k]; t.avg=t.n?t.sum/t.n:0; return t; }).sort(function(a,b){return b.avg-a.avg;});
@@ -782,11 +783,11 @@ function wkBoard(W){
 function wkBoardHtml(W){
   var B=wkBoard(W);
   var h='<div class="sheet"><h2 style="margin:0 0 4px">投入榜　'+esc(W.from.slice(5))+' ～ '+esc(W.to.slice(5))+'</h2>'+
-    '<div class="sub">排的是練習量，不是分數。有效卷（第一次作答、至少一半題目有作答）+5，有練習的天數每天 +1。✓＝本週競速和個人都至少交一份；★＝全隊都 ✓。</div>'+
+    '<div class="sub">排的是練習量，不是分數。有效卷（第一次作答、至少一半題目有作答）+5，有練習的天數每天 +1，回饋勾「卡在哪裡」每題 +1。✓＝本週競速和個人都至少交一份；★＝全隊都 ✓。</div>'+
     '<div class="lec-cols" style="margin-top:8px"><div><b>隊伍（平均點數）</b><table><tr><th>#</th><th>隊伍</th><th class="n">平均</th></tr>'+
     B.teams.map(function(t,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(t.team)+(t.all?' ★':'')+'</td><td class="n">'+t.avg.toFixed(1)+'</td></tr>';}).join('')+'</table></div>'+
-    '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">天數</th></tr>'+
-    B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.nd+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
+    '<div><b>個人</b>'+(B.ppl.length?'<table><tr><th>#</th><th>姓名</th><th class="n">點數</th><th class="n">天數</th><th class="n">回饋</th></tr>'+
+    B.ppl.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.r.team+'・'+p.r.name)+(p.base?' ✓':'')+'</td><td class="n">'+p.pts+'</td><td class="n">'+p.nd+'</td><td class="n">'+(p.fb||0)+'</td></tr>';}).join('')+'</table>':'<div class="muted">這一週還沒有人交有效卷。</div>')+
     '</div></div></div>';
   return h;
 }
