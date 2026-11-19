@@ -234,6 +234,7 @@ button.ghost{background:transparent;color:var(--indigo)}
         <div class="row">
           <label class="f" for="wkFrom">從<input type="date" id="wkFrom"></label>
           <label class="f" for="wkTo">到<input type="date" id="wkTo"></label>
+          <label class="f" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="wkBoardOn">學生看得到投入榜</label>
           <button type="button" id="btnWkCopy" class="ghost">複製文字摘要</button>
           <button type="button" id="btnWkPrint" class="ghost">列印</button>
           <span class="sub" id="wkMsg" style="padding-bottom:8px"></span>
@@ -936,6 +937,7 @@ function wkText(W,names){
 }
 function renderWeek(){
   wkDefaults();
+  $('wkBoardOn').checked=!!data.boardOn;
   var W=wkCompute(), names=lecNames();
   $('wkNote').textContent='只算第一次作答、不含測試組。這一頁只是把資料排成三個決定，最後要講哪幾題、誰去哪一邊，仍然在「講解」分頁定案。';
   $('wkOut').innerHTML=wkHtml(W,names)+wkBoardHtml(W); $('wkMsg').textContent='';
@@ -955,6 +957,9 @@ function renderWeek(){
     w.document.close(); w.focus(); setTimeout(function(){w.print();},300);
   };
 }
+$('wkBoardOn').addEventListener('change',function(){ var on=this.checked, cb=this; cb.disabled=true; $('wkMsg').textContent='儲存中…';
+  postJ(API,{action:'boardSet',key:lget('trml-key'),on:on}).then(function(d){ cb.disabled=false; if(!d.ok) throw new Error(d.error); data.boardOn=d.on; $('wkMsg').textContent=on?'學生在「我的分析」看得到投入榜了。':'已對學生隱藏投入榜。'; })
+  .catch(function(e){ cb.disabled=false; cb.checked=!on; $('wkMsg').textContent='沒存成功：'+e.message; }); });
 ['wkFrom','wkTo'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='週報') renderWeek(); });});
 
 /* ---------- 開放詳解：學生到「看詳解」頁登入就能讀 ---------- */
