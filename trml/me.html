@@ -51,6 +51,7 @@ fetch(API+'?action=init').then(function(r){return r.json();}).then(function(d){
   $('team').onchange=function(){ fillNames(); $('pin').value=''; $('out').innerHTML=''; };
   $('name').onchange=function(){ $('pin').value=''; $('out').innerHTML=''; };
 }).catch(function(e){ $('msg').innerHTML='<span class="err">讀不到名單：'+esc(e.message)+'</span>'; });
+function qsrc(q){ var f=q.img||(q.text?'':q.qid+'.png'); return !f?'':/^(https?:|data:|\/)/.test(f)?f:IMG+f; }
 function loadReview(auth){
   var box=document.createElement('div'); box.className='sheet stack'; box.id='revBox'; box.innerHTML='<div class="muted">錯題小複習讀取中…</div>';
   $('out').insertBefore(box,$('out').firstChild);
@@ -61,7 +62,7 @@ function loadReview(auth){
     if(!R.items.length){ box.innerHTML=head+'<div>這週沒有要複習的題目。</div>'; return; }
     box.innerHTML=head+R.items.map(function(it,i){
       return '<div class="stack" style="gap:6px;border-top:1px solid var(--line,#ddd);padding-top:10px" data-q="'+esc(it.qid)+'"><b>第 '+(i+1)+' 題</b>'+
-        (it.img?'<img src="'+esc(IMG+it.img)+'" alt="第 '+(i+1)+' 題題目" style="max-width:100%">':'')+(it.text?'<div style="white-space:pre-wrap">'+esc(it.text)+'</div>':'')+
+        (qsrc(it)?'<img src="'+esc(qsrc(it))+'" alt="第 '+(i+1)+' 題題目" style="max-width:100%">':'')+(it.text?'<div style="white-space:pre-wrap">'+esc(it.text)+'</div>':'')+
         '<div class="row"><input type="text" class="rv-a" autocomplete="off" spellcheck="false" placeholder="答案" aria-label="第 '+(i+1)+' 題答案"><button class="primary rv-go">送出</button><span class="rv-m"></span></div></div>';
     }).join('');
     R.items.forEach(function(it){
