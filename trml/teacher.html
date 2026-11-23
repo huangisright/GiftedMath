@@ -1166,10 +1166,13 @@ function printPaper(y,k){
     '.bar{position:sticky;top:0;background:#fff8d6;border:1px solid #e0c000;padding:8px 12px;margin-bottom:12px;font-size:14px}@media print{.bar{display:none}}'+
     '</style><div class="bar">圖片載入後會自動跳出列印。要存成檔案：列印視窗的「目的地」選「另存為 PDF」。</div>'+head+body+sheet+key);
   w.document.close(); w.focus();
-  // 題目圖依原始寬度等比例縮放，讓每題字的大小一致（1600 像素 ≈ 整行寬）
-  var imgs=w.document.querySelectorAll('.qb img'), left=imgs.length, done=function(){ if(--left<=0) setTimeout(function(){w.print();},300); };
-  if(!left) done(); else Array.prototype.forEach.call(imgs,function(im){ var fit=function(){ if(im.naturalWidth) im.style.width=Math.min(100,im.naturalWidth/16)+'%'; done(); };
-    if(im.complete) fit(); else { im.onload=fit; im.onerror=done; } });
+  // 題目圖等比例縮放：整份卷子最寬的那張放滿整行，其他照同一比例，每題字的大小一致。
+  // （2026-11-23 改：原本固定 1600 像素＝整行，2022 等年度的截圖只有 700 像素左右，印出來字太小）
+  var imgs=w.document.querySelectorAll('.qb img'), left=imgs.length, done=function(){ if(--left<=0){ var mx=0;
+      Array.prototype.forEach.call(imgs,function(im){ mx=Math.max(mx,im.naturalWidth||0); });
+      if(mx) Array.prototype.forEach.call(imgs,function(im){ if(im.naturalWidth) im.style.width=(im.naturalWidth/mx*100)+'%'; });
+      setTimeout(function(){w.print();},300); } };
+  if(!left) done(); else Array.prototype.forEach.call(imgs,function(im){ if(im.complete) done(); else { im.onload=done; im.onerror=done; } });
   $('ppMsg').textContent='已開啟〈'+name+'〉列印頁。';
 }
 
