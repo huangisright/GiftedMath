@@ -500,7 +500,7 @@ function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
   $('filters').hidden=tab==='卷子'||tab==='帳號'; $('vSets').hidden=tab!=='卷子'; $('vAcct').hidden=tab!=='帳號';
-  $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋'; $('vPaper').hidden=tab!=='試題'; $('filters').hidden=tab==='試題';
+  $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋'; $('vPaper').hidden=tab!=='試題'; $('filters').hidden=tab==='試題'||tab==='帳號'||tab==='卷子';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
     var ns=(data.notes||[]).filter(function(n){return n.year===y;}), cnt={}; ns.forEach(function(n){cnt[n.setId]=(cnt[n.setId]||0)+1;});
