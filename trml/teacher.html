@@ -491,7 +491,9 @@ function afterLoad(){
   renderTabs(); refill(); render();
 }
 function renderTabs(){
-  var pend=data.responses.filter(function(r){return /待批改/.test(r.graded);}).length;
+  // 只算目前選的年度、還沒給分的團體賽證明題；年度欄被標成「重複交卷」「測試」的不算（和批改清單同一套規則）
+  var py=$('fYear').value||data.year;
+  var pend=data.responses.filter(function(r){return r.kind==='團體'&&r.year===py&&r.points==null&&/待批改/.test(r.graded);}).length;
   $('tabs').innerHTML=TABS.map(function(t){return '<button role="tab" data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'" aria-selected="'+(tab===t[0])+'">'+t[1]+(t[0]==='批改'&&pend?'<span class="cnt">'+pend+'</span>':'')+'</button>';}).join('');
   Array.prototype.forEach.call($('tabs').querySelectorAll('button'),function(b){ b.onclick=function(){ tab=b.getAttribute('data-t'); lset('trml-tab',tab); renderTabs(); refill(); render(); }; });
 }
@@ -528,7 +530,7 @@ function refill(){
     if(ps&&stu.some(function(r){return r.id===ps;})) $('fStu').value=ps;
   }
 }
-['fYear'].forEach(function(id){$(id).addEventListener('change',function(){refill();render();});});
+['fYear'].forEach(function(id){$(id).addEventListener('change',function(){renderTabs();refill();render();});});
 ['fSet','fTeam','fFirst','fStu','fDone'].forEach(function(id){$(id).addEventListener('change',render);});
 $('btnLoad').onclick=function(){ MODE='password'; fetchReport(); }; $('btnReload').onclick=fetchReport; $('btnGoogle').onclick=googleLogin;
 $('key').addEventListener('keydown',function(e){if(e.key==='Enter'){ MODE='password'; fetchReport(); }});
