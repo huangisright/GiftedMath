@@ -122,6 +122,15 @@ button.ghost{background:transparent;color:var(--indigo)}
 .lock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 14px}
 .lock-grid label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.92rem}
 .split .who small{color:var(--muted);font-family:var(--f-mono)}
+.who-bar{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px}
+.role{font-size:.8rem;font-weight:700;border-radius:3px;padding:2px 8px;white-space:nowrap}
+.role.admin{background:var(--ochre-soft);color:var(--ochre)}
+.role.teacher{background:var(--indigo-soft);color:var(--indigo)}
+.perm-note{border-left:4px solid var(--ochre);background:var(--ochre-soft);padding:8px 12px;border-radius:3px;font-size:.92rem}
+.noperm{opacity:.45;cursor:not-allowed!important}
+.acct td,.acct th{vertical-align:middle}
+.acct input[type=checkbox]{width:18px;height:18px}
+.perm-tbl td:first-child{white-space:nowrap;font-weight:700}
 </style>
 </head>
 <body>
@@ -133,12 +142,19 @@ button.ghost{background:transparent;color:var(--indigo)}
   <div id="demoNote" class="demo" hidden>範例模式：還沒接上試算表。</div>
 
   <div class="sheet" id="login">
-    <div class="row">
-      <label class="f" for="key">老師密碼<input type="password" id="key" autocomplete="current-password"></label>
-      <button id="btnLoad">讀取成績</button>
+    <div class="row" style="align-items:center">
+      <button id="btnGoogle" type="button">用學校 Google 帳號登入</button>
       <span id="status" class="muted"></span>
     </div>
+    <div class="sub">每位老師用自己的學校帳號登入。帳號要先由管理者在「老師帳號」分頁加進名單。</div>
+    <details id="pwBox"><summary class="sub" style="cursor:pointer">Google 登入不了時：用備用密碼登入（等同管理者權限）</summary>
+      <div class="row" style="margin-top:8px">
+        <label class="f" for="key">備用密碼<input type="password" id="key" autocomplete="current-password"></label>
+        <button id="btnLoad" class="ghost">登入</button>
+      </div>
+    </details>
   </div>
+  <div class="sheet who-bar" id="whoBar" hidden></div>
 
   <div id="app" hidden style="display:flex;flex-direction:column;gap:18px">
     <div class="tabs" id="tabs" role="tablist"></div>
@@ -282,6 +298,7 @@ button.ghost{background:transparent;color:var(--indigo)}
       <div class="sub">團體賽的證明題（questions 表答案寫「人工」的題目）在這裡給分，每題 0～8 分。存檔後會寫回試算表，那一隊的總分跟著更新。</div>
       <div id="gradeList" style="display:flex;flex-direction:column;gap:14px"></div>
     </div>
+    <div id="vAcct" hidden style="display:flex;flex-direction:column;gap:16px"></div>
     <div id="vPaper" hidden style="display:flex;flex-direction:column;gap:14px">
       <div class="sheet stack">
         <div class="sub">選年份和賽別，會開一個列印頁：直接印，或在列印視窗的「目的地」選「另存為 PDF」就是下載。題目圖和正式考卷一樣是黑白。</div>
@@ -320,21 +337,149 @@ function isManual(spec){return /^人工/.test(String(spec||'').trim());}
 function showAns(a){ if(isManual(a)) return '（證明題）'+String(a).replace(/^人工[:：]?/,''); return String(a||'').split('|').map(function(x){return x.trim().replace(/^set:/i,'');}).join(' 或 ');}
 
 var data=null, qinfo={}, tab=lget('trml-tab')||'競速';
-var TABS=[['卷子','卷子開關'],['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改'],['試題','試題下載']];
+var TABS=[['卷子','卷子開關'],['週報','週報'],['講解','講解'],['競速','競速賽'],['個人','個人賽'],['團體','團體賽'],['總表','全隊總表'],['學生','學生檔案'],['回饋','學生回饋'],['批改','證明題批改'],['試題','試題下載'],['帳號','老師帳號']];
 
 /* ---------- 讀資料 ---------- */
+/* ---------- 登入（2026-11-24）：學校 Google 帳號（Firebase，和探索島同一個專案），或備用密碼 ----------
+ * 送到後端的 key：Google 登入是「g:」加 ID token（一小時換一次，這裡會自動更新）；備用密碼就是密碼本身。 */
+var FB_CFG={apiKey:"AIzaSyADSoa44HY5q0mM42Ezuomw5FmnFRA5JRM",authDomain:"giftedmath-island.firebaseapp.com",projectId:"giftedmath-island",appId:"1:12080862626:web:67b6a3d714ba46bfc20efb"};
+var FBV='https://www.gstatic.com/firebasejs/11.0.2/';
+var FB=null, TOK='', MODE=lget('trml-login')||(lget('trml-key')?'password':''), ME=null;
+function tkey(){ return MODE==='google'?(TOK?'g:'+TOK:''):(lget('trml-key')||''); }
+function fb(){
+  if(!FB) FB=Promise.all([import(FBV+'firebase-app.js'),import(FBV+'firebase-auth.js')]).then(function(m){
+    var app=m[0].initializeApp(FB_CFG,'trml-teacher'), auth=m[1].getAuth(app);
+    m[1].onIdTokenChanged(auth,function(u){ if(u) u.getIdToken().then(function(t){TOK=t;}); else TOK=''; });
+    setInterval(function(){ if(auth.currentUser) auth.currentUser.getIdToken().then(function(t){TOK=t;}); },10*60*1000);
+    return {m:m[1],auth:auth};
+  });
+  return FB;
+}
+function googleLogin(){
+  $('status').textContent='開啟 Google 登入視窗…';
+  fb().then(function(F){ var p=new F.m.GoogleAuthProvider(); p.setCustomParameters({prompt:'select_account'}); return F.m.signInWithPopup(F.auth,p); })
+  .then(function(r){ return r.user.getIdToken(); })
+  .then(function(t){ TOK=t; MODE='google'; lset('trml-login','google'); ldel('trml-key'); fetchReport(); })
+  .catch(function(e){ var c=String(e&&e.code||e&&e.message||e);
+    $('status').innerHTML='<span class="err">Google 登入沒有完成'+(/popup-blocked/.test(c)?'：瀏覽器擋了登入視窗，請允許彈出視窗後再按一次':/popup-closed|cancelled/.test(c)?'（登入視窗被關掉了）':'：'+esc(c))+'</span>'; });
+}
+function logout(){
+  ldel('trml-key'); ldel('trml-login');
+  var done=function(){ location.reload(); };
+  if(MODE==='google') fb().then(function(F){ return F.m.signOut(F.auth); }).then(done,done); else done();
+}
 function fetchReport(){
   if(!API){ $('demoNote').hidden=false; return; }
-  var key=$('key').value.trim();
-  if(!key){$('status').textContent='先輸入密碼。';return;}
+  var key;
+  if(MODE==='google'){ key=tkey(); if(!key){ $('status').textContent='請先用 Google 帳號登入。'; return; } }
+  else { key=$('key').value.trim()||lget('trml-key')||''; if(!key){ $('status').textContent='先輸入備用密碼。'; return; } }
   $('status').textContent='讀取中…';
-  fetch(API+'?action=report&key='+encodeURIComponent(key)).then(function(r){return r.json();}).then(function(d){
-    if(!d.ok) throw new Error(d.error||'讀取失敗');
-    lset('trml-key',key); data=d; lecFromServer(d.lec); $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; afterLoad();
+  postJ(API,{action:'report',key:key}).then(function(d){
+    if(!d.ok){ var er=new Error(d.error||'讀取失敗'); er.relogin=d.relogin; throw er; }
+    if(MODE!=='google'){ MODE='password'; lset('trml-login','password'); lset('trml-key',key); }
+    data=d; ME=d.me||{role:'admin',perms:['sets','lec','sol','grade','board'],name:'',email:'',via:'password'};
+    lecFromServer(d.lec); $('status').textContent='已讀取 '+d.submissions.length+' 份交卷。'; $('login').hidden=true; renderWho(); afterLoad();
   }).catch(function(e){
     // 記住的密碼錯了（換過密碼）就忘掉，下次開頁面不會再自動送錯的密碼、把自己鎖住
-    if(/密碼不對/.test(e.message)&&lget('trml-key')===key){ ldel('trml-key'); }
+    if(MODE!=='google'&&/密碼不對/.test(e.message)){ ldel('trml-key'); ldel('trml-login'); MODE=''; }
+    if(MODE==='google'&&e.relogin){ fb().then(function(F){ return F.m.signOut(F.auth); }); ldel('trml-login'); MODE=''; }
+    $('login').hidden=false;
     $('status').innerHTML='<span class="err">'+esc(e.message)+'</span>';});
+}
+/* ---------- 身分列與權限 ---------- */
+var PERM_UI={
+  sets:{name:'卷子開關',desc:'開放／收起卷子、通關密碼、開放日期、交卷後顯示答案',views:['vSets'],sel:'#tSets button,#tSets input'},
+  lec:{name:'講解排題與分組',desc:'講解分頁的老師名字、哪邊誰講與主題、移題、這題不講、只點到、學生換邊、鎖定學生',views:['vLec'],
+    sel:'#lT0,#lT1,#lockGrid select,#btnSplitReset,#vLec [data-mv],#vLec [data-off],#vLec [data-brief],#vLec [data-tsel],#vLec [data-topic],#tSplit .who'},
+  sol:{name:'開放詳解',desc:'學生「看詳解」的開放與關閉',views:['vLec'],sel:'#btnSolOn,#btnSolOff,#solList button'},
+  grade:{name:'批改與另解',desc:'證明題存分數、AI 建議、公開另解、把學生回饋分享給同學',views:['vGrade','vNotes'],sel:'#gradeList button,#gradeList input,#gradeList textarea,#noteList [data-sh]'},
+  board:{name:'投入榜開關',desc:'學生在「我的分析」看不看得到投入榜',views:['vWeek'],sel:'#wkBoardOn'}
+};
+function can(p){ return !!ME&&(ME.role==='admin'||(ME.perms||[]).indexOf(p)>=0); }
+function adminName(){ var T=data&&data.teachers; if(!T) return '管理者'; var a=(T.list||[]).filter(function(x){return x.email===T.admin;})[0]; return (a&&a.name)||T.admin; }
+function renderWho(){
+  if(!ME) return;
+  var admin=ME.role==='admin', miss=Object.keys(PERM_UI).filter(function(p){return !can(p);});
+  $('whoBar').hidden=false;
+  $('whoBar').innerHTML='<b>'+esc(ME.via==='password'?'備用密碼登入':ME.name)+'</b>'+(ME.via==='google'?'<span class="sub">'+esc(ME.email)+'</span>':'')+
+    '<span class="role '+(admin?'admin':'teacher')+'">'+(admin?'管理者':'老師')+'</span>'+
+    '<span class="sub">'+(admin?'全部權限，並可管理老師帳號':(miss.length?'不能做：'+miss.map(function(p){return PERM_UI[p].name;}).join('、')+'（按鈕會變灰）':'五項權限都有'))+'</span>'+
+    '<span style="flex:1"></span><button type="button" class="ghost" id="btnAcctGo">老師帳號與權限說明</button><button type="button" class="ghost" id="btnLogout">登出</button>';
+  $('btnLogout').onclick=logout;
+  $('btnAcctGo').onclick=function(){ tab='帳號'; lset('trml-tab',tab); renderTabs(); refill(); render(); };
+}
+var permBusy=false;
+function applyPerms(){
+  if(!ME||permBusy) return; permBusy=true;
+  try{
+    var notes={};
+    Object.keys(PERM_UI).forEach(function(p){
+      if(can(p)) return; var u=PERM_UI[p];
+      Array.prototype.forEach.call(document.querySelectorAll(u.sel),function(el){
+        if(el.classList.contains('noperm')) return;
+        el.classList.add('noperm'); el.title='需要「'+u.name+'」權限，請找管理者（'+adminName()+'）開';
+        if(el.classList.contains('who')) el.style.pointerEvents='none'; else el.disabled=true;
+      });
+      u.views.forEach(function(v){ (notes[v]=notes[v]||[]).push(u.name); });
+    });
+    ['vSets','vLec','vGrade','vNotes','vWeek'].forEach(function(v){
+      var root=$(v); if(!root) return; var el=$('pn-'+v);
+      if(!notes[v]){ if(el) el.remove(); return; }
+      var txt='你沒有「'+notes[v].join('」「')+'」權限，這一頁相關的按鈕是灰的，只能看。要開權限請找管理者（'+adminName()+'）。';
+      if(!el){ el=document.createElement('div'); el.id='pn-'+v; el.className='perm-note'; root.insertBefore(el,root.firstChild); }
+      if(el.textContent!==txt) el.textContent=txt;
+    });
+  } finally { permBusy=false; }
+}
+var permTimer=null;
+new MutationObserver(function(){ if(permBusy) return; clearTimeout(permTimer); permTimer=setTimeout(applyPerms,0); }).observe($('app'),{childList:true,subtree:true});
+
+/* ---------- 老師帳號分頁：說明身分與權限；管理者可新增、移除、改權限、轉移管理者 ---------- */
+function renderAcct(){
+  var T=data.teachers||{admin:'',list:[]}, admin=!!ME&&ME.role==='admin', keys=Object.keys(PERM_UI);
+  var h='<div class="sheet"><h2>身分與權限怎麼分</h2>'+
+    '<div class="tbl-wrap"><table class="perm-tbl"><tr><th>身分／權限</th><th>可以做什麼</th></tr>'+
+    '<tr><td><span class="role admin">管理者</span></td><td>只有一位。擁有下面全部權限，還能新增／移除老師、勾選每位老師的權限、把管理者轉給別人。用「備用密碼」登入也等同管理者。</td></tr>'+
+    '<tr><td><span class="role teacher">老師</span></td><td>所有老師都能看全部資料、列印、產生講解包。下面五項要管理者勾了才能做；沒勾的按鈕會變灰，滑鼠移上去會寫需要哪一項。</td></tr>'+
+    keys.map(function(p){return '<tr><td>'+esc(PERM_UI[p].name)+'</td><td>'+esc(PERM_UI[p].desc)+'</td></tr>';}).join('')+
+    '</table></div><div class="sub">講解分頁的排題、分組、移題等設定都存在試算表，兩位老師各自登入看到的是同一份。</div></div>';
+  h+='<div class="sheet"><h2>老師名單</h2>'+(admin?'':'<div class="perm-note">只有管理者（'+esc(adminName())+'）能改名單與權限。</div>')+
+    '<div class="tbl-wrap"><table class="acct"><tr><th>名字</th><th>學校信箱</th><th>身分</th>'+keys.map(function(p){return '<th>'+esc(PERM_UI[p].name)+'</th>';}).join('')+'<th>最近登入</th>'+(admin?'<th></th>':'')+'</tr>'+
+    T.list.map(function(x){
+      var isA=x.email===T.admin, me=ME&&ME.email===x.email;
+      return '<tr data-em="'+esc(x.email)+'"><td>'+(admin?'<input type="text" data-nm value="'+esc(x.name)+'" placeholder="（登入後自動帶入）" size="10">':esc(x.name||'—'))+(me?' <span class="sub">（你）</span>':'')+'</td>'+
+        '<td>'+esc(x.email)+'</td><td><span class="role '+(isA?'admin':'teacher')+'">'+(isA?'管理者':'老師')+'</span></td>'+
+        keys.map(function(p){ var on=isA||(x.perms||[]).indexOf(p)>=0; return '<td style="text-align:center"><input type="checkbox" data-pm="'+p+'"'+(on?' checked':'')+(admin&&!isA?'':' disabled')+' aria-label="'+esc(PERM_UI[p].name)+'"></td>'; }).join('')+
+        '<td class="sub">'+esc(x.last||'還沒登入過')+'</td>'+
+        (admin?'<td style="white-space:nowrap">'+(isA?'<span class="sub">固定全部權限</span>':'<button type="button" class="ghost" data-tr>設為管理者</button> <button type="button" class="ghost" data-rm>移除</button>')+'</td>':'')+'</tr>';
+    }).join('')+'</table></div><div class="sub" id="acctMsg"></div></div>';
+  if(admin) h+='<div class="sheet"><h2>新增老師</h2><div class="row" style="align-items:flex-end">'+
+    '<label class="f" for="acEm">學校信箱<input type="email" id="acEm" placeholder="例如 xxx@cnc.km.edu.tw" size="26"></label>'+
+    '<label class="f" for="acNm">名字（可不填）<input type="text" id="acNm" size="8"></label>'+
+    '<span style="display:flex;flex-wrap:wrap;gap:4px 12px;padding-bottom:8px">'+keys.map(function(p){return '<label class="chk"><input type="checkbox" data-np="'+p+'" checked> '+esc(PERM_UI[p].name)+'</label>';}).join('')+'</span>'+
+    '<button type="button" id="acAdd">加入</button></div><div class="sub">對方用這個信箱按「用學校 Google 帳號登入」就能進來。權限之後隨時可以改。</div></div>';
+  $('vAcct').innerHTML=h;
+  if(!admin) return;
+  var msg=function(t,err){ $('acctMsg').innerHTML=err?'<span class="err">'+esc(t)+'</span>':esc(t); };
+  var send=function(body,ok){ body.action='teachers'; body.key=tkey(); msg('存檔中…');
+    return postJ(API,body).then(function(d){ if(!d.ok) throw new Error(d.error||'沒存成'); data.teachers=d.teachers; renderAcct(); $('acctMsg').textContent=ok||'已存檔。'; return d; })
+      .catch(function(e){ msg(e.message,true); }); };
+  Array.prototype.forEach.call($('vAcct').querySelectorAll('tr[data-em]'),function(tr){
+    var em=tr.getAttribute('data-em');
+    Array.prototype.forEach.call(tr.querySelectorAll('[data-pm]'),function(cb){ cb.onchange=function(){
+      var ps=Array.prototype.filter.call(tr.querySelectorAll('[data-pm]'),function(x){return x.checked;}).map(function(x){return x.getAttribute('data-pm');});
+      send({op:'perms',email:em,perms:ps},'已更新 '+em+' 的權限（對方重新整理老師頁就生效）。'); }; });
+    var nm=tr.querySelector('[data-nm]'); if(nm) nm.onchange=function(){ send({op:'name',email:em,name:nm.value.trim()}); };
+    var rm=tr.querySelector('[data-rm]'); if(rm) rm.onclick=function(){ if(confirm('把 '+em+' 從老師名單移除？移除後他就登入不了老師頁。')) send({op:'remove',email:em},'已移除 '+em+'。'); };
+    var trn=tr.querySelector('[data-tr]'); if(trn) trn.onclick=function(){
+      if(!confirm('把管理者轉給 '+em+'？\n\n轉了之後：他擁有全部權限並管理老師帳號；你變成一般老師（保留五項權限），不能再改名單，要請他轉回來。\n備用密碼仍等同管理者，請一併交給他保管。')) return;
+      send({op:'transfer',email:em},'管理者已轉給 '+em+'。').then(function(d){ if(d) fetchReport(); }); };
+  });
+  $('acAdd').onclick=function(){
+    var em=$('acEm').value.trim(); if(!em){ msg('先填信箱。',true); return; }
+    var ps=Array.prototype.filter.call($('vAcct').querySelectorAll('[data-np]'),function(x){return x.checked;}).map(function(x){return x.getAttribute('data-np');});
+    send({op:'add',email:em,name:$('acNm').value.trim(),perms:ps},'已加入 '+em+'，對方用這個信箱登入就能進來。');
+  };
 }
 function afterLoad(){
   $('app').hidden=false;
@@ -354,7 +499,7 @@ function renderTabs(){
 function refill(){
   var kindTab=['競速','個人','團體'].indexOf(tab)>=0, y=$('fYear').value;
   $('wSet').hidden=!kindTab&&tab!=='批改'&&tab!=='回饋'; $('wTeam').hidden=tab==='學生'; $('wFirst').hidden=!kindTab; $('wStu').hidden=tab!=='學生'; $('wDone').hidden=tab!=='批改';
-  $('filters').hidden=tab==='卷子'; $('vSets').hidden=tab!=='卷子';
+  $('filters').hidden=tab==='卷子'||tab==='帳號'; $('vSets').hidden=tab!=='卷子'; $('vAcct').hidden=tab!=='帳號';
   $('vStats').hidden=!kindTab; $('vWeek').hidden=tab!=='週報'; $('vLec').hidden=tab!=='講解'; $('wTeam').hidden=$('wTeam').hidden||tab==='講解'||tab==='週報'; $('vStudent').hidden=tab!=='學生'; $('vTotal').hidden=tab!=='總表'; $('wTeam').hidden=$('wTeam').hidden||tab==='總表'; $('vGrade').hidden=tab!=='批改'; $('vNotes').hidden=tab!=='回饋'; $('vPaper').hidden=tab!=='試題'; $('filters').hidden=tab==='試題';
   var kind=tab==='批改'?'團體':tab;
   if(tab==='回饋'){
@@ -385,8 +530,8 @@ function refill(){
 }
 ['fYear'].forEach(function(id){$(id).addEventListener('change',function(){refill();render();});});
 ['fSet','fTeam','fFirst','fStu','fDone'].forEach(function(id){$(id).addEventListener('change',render);});
-$('btnLoad').onclick=fetchReport; $('btnReload').onclick=fetchReport;
-$('key').addEventListener('keydown',function(e){if(e.key==='Enter')fetchReport();});
+$('btnLoad').onclick=function(){ MODE='password'; fetchReport(); }; $('btnReload').onclick=fetchReport; $('btnGoogle').onclick=googleLogin;
+$('key').addEventListener('keydown',function(e){if(e.key==='Enter'){ MODE='password'; fetchReport(); }});
 
 function render(){
   if(!data) return;
@@ -398,6 +543,7 @@ function render(){
   if(tab==='批改') return renderGrade();
   if(tab==='回饋') return renderNotes();
   if(tab==='試題') return renderPaper();
+  if(tab==='帳號') return renderAcct();
   renderStats(tab);
 }
 
@@ -425,7 +571,7 @@ function renderSets(){
 }
 function saveSet(id,patch,el){
   var s=data.sets.filter(function(x){return x.id===id;})[0]; if(!s) return;
-  patch.action='setOpen'; patch.key=lget('trml-key'); patch.setId=id;
+  patch.action='setOpen'; patch.key=tkey(); patch.setId=id;
   if(el) el.disabled=true; $('setsMsg').textContent='寫入中…';
   postJ(API,patch).then(function(d){
     if(!d||!d.ok) throw new Error((d&&d.error)||'寫入失敗');
@@ -621,7 +767,7 @@ function lecHandNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ v
 function lecNames(){ var c=lecCfg(), o={}; ['A','B'].forEach(function(sd){ var tp=String(c[sd].topic||'').trim(); o[sd]=lecTName(c[sd].t)+(tp?'・'+tp:''); }); return o; }
 // 鎖定學生：某些學生講解時固定去講某主題的那一邊（例如每次都去幾何），不管當週哪位老師講、自動分組怎麼排
 // 講解設定存在試算表（settings 的「講解設定」），兩位老師共用；這台電腦的瀏覽器只當暫存
-var LEC_SYNC={teachers:'trml-lec-teachers',cfg:'trml-lec-cfg',lock:'trml-lec-lock',brief:'trml-lec-brief'}, LEC_SERVER=false;
+var LEC_SYNC={teachers:'trml-lec-teachers',cfg:'trml-lec-cfg',lock:'trml-lec-lock',brief:'trml-lec-brief',side:'trml-lec-side',off:'trml-lec-off',who:'trml-lec-who'}, LEC_SERVER=false;
 function lecFromServer(lec){
   if(!lec||typeof lec!=='object'){ LEC_SERVER=false; return; }   // 舊版後端：只存在這台電腦
   LEC_SERVER=true; var up={};
@@ -633,7 +779,7 @@ function lecPush(part){
   var el=$('lecSync');
   if(!API||!LEC_SERVER){ if(el) el.textContent='（目前只存在這台電腦）'; return; }
   if(el) el.textContent='存到試算表中…';
-  postJ(API,{action:'lecSave',key:lget('trml-key'),data:part}).then(function(d){
+  postJ(API,{action:'lecSave',key:tkey(),data:part}).then(function(d){
     if(!d||!d.ok) throw new Error(d&&d.error||'沒存成');
     if(d.lec){ Object.keys(LEC_SYNC).forEach(function(k){ if(d.lec[k]!=null) jset(LEC_SYNC[k],d.lec[k]); }); }
     if(el) el.textContent='已存到試算表，另一位老師重新讀取就看得到。';
@@ -712,7 +858,7 @@ function renderLec(){
     $('lockSum').textContent=n?('目前鎖定 '+n+' 人'+(miss?'；其中 '+miss+' 人鎖定的主題這週沒有人講，先照自動分組':'')):'目前沒有人鎖定';
     Array.prototype.forEach.call($('lockGrid').querySelectorAll('[data-lock]'),function(el){ el.onchange=function(){ var o=lecLocks(), k=D.y+'|'+el.getAttribute('data-lock'); if(el.value) o[k]=el.value; else delete o[k]; jset('trml-lec-lock',o); var pt={}; pt[k]=el.value; lecPush({lockPatch:pt}); $('lockBox').open=true; renderLec(); }; });
   })();
-  Array.prototype.forEach.call($('tSplit').querySelectorAll('.who:not(.lock)'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); renderLec(); }; });
+  Array.prototype.forEach.call($('tSplit').querySelectorAll('.who:not(.lock)'),function(el){ el.onclick=function(){ var o=jget('trml-lec-who',{}); o[D.y+'|'+el.getAttribute('data-sid')]=el.getAttribute('data-sd')==='A'?'B':'A'; jset('trml-lec-who',o); lecPush({who:o}); renderLec(); }; });
   ['A','B'].forEach(function(sd){
     var mine=D.top.filter(function(x){return sideOf(x.qid)===sd;});
     var cfg=lecCfg();
@@ -724,10 +870,10 @@ function renderLec(){
     $('side'+sd).querySelector('[data-topic]').onchange=function(e){ var c=lecCfg(); c[sd].topic=e.target.value.trim(); jset('trml-lec-cfg',c); lecPush({cfg:c}); renderLec(); };
     $('side'+sd).querySelector('[data-print]').onclick=function(){ lecPrint(sd); };
   });
-  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); renderLec(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); lecPush({side:o}); renderLec(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-brief]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-brief'), o=jget('trml-lec-brief',{}), p={}; if(o[q]){ delete o[q]; p[q]=''; } else { o[q]=ymd(new Date()); p[q]=o[q]; } jset('trml-lec-brief',o); lecPush({briefPatch:p}); renderLec(); }; });
-  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-off]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-off'), o=jget('trml-lec-off',{}); if(o[q]) delete o[q]; else o[q]=1; jset('trml-lec-off',o); renderLec(); }; });
-  $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); renderLec(); };
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-off]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-off'), o=jget('trml-lec-off',{}); if(o[q]) delete o[q]; else o[q]=1; jset('trml-lec-off',o); lecPush({off:o}); renderLec(); }; });
+  $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); lecPush({who:{}}); renderLec(); };
   $('btnSplitPrint').onclick=function(){
     var w=window.open('','_blank'); if(!w) return;
     w.document.write('<!doctype html><meta charset="utf-8"><title>講解分組</title><style>body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;margin:14mm;color:#111}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 12px;color:#555}table{border-collapse:collapse;width:100%;font-size:18px}th,td{border:1px solid #999;padding:10px 12px;text-align:left}th{background:#eee}</style>'+
@@ -969,7 +1115,7 @@ function renderWeek(){
   };
 }
 $('wkBoardOn').addEventListener('change',function(){ var on=this.checked, cb=this; cb.disabled=true; $('wkMsg').textContent='儲存中…';
-  postJ(API,{action:'boardSet',key:lget('trml-key'),on:on}).then(function(d){ cb.disabled=false; if(!d.ok) throw new Error(d.error); data.boardOn=d.on; $('wkMsg').textContent=on?'學生在「我的分析」看得到投入榜了。':'已對學生隱藏投入榜。'; })
+  postJ(API,{action:'boardSet',key:tkey(),on:on}).then(function(d){ cb.disabled=false; if(!d.ok) throw new Error(d.error); data.boardOn=d.on; $('wkMsg').textContent=on?'學生在「我的分析」看得到投入榜了。':'已對學生隱藏投入榜。'; })
   .catch(function(e){ cb.disabled=false; cb.checked=!on; $('wkMsg').textContent='沒存成功：'+e.message; }); });
 ['wkFrom','wkTo'].forEach(function(id){$(id).addEventListener('change',function(){ if(tab==='週報') renderWeek(); });});
 
@@ -990,7 +1136,7 @@ function renderSolBtn(){
 function setSol(id,want){
   var st=data.sets.filter(function(x){return x.id===id;})[0]; if(!st) return;
   $('btnSolOn').disabled=$('btnSolOff').disabled=true; $('solNote').textContent=(want?'開放':'關閉')+'〈'+st.title+'〉中…';
-  postJ(API,{action:'solOpen',key:lget('trml-key'),setId:id,open:want}).then(function(d){
+  postJ(API,{action:'solOpen',key:tkey(),setId:id,open:want}).then(function(d){
     if(!d||!d.ok){ renderSolBtn(); $('solNote').textContent='沒有成功：'+((d&&d.error)||'請稍後再試'); return; }
     st.solOpen=d.solOpen; renderSolBtn();
   }).catch(function(){ renderSolBtn(); $('solNote').textContent='連不上後端，請確認網路後再試。'; });
@@ -1265,7 +1411,7 @@ function renderNotes(){
     var i=+b.getAttribute('data-sh'), n=withText[i];
     b.onclick=function(){
       b.disabled=true; $('shs-'+i).textContent='處理中…';
-      postJ(API,{action:'share',key:lget('trml-key'),year:n.year,sid:n.sid,qid:n.qid,on:!n.shared})
+      postJ(API,{action:'share',key:tkey(),year:n.year,sid:n.sid,qid:n.qid,on:!n.shared})
         .then(function(d){
           b.disabled=false;
           if(!d.ok){ $('shs-'+i).innerHTML='<span class="err">'+esc(d.error||'失敗')+'</span>'; return; }
@@ -1313,7 +1459,7 @@ function wireAi(r,i){
   if(bAp) bAp.onclick=function(){ var a=aiOf(r); if(!a) return; $('pt-'+i).value=a.result.score; if(a.result.comment) $('nt-'+i).value=a.result.comment; $('gs-'+i).className='sub'; $('gs-'+i).textContent='已填入建議，確認後按「存分數」。'; };
   if(bAi) bAi.onclick=function(){
     var had=!!aiOf(r); bAi.disabled=true; $('ais-'+i).textContent='AI 分析中，約 20～40 秒…';
-    postJ(API,{action:'aiGrade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,force:had}).then(function(d){
+    postJ(API,{action:'aiGrade',key:tkey(),attemptId:r.attemptId,qid:r.qid,force:had}).then(function(d){
       bAi.disabled=false;
       if(!d||!d.ok){ $('ais-'+i).innerHTML='<span class="err">'+esc((d&&d.error)||'分析失敗')+'</span>'; return; }
       (data.ai=data.ai||[]).push({attemptId:r.attemptId,qid:r.qid,time:d.time,result:d.result});
@@ -1324,7 +1470,7 @@ function wireAi(r,i){
     var al=altOf(r), want=!(al&&al.on), sum=$('alt-'+i).value.trim();
     if(want&&!sum){ $('alts-'+i).innerHTML='<span class="err">先寫一兩句這個解法的思路，再公開。</span>'; return; }
     bAlt.disabled=true; $('alts-'+i).textContent=want?'公開中…':'收回中…';
-    postJ(API,{action:'altSet',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,on:want,summary:sum,showName:$('altn-'+i).checked}).then(function(d){
+    postJ(API,{action:'altSet',key:tkey(),attemptId:r.attemptId,qid:r.qid,on:want,summary:sum,showName:$('altn-'+i).checked}).then(function(d){
       bAlt.disabled=false;
       if(!d||!d.ok){ $('alts-'+i).innerHTML='<span class="err">'+esc((d&&d.error)||'沒有成功')+'</span>'; return; }
       var o=altOf(r); if(!o){ o={attemptId:r.attemptId,qid:r.qid}; (data.alts=data.alts||[]).push(o); }
@@ -1371,7 +1517,7 @@ function renderGrade(){
       var v=$('pt-'+i).value.trim(), pts=Number(v);
       if(v===''||!(pts>=0&&pts<=8)){ $('gs-'+i).innerHTML='<span class="err">請填 0～8</span>'; return; }
       b.disabled=true; $('gs-'+i).textContent='存檔中…';
-      postJ(API,{action:'grade',key:lget('trml-key'),attemptId:r.attemptId,qid:r.qid,points:pts,note:$('nt-'+i).value.trim()})
+      postJ(API,{action:'grade',key:tkey(),attemptId:r.attemptId,qid:r.qid,points:pts,note:$('nt-'+i).value.trim()})
         .then(function(d){
           b.disabled=false;
           if(!d.ok){ $('gs-'+i).innerHTML='<span class="err">'+esc(d.error||'存檔失敗')+'</span>'; return; }
@@ -1385,7 +1531,11 @@ function renderGrade(){
 }
 
 if(!API){ $('demoNote').hidden=false; $('login').hidden=true; }
-else { var k=lget('trml-key'); if(k){ $('key').value=k; fetchReport(); } }
+else if(MODE==='google'){ $('status').textContent='確認 Google 登入中…';
+  fb().then(function(F){ return new Promise(function(res){ var un=F.m.onAuthStateChanged(F.auth,function(u){ un(); res(u); }); }); })
+  .then(function(u){ if(!u){ $('status').textContent=''; ldel('trml-login'); MODE=''; return; } return u.getIdToken().then(function(t){ TOK=t; fetchReport(); }); })
+  .catch(function(){ $('status').textContent=''; }); }
+else { var k=lget('trml-key'); if(k){ MODE='password'; $('key').value=k; fetchReport(); } }
 })();
 </script>
 </body>
