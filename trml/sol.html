@@ -55,6 +55,7 @@
 <script>
 (function(){
 'use strict';
+function solUrl(base,s){ s=String(s||''); if(!s) return ''; if(s.indexOf('ov:')===0){ var p=s.split(':'); return 'https://drive.google.com/thumbnail?id='+p[1]+'&sz=w1600&v='+(p[2]||1); } return /^(data:|https?:)/.test(s)?s:base+s; }
 var API=(window.TRML_CONFIG&&window.TRML_CONFIG.apiUrl)||'', IMG=(window.TRML_CONFIG&&window.TRML_CONFIG.imgBase)||'img/', ROOT=IMG.replace(/img\/$/,'');
 var $=function(id){return document.getElementById(id);};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -87,7 +88,7 @@ function render(d){
         '<img loading="lazy" src="'+esc(src(q.img||(q.qid+'.png')))+'" alt="第 '+q.num+' 題題目">'+
         '<div class="ans">答案：<b>'+esc(q.answer)+'</b>'+(q.manual?'（證明題，看詳解的寫法）':'')+'</div>'+
         (q.key?'<div class="keyline">核心關鍵：'+esc(q.key)+'</div>':'')+
-        '<details><summary>展開完整詳解</summary><img loading="lazy" src="'+esc(ROOT+q.sol)+'" alt="第 '+q.num+' 題詳解"><div class="shr" data-q="'+esc(q.qid)+'"></div></details></div>';
+        '<details><summary>展開完整詳解</summary><img loading="lazy" src="'+esc(solUrl(ROOT,q.sol))+'" alt="第 '+q.num+' 題詳解"><div class="shr" data-q="'+esc(q.qid)+'"></div></details></div>';
     }).join('')+'</div>';
   if(window.TRMLNote) Array.prototype.forEach.call(document.querySelectorAll('.shr'),function(el){ var sh=(d.shared||{})[el.getAttribute('data-q')]; if(sh&&sh.length) TRMLNote.mount(el,{readonly:true,shared:sh}); });
   $('hide').onchange=function(){ $('out').classList.toggle('hideans',this.checked); };

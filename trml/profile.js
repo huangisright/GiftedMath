@@ -1,3 +1,4 @@
+function solUrl(base,s){ s=String(s||''); if(!s) return ''; if(s.indexOf('ov:')===0){ var p=s.split(':'); return 'https://drive.google.com/thumbnail?id='+p[1]+'&sz=w1600&v='+(p[2]||1); } return /^(data:|https?:)/.test(s)?s:base+s; }
 /* TRML 個人分析：學生頁（me.html）與老師頁共用的計算與畫面
  * TRMLProfile.render(el, data, opts)
  *   data = { me:{name,team,year,id}, subs:[…], resps:[…], qinfo:{qid:{topic,img}}, cls:{year,topics:{題型:{n,ok,sec}},speedSec} }
@@ -312,7 +313,7 @@ function render(el,data,opts){
       shown.map(function(r){ var q=data.qinfo[r.qid]||{}, src=q.img?(/^(https?:|\/)/.test(q.img)?q.img:IMG+q.img):IMG+r.qid+'.png';
         return '<figure><img loading="lazy" src="'+esc(src)+'" alt="'+esc(r.qid)+' 題目"><figcaption>'+esc(r.qid)+'・'+esc(q.topic||'')+'・'+(r.kind==='個人'?'個人賽':'競速')+
           '・當時寫 '+(r.answer?'<b>'+esc(r.answer)+'</b>':'空白')+'・'+fmt(r.seconds)+(q.zt&&q.zt!=='其他'?'<br>專題 '+esc(ztName(q.zt)):'')+'</figcaption>'+
-          (q.sol?'<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(IMG.replace(/img\/$/,'')+q.sol)+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+(q.mates&&q.mates.length?'<details class="sol mates"><summary>同一招的題（'+q.mates.length+' 題）</summary>'+q.mates.map(function(m){ var s2=m.img?(/^(https?:|\/)/.test(m.img)?m.img:IMG+m.img):IMG+m.qid+'.png'; return '<div class="muted" style="font-size:.8rem;margin-top:6px">'+esc(m.qid)+'</div><img loading="lazy" src="'+esc(s2)+'" alt="'+esc(m.qid)+' 題目">'; }).join('')+'</details>':'')+'</figure>'; }).join('')+'</div></div>';
+          (q.sol?'<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(solUrl(IMG.replace(/img\/$/,''),q.sol))+'"><summary>看詳解</summary><div class="solbody"></div></details>':'')+(q.mates&&q.mates.length?'<details class="sol mates"><summary>同一招的題（'+q.mates.length+' 題）</summary>'+q.mates.map(function(m){ var s2=m.img?(/^(https?:|\/)/.test(m.img)?m.img:IMG+m.img):IMG+m.qid+'.png'; return '<div class="muted" style="font-size:.8rem;margin-top:6px">'+esc(m.qid)+'</div><img loading="lazy" src="'+esc(s2)+'" alt="'+esc(m.qid)+' 題目">'; }).join('')+'</details>':'')+'</figure>'; }).join('')+'</div></div>';
   }
 
   h+='<div class="sheet stack"><h2>作答紀錄</h2>'+(P.subs.length?'<div class="tbl-wrap"><table><tr><th>交卷時間</th><th>年度</th><th>賽別</th><th>卷子</th><th class="n">第幾次</th><th class="n">得分</th><th class="n">用時</th></tr>'+

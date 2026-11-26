@@ -317,7 +317,7 @@ button.ghost{background:transparent;color:var(--indigo)}
 
 <script src="config.js"></script>
 <script src="note.js?v=20261119a"></script>
-<script src="profile.js?v=20261116a"></script>
+<script src="profile.js?v=20261126a"></script>
 <script>
 (function(){
 'use strict';
@@ -731,7 +731,9 @@ function lecDefaults(){
 }
 function qLabel(q){var m=String(q).match(/^(\d{4})-([SIT])(\d+)/);if(!m)return q;return m[1]+' '+({S:'競速',I:'個人',T:'團體'})[m[2]]+' 第 '+Number(m[3])+' 題';}
 function imgSrc(q){var x=qinfo[q]||{};var s=x.img?(/^(https?:|\/)/.test(x.img)?x.img:IMG+x.img):IMG+q+'.png';return new URL(s,location.href).href;}
-function solSrc(q){var x=qinfo[q]||{};return x.sol?new URL(IMG.replace(/img\/$/,'')+x.sol,location.href).href:'';}
+function solUrl(base,s){ s=String(s||''); if(!s) return ''; if(s.indexOf('ov:')===0){ var p=s.split(':'); return 'https://drive.google.com/thumbnail?id='+p[1]+'&sz=w1600&v='+(p[2]||1); } return /^(data:|https?:)/.test(s)?s:base+s; }
+function solSrc(q){var x=qinfo[q]||{};if(!x.sol) return '';var u=solUrl(IMG.replace(/img\/$/,''),x.sol);return /^(data:|https?:)/.test(u)?u:new URL(u,location.href).href;}
+function solUpdated(q){var s=(qinfo[q]||{}).sol||'';return s.indexOf('ov:')===0||s.indexOf('data:')===0;}
 function lecData(){
   var y=$('fYear').value, from=$('lFrom').value, to=$('lTo').value;
   var kinds=['競速','個人','團體'].filter(function(k){return $('lK'+k).checked;});
@@ -821,7 +823,7 @@ function lecCard(x,D,screen){
     (texts.length?'<div class="sub">'+texts.slice(0,4).map(function(n){return '「'+esc(n.text)+'」—'+esc(n.name);}).join('<br>')+'</div>':'')+
     '<div class="key'+(info.key?'':' none')+'">核心關鍵：'+(info.key?esc(info.key):'還沒寫。可以在試算表 questions 工作表的 F 欄「關鍵」補上。')+'</div>'+
     (solSrc(q)?(screen?'<details><summary>看詳解</summary><img loading="lazy" src="'+esc(solSrc(q))+'" alt="詳解"></details>':'<div class="sol"><b>詳解</b><img src="'+esc(solSrc(q))+'" alt="詳解"></div>'):'')+
-    (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button><button type="button" class="ghost" data-brief="'+esc(q)+'" title="只點到為止的題，選了「沒有想法／看完詳解還是不懂」的學生下週小複習會優先拿到">'+(jget('trml-lec-brief',{})[q]?'✓ 只點到（改回完整講）':'只點到')+'</button></div>':'')+
+    (screen?'<div class="acts"><button type="button" class="ghost" data-mv="'+esc(q)+'">移到另一邊</button><button type="button" class="ghost" data-off="'+esc(q)+'">'+(jget('trml-lec-off',{})[q]?'改回要講':'這題不講')+'</button><button type="button" class="ghost" data-brief="'+esc(q)+'" title="只點到為止的題，選了「沒有想法／看完詳解還是不懂」的學生下週小複習會優先拿到">'+(jget('trml-lec-brief',{})[q]?'✓ 只點到（改回完整講）':'只點到')+'</button><button type="button" class="ghost" data-solup="'+esc(q)+'" title="用你自己的版本換掉這題的詳解（可拍照或選圖片），舊版會留著">更新詳解</button>'+(solUpdated(q)?'<button type="button" class="ghost" data-solrev="'+esc(q)+'">還原原版</button><button type="button" class="ghost" data-solhist="'+esc(q)+'">版本</button><span class="tag" title="這題的詳解已換成你的版本">詳解已更新</span>':'')+'</div>':'')+
   '</div>';
 }
 function lecSets(){
@@ -833,6 +835,34 @@ function lecSets(){
   var saved=lget('trml-lec-set');
   sel.value=last?last.id:(saved&&L.some(function(x){return x.id===saved;})?saved:(L[0]||{}).id);
 }
+/* 詳解更新（2026-11-26）：在講解頁換掉某題詳解圖；舊版留著，可還原 */
+var solTarget='';
+function solToast(msg,ms){ var n=$('solToast'); if(!n){ n=document.createElement('div'); n.id='solToast'; n.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#222;color:#fff;padding:9px 16px;border-radius:6px;z-index:99;max-width:86vw;font-size:.92rem'; document.body.appendChild(n); } n.textContent=msg; n.style.display='block'; clearTimeout(n._t); if(ms!==0) n._t=setTimeout(function(){ n.style.display='none'; },ms||4500); }
+function solPrep(file){ return new Promise(function(res,rej){ var fr=new FileReader(); fr.onerror=function(){ rej(new Error('讀不到這張圖')); }; fr.onload=function(){ var im=new Image(); im.onerror=function(){ rej(new Error('這個檔案不是圖片')); }; im.onload=function(){ var k=Math.min(1,1600/im.naturalWidth), c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); var g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',0.86)); }; im.src=fr.result; }; fr.readAsDataURL(file); }); }
+function solApply(q,sol){ (qinfo[q]=qinfo[q]||{}).sol=sol; renderLec(); }
+function solPick(q){ solTarget=q; var f=$('solFile'); if(!f){ f=document.createElement('input'); f.type='file'; f.accept='image/*'; f.id='solFile'; f.style.display='none'; document.body.appendChild(f);
+  f.onchange=function(){ var file=f.files&&f.files[0], tq=solTarget; f.value=''; if(!file||!tq) return; solToast('壓縮並上傳中…',0);
+    solPrep(file).then(function(data){ return postJ(API,{action:'solUp',key:tkey(),qid:tq,data:data,note:''}); }).then(function(d){
+      if(!d||!d.ok){ solToast('沒有成功：'+((d&&d.error)||'請稍後再試'),7000); return; }
+      solApply(tq,d.sol); solToast('已更新 '+qLabel(tq)+' 的詳解（第 '+d.ver+' 版）'+(d.warn?'。'+d.warn:''),d.warn?9000:4500);
+    }).catch(function(e){ solToast('沒有成功：'+(e&&e.message||'連不上後端'),7000); }); }; }
+  f.click(); }
+function solRevert(q,ver){ solToast(ver?'改用第 '+ver+' 版…':'還原原版中…',0);
+  postJ(API,{action:'solRevert',key:tkey(),qid:q,ver:ver}).then(function(d){
+    if(!d||!d.ok){ solToast('沒有成功：'+((d&&d.error)||'請稍後再試'),7000); return; }
+    solApply(q,d.sol); solToast(ver?'已改用第 '+ver+' 版':'已還原成原版');
+  }).catch(function(){ solToast('連不上後端，請確認網路後再試。',7000); }); }
+function solHistory(q){ solToast('讀取版本中…',0);
+  postJ(API,{action:'solHist',key:tkey(),qid:q}).then(function(d){
+    if(!d||!d.ok){ solToast('沒有成功：'+((d&&d.error)||'請稍後再試'),7000); return; }
+    var n=$('solToast'); if(n) n.style.display='none';
+    var box=document.createElement('div'); box.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:98;display:flex;align-items:center;justify-content:center';
+    box.innerHTML='<div style="background:#fff;border-radius:8px;padding:16px 18px;max-width:92vw;min-width:300px;max-height:80vh;overflow:auto"><b>'+esc(qLabel(q))+' 詳解版本</b><div class="sub" style="margin:4px 0 10px">原版一直都在，按「還原原版」就會換回去。</div>'+
+      (d.versions.length?d.versions.slice().reverse().map(function(v){ return '<div style="display:flex;gap:10px;align-items:center;padding:5px 0;border-top:1px solid #ddd"><span>第 '+v.ver+' 版　'+esc(v.time)+(v.who?'　'+esc(v.who):'')+(v.note?'　'+esc(v.note):'')+'</span><span style="flex:1"></span>'+(v.cur?'<span class="tag">使用中</span>':'<button type="button" class="ghost" data-use="'+v.ver+'">改用這版</button>')+'</div>'; }).join(''):'<div>還沒有更新過。</div>')+
+      '<div style="text-align:right;margin-top:10px"><button type="button" class="ghost" data-close="1">關閉</button></div></div>';
+    document.body.appendChild(box);
+    box.onclick=function(e){ var t=e.target; if(t===box||t.getAttribute('data-close')) box.remove(); else if(t.getAttribute('data-use')){ box.remove(); solRevert(q,Number(t.getAttribute('data-use'))); } };
+  }).catch(function(){ solToast('連不上後端，請確認網路後再試。',7000); }); }
 function renderLec(){
   lecDefaults(); lecSets();
   var TT=lecTeachers(); $('lT0').value=TT[0]; $('lT1').value=TT[1];
@@ -875,6 +905,9 @@ function renderLec(){
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-mv]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-mv'), o=jget('trml-lec-side',{}); o[q]=sideOf(q)==='A'?'B':'A'; jset('trml-lec-side',o); lecPush({side:o}); renderLec(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-brief]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-brief'), o=jget('trml-lec-brief',{}), p={}; if(o[q]){ delete o[q]; p[q]=''; } else { o[q]=ymd(new Date()); p[q]=o[q]; } jset('trml-lec-brief',o); lecPush({briefPatch:p}); renderLec(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-off]'),function(b){ b.onclick=function(){ var q=b.getAttribute('data-off'), o=jget('trml-lec-off',{}); if(o[q]) delete o[q]; else o[q]=1; jset('trml-lec-off',o); lecPush({off:o}); renderLec(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-solup]'),function(b){ b.onclick=function(){ solPick(b.getAttribute('data-solup')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-solrev]'),function(b){ b.onclick=function(){ solRevert(b.getAttribute('data-solrev'),0); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#vLec [data-solhist]'),function(b){ b.onclick=function(){ solHistory(b.getAttribute('data-solhist')); }; });
   $('btnSplitReset').onclick=function(){ jset('trml-lec-who',{}); lecPush({who:{}}); renderLec(); };
   $('btnSplitPrint').onclick=function(){
     var w=window.open('','_blank'); if(!w) return;

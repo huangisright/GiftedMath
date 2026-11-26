@@ -1,3 +1,4 @@
+function solUrl(base,s){ s=String(s||''); if(!s) return ''; if(s.indexOf('ov:')===0){ var p=s.split(':'); return 'https://drive.google.com/thumbnail?id='+p[1]+'&sz=w1600&v='+(p[2]||1); } return /^(data:|https?:)/.test(s)?s:base+s; }
 /* TRML 練習：作答頁共用程式（競速／個人／團體）
  * 頁面用 <body data-kind="競速|個人|團體"> 決定規則：
  *   競速：一題一頁、可跳題，整份卷子一個倒數。
@@ -467,7 +468,7 @@ function renderSols(results,p,d){
   box.innerHTML='<h2>詳解</h2><div class="muted" style="font-size:.88rem">點題號展開。先自己再想一次，真的想不出來再看。看完可以在下面留回饋：這題難不難、卡在哪、你的想法或另解。</div>'+
     results.map(function(r,i){ if(!r.sol) return '';
       var mark=r.manual?'<span class="muted">證明題</span>':(r.correct?'<span class="mark-ok">○</span>':'<span class="mark-no">×</span>');
-      return '<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(IMG_BASE.replace(/img\/$/,'')+r.sol)+'"><summary>第 '+(i+1)+' 題　'+mark+'</summary><div class="solbody"></div></details>'; }).join('');
+      return '<details class="sol" data-q="'+esc(r.qid)+'" data-src="'+esc(solUrl(IMG_BASE.replace(/img\/$/,''),r.sol))+'"><summary>第 '+(i+1)+' 題　'+mark+'</summary><div class="solbody"></div></details>'; }).join('');
   each('details.sol',box,function(dt){
     dt.addEventListener('toggle',function(){
       if(!dt.open||dt._loaded) return; dt._loaded=true;

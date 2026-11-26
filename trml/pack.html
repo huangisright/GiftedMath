@@ -140,6 +140,7 @@ td.n{font-family:var(--f-mono);text-align:right;white-space:nowrap}
 </div>
 <div id="show" hidden><div id="stage"></div></div>
 <div class="ctl" id="ctl" hidden><button type="button" id="cPrev">← 上一張</button><span id="cPos" style="color:#fff;align-self:center;font-family:var(--f-mono)"></span><button type="button" id="cNext">下一張 →</button><button type="button" id="cFull">全螢幕</button><button type="button" id="cClose">結束</button></div>
+<script src="config.js"></script>
 <script>
 (function(){
 'use strict';
@@ -296,7 +297,10 @@ function loadOne(src){ return new Promise(function(ok,no){ var s=document.create
 function loadScript(){ if(window.PptxGenJS) return Promise.resolve();
   return loadOne('lib/pptxgen.bundle.js').catch(function(){ return loadOne('https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js'); })
     .then(function(){ if(!window.PptxGenJS) throw new Error('x'); }).catch(function(){ throw new Error('載入 PowerPoint 工具失敗，請確認網路'); }); }
-function imgData(url){ return fetch(url).then(function(r){ if(!r.ok) throw new Error('圖片 '+r.status); return r.blob(); }).then(function(b){ return new Promise(function(ok){ var fr=new FileReader(); fr.onload=function(){ var im=new Image(); im.onload=function(){ ok({data:fr.result,w:im.naturalWidth,h:im.naturalHeight}); }; im.src=fr.result; }; fr.readAsDataURL(b); }); }); }
+function driveFallback(url){ var m=String(url).match(/drive\.google\.com\/thumbnail\?id=([-\w]+)/), cfg=window.TRML_CONFIG||{}, key=''; try{ key=(window.opener&&window.opener.tkey&&window.opener.tkey())||localStorage.getItem('trml-key')||''; }catch(e){}
+  if(!m||!cfg.apiUrl||!key) return Promise.reject(new Error('no fallback'));
+  return fetch(cfg.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'solData',key:key,id:m[1]})}).then(function(r){return r.json();}).then(function(d){ if(!d||!d.ok||!d.data) throw new Error('no data'); return d.data; }); }
+function imgData(url){ return fetch(url).catch(function(e){ return driveFallback(url).then(function(u){ return fetch(u); }); }).then(function(r){ if(!r.ok) throw new Error('圖片 '+r.status); return r.blob(); }).then(function(b){ return new Promise(function(ok){ var fr=new FileReader(); fr.onload=function(){ var im=new Image(); im.onload=function(){ ok({data:fr.result,w:im.naturalWidth,h:im.naturalHeight}); }; im.src=fr.result; }; fr.readAsDataURL(b); }); }); }
 function fitBox(im,x,y,w,h){ var k=Math.min(w/im.w,h/im.h); var W=im.w*k,H=im.h*k; return {data:im.data,x:x+(w-W)/2,y:y+(h-H)/2,w:W,h:H}; }
 function pptx(sd,btn){
   var msg=$('pp'+sd); btn.disabled=true; msg.textContent='製作中…';
