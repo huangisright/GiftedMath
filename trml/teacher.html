@@ -389,7 +389,7 @@ function fetchReport(){
 /* ---------- 身分列與權限 ---------- */
 var PERM_UI={
   sets:{name:'卷子開關',desc:'開放／收起卷子、通關密碼、開放日期、交卷後顯示答案',views:['vSets'],sel:'#tSets button,#tSets input'},
-  lec:{name:'講解排題與分組',desc:'講解分頁的老師名字、哪邊誰講與主題、移題、這題不講、只點到、學生換邊、鎖定學生',views:['vLec'],
+  lec:{name:'講解排題與分組',desc:'講解分頁的老師名字、哪邊誰講與主題、移題、這題不講、只點到、學生換邊、鎖定學生、更新詳解圖（換成自己的版本、還原原版）',views:['vLec'],
     sel:'#lT0,#lT1,#lockGrid select,#btnSplitReset,#vLec [data-mv],#vLec [data-off],#vLec [data-brief],#vLec [data-tsel],#vLec [data-topic],#tSplit .who'},
   sol:{name:'開放詳解',desc:'學生「看詳解」的開放與關閉',views:['vLec'],sel:'#btnSolOn,#btnSolOff,#solList button'},
   grade:{name:'批改與另解',desc:'證明題存分數、AI 建議、公開另解、把學生回饋分享給同學',views:['vGrade','vNotes'],sel:'#gradeList button,#gradeList input,#gradeList textarea,#noteList [data-sh]'},
